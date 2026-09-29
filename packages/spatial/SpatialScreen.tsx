@@ -53,8 +53,6 @@ export function SpatialScreen() {
             </Text>
             <RiveStage source={RIVE_DEMO} />
           </View>
-
-          {!capabilities.metaSpatialWindows ? tools : null}
         </View>
       </GridFloor>
     </ForkSpatialLayout>
