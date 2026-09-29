@@ -1,6 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import { View as RNView } from 'react-native';
+import { Div } from '@expo/html-elements';
 import { Host, TextInput as BaseExpoTextInput, useNativeState } from '@expo/ui';
 import { css } from './css';
 
@@ -113,7 +113,7 @@ export function NativeInput({
       vertical so the field is as tall as its text, horizontal off so it fills
       the width the wrapper gives it.
     */
-    <RNView style={containerStyle}>
+    <Div style={containerStyle as never}>
       <Host matchContents={{ vertical: true, horizontal: false }}>
         <ExpoTextInput
           value={state}
@@ -132,6 +132,6 @@ export function NativeInput({
           textStyle={{ color, fontSize }}
         />
       </Host>
-    </RNView>
+    </Div>
   );
 }

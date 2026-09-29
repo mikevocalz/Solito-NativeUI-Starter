@@ -16,6 +16,16 @@ allowBuilds:
   unrs-resolver: true
   esbuild: true
 
+# Expo SDK 58 preview packages were published together. Keep pnpm's 24-hour
+# release-age protection for the rest of the graph while allowing the explicitly
+# selected Expo preview family to install immediately.
+minimumReleaseAgeExclude:
+  - '@expo/*'
+  - expo
+  - 'expo-*'
+  - babel-preset-expo
+  - eslint-config-expo
+
 # One version per dependency, declared once. Package manifests consume catalog:.
 catalog:
   # Expo SDK 58 beta / React Native 0.88 lane

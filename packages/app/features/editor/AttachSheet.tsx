@@ -1,8 +1,7 @@
 'use client';
 import { useRef } from 'react';
-import { Modal } from 'react-native';
 import { createStore, useStore } from 'zustand';
-import { Button, DropZone, MotionView } from '@acme/ui';
+import { Button, DropZone, Modal, MotionView } from '@acme/ui';
 import { Pressable, Text, View } from '@acme/ui/tw';
 import { CloudUpload, Paperclip, X } from '@acme/ui/icons';
 import { attach, IDLE_PROGRESS, type AttachProgress, type Attachment } from './attachment.ts';

@@ -34,6 +34,7 @@ export { notify, Toaster } from './notify';
 export type { NotifyOptions, NotifyVariant } from './notify.shared';
 
 // overlays + nav
+export { Modal, type ModalProps } from './Modal';
 export { Dialog, DialogCard, type DialogProps } from './Dialog';
 export { Lightbox, type LightboxProps } from './Lightbox';
 export { BottomSheet, SheetSurface, type BottomSheetProps } from './BottomSheet';

@@ -33,3 +33,8 @@ export {
   SegmentedControl as NativeSegmentedControl,
   type SegmentedControlProps as NativeSegmentedControlProps,
 } from '@expo/ui/community/segmented-control';
+
+export {
+  MenuView as NativeMenuView,
+  type MenuComponentProps as NativeMenuViewProps,
+} from '@expo/ui/community/menu';
