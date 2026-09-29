@@ -21,6 +21,12 @@ packageExtensions:
       expo: '>=57.0.0 <59.0.0'
       react-native: '>=0.86.0 <0.89.0'
       '@reactvision/react-native-visionos': '>=0.86.0 <0.89.0'
+  # Intentional compatibility lane: this starter stays on Nitro 0.37.x.
+  # Rive 0.5.0 still publishes a <0.37 peer cap, so keep this extension
+  # explicit until upstream widens its declared range.
+  '@rive-app/react-native@0.5.0':
+    peerDependencies:
+      react-native-nitro-modules: '>=0.37.0 <0.38'
 
 allowBuilds:
   sharp: true
@@ -70,7 +76,7 @@ catalog:
   react-native-youtube-bridge: 2.2.3
   react-native-keyboard-controller: 1.22.5
   react-native-mmkv: 4.3.2
-  react-native-nitro-modules: 0.36.5
+  react-native-nitro-modules: 0.37.1
   react-native-enriched-html: 1.1.1
   react-native-gesture-handler: ~3.2.1
   react-native-reanimated: 4.7.0
@@ -97,7 +103,7 @@ catalog:
   "@reactvision/viro-web-renderer": 1.0.0
   "@metavr/layout-compat": 1.0.0
   "@metavr/layout-window-compat": 1.0.0
-  "@rive-app/react-native": 0.5.0-beta.6
+  "@rive-app/react-native": 0.5.0
   "@rive-app/react-webgl2": 4.35.0
 
   # web
