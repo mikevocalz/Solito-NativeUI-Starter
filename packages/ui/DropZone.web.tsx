@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { tv } from 'tailwind-variants';
 import { DropSurface } from './html/dom.web';
 import { View } from './tw';
@@ -94,7 +95,7 @@ export function DropZone({
   ...rest
 }: DropZoneProps) {
   const s = dropZone({ active });
-  let dragDepth = 0;
+  const dragDepth = useRef(0);
 
   return (
     <DropSurface
@@ -118,8 +119,8 @@ export function DropZone({
       onDragEnd={() => onDragEnd?.()}
       onDragEnter={(event) => {
         event.preventDefault();
-        dragDepth += 1;
-        if (dragDepth === 1) onEnter?.();
+        dragDepth.current += 1;
+        if (dragDepth.current === 1) onEnter?.();
       }}
       onDragOver={(event) => {
         event.preventDefault();
@@ -127,12 +128,12 @@ export function DropZone({
       }}
       onDragLeave={(event) => {
         event.preventDefault();
-        dragDepth = Math.max(0, dragDepth - 1);
-        if (dragDepth === 0) onExit?.();
+        dragDepth.current = Math.max(0, dragDepth.current - 1);
+        if (dragDepth.current === 0) onExit?.();
       }}
       onDrop={async (event) => {
         event.preventDefault();
-        dragDepth = 0;
+        dragDepth.current = 0;
         onExit?.();
 
         const files = Array.from(event.dataTransfer.files).filter((file) =>
