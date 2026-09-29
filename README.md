@@ -1,4 +1,4 @@
-# Solito-NativeUI-Starter
+# Spatial-Solotio-Starter
 
 Universal app monorepo starter: **Expo (iOS/Android) + Next.js (web + Payload CMS)** sharing
 screens via **Solito** and a **Uniwind** UI kit, with **Storybook** for the components.
