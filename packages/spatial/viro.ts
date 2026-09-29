@@ -3,9 +3,13 @@ export {
   ViroAmbientLight,
   ViroBox,
   ViroDirectionalLight,
+  ViroGameLoop,
   ViroMaterials,
+  ViroNode,
   ViroPolyline,
   ViroQuad,
   ViroScene,
   ViroText,
+  ViroVirtualJoystick,
+  ViroXRSceneNavigator,
 } from '@reactvision/react-viro';
