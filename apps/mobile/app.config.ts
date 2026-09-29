@@ -53,7 +53,18 @@ const config: ExpoConfig = {
       },
     ],
     'expo-image',
-    '@reactvision/react-viro',
+    [
+      '@reactvision/react-viro',
+      {
+        provider: 'none',
+        android: {
+          xRMode: ['AR', 'QUEST', 'PICO'],
+          metaSpatialLayout: true,
+          metaSpatialLayoutBomVersion: '1.2026.0.0',
+          questArm64Only: true,
+        },
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
