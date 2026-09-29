@@ -2,7 +2,11 @@
 
 import type { ComponentType } from 'react';
 import { Text, View } from '@acme/ui/tw';
-import { Viro3DSceneNavigator, ViroVirtualJoystick } from './viro';
+import {
+  Viro3DSceneNavigator,
+  ViroVirtualButton,
+  ViroVirtualJoystick,
+} from './viro';
 import { SpatialDemoScene } from './SpatialDemoScene';
 import { gridRace, useGridRaceStore } from './gridRaceStore';
 
@@ -29,7 +33,7 @@ export function SpatialViroExperience() {
       <View className="pointer-events-box-none absolute inset-0">
         <View className="absolute bottom-4 left-4 gap-2">
           <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-100">
-            {phase === 'gateway' ? 'Select gate or start race' : 'Steer / push up to boost'}
+            {phase === 'gateway' ? 'Select gate or start race' : 'Tap stick left/right to turn • push up or A to boost'}
           </Text>
           <ViroVirtualJoystick
             controllerId="grid-racer"
@@ -43,6 +47,15 @@ export function SpatialViroExperience() {
             style={{ width: 104, height: 104 }}
           />
         </View>
+        <ViroVirtualButton
+          controllerId="grid-racer"
+          button="A"
+          size={58}
+          tintColor="rgba(255,122,0,0.78)"
+          onPressIn={() => gridRace.setBoost(true)}
+          onPressOut={() => gridRace.setBoost(false)}
+          style={{ position: 'absolute', right: 30, bottom: 38, width: 58, height: 58 }}
+        />
       </View>
     </View>
   );

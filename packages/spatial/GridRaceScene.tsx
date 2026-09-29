@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ViroAmbientLight,
   ViroBox,
+  ViroController,
   ViroDirectionalLight,
   ViroGameLoop,
   ViroMaterials,
@@ -12,102 +13,68 @@ import {
   ViroScene,
   ViroText,
 } from './viro';
+import {
+  advanceGridRace,
+  createGridRaceSimulation,
+  getActiveTrailSegments,
+  GRID_ARENA_HALF,
+  GRID_CELL,
+  restartGridRace,
+  type GridPoint,
+  type GridRaceSimulation,
+  type GridRiderId,
+  type GridRiderState,
+  type GridTrailSegment,
+  type GridTurn,
+} from './gridRaceEngine';
 import { gridRace, useGridRaceStore } from './gridRaceStore';
 
 ViroMaterials.createMaterials({
   raceCyan: { diffuseColor: '#00f3ff', lightingModel: 'Constant' },
-  raceOrange: { diffuseColor: '#ff8a00', lightingModel: 'Constant' },
+  raceOrange: { diffuseColor: '#ff7a00', lightingModel: 'Constant' },
+  raceGold: { diffuseColor: '#ffd24a', lightingModel: 'Constant' },
   raceWhite: { diffuseColor: '#fff6cf', lightingModel: 'Constant' },
+  raceRed: { diffuseColor: '#ff355e', lightingModel: 'Constant' },
   raceDark: { diffuseColor: '#020407', lightingModel: 'Constant' },
 });
 
-const GRID_X = Array.from({ length: 21 }, (_, index) => index - 10);
-const GRID_Z = Array.from({ length: 38 }, (_, index) => index);
-const TRACK_LOOP = 78;
-const GRID_STEP = 2.2;
+const CAMERA_PLAYER_Z = -4.2;
+const GRID_LINES = Array.from(
+  { length: Math.floor((GRID_ARENA_HALF * 2) / GRID_CELL) + 1 },
+  (_, index) => -GRID_ARENA_HALF + index * GRID_CELL,
+);
 
-const OBSTACLES = [
-  { x: -2.4, offset: 18, tone: 'raceOrange' },
-  { x: 2.2, offset: 30, tone: 'raceWhite' },
-  { x: 0.2, offset: 44, tone: 'raceOrange' },
-  { x: -1.8, offset: 58, tone: 'raceWhite' },
-] as const;
-
-const SKYLINE = [
-  { x: -8.2, width: 1.7, height: 3.3, tone: 'raceCyan' },
-  { x: -5.8, width: 2.2, height: 5.8, tone: 'raceOrange' },
-  { x: -2.9, width: 1.5, height: 4.1, tone: 'raceCyan' },
-  { x: -0.2, width: 2.6, height: 7.2, tone: 'raceOrange' },
-  { x: 3.2, width: 1.8, height: 4.8, tone: 'raceCyan' },
-  { x: 6.2, width: 2.5, height: 6.2, tone: 'raceOrange' },
-] as const;
-
-type RaceFrame = {
-  x: number;
-  distance: number;
-  hits: number;
-  hitCooldown: number;
+const RIDER_MATERIAL: Record<GridRiderId, string> = {
+  player: 'raceCyan',
+  'rival-a': 'raceOrange',
+  'rival-b': 'raceGold',
+  'rival-c': 'raceWhite',
 };
 
-const clamp = (value: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, value));
+const RIVAL_IDS: GridRiderId[] = ['rival-a', 'rival-b', 'rival-c'];
 
-const positiveModulo = (value: number, divisor: number) =>
-  ((value % divisor) + divisor) % divisor;
+type LocalPoint = [number, number, number];
 
-const obstacleZ = (offset: number, distance: number) =>
-  -4 - positiveModulo(offset - distance, TRACK_LOOP);
-
-function GridWorld({ distance }: { distance: number }) {
+function directionVector(direction: GridRiderState['direction']): GridPoint {
   return (
-    <>
-      {GRID_X.map((offset) => (
-        <ViroPolyline
-          key={`gx-${offset}`}
-          points={[[offset, -1.55, -1], [offset, -1.55, -82]]}
-          thickness={0.014}
-          materials={['raceCyan']}
-        />
-      ))}
-      {GRID_Z.map((index) => {
-        const z = -1 - positiveModulo(index * GRID_STEP - distance, TRACK_LOOP);
-        return (
-          <ViroPolyline
-            key={`gz-${index}`}
-            points={[[-10, -1.55, z], [10, -1.55, z]]}
-            thickness={0.012}
-            materials={['raceCyan']}
-          />
-        );
-      })}
-
-      <ViroPolyline
-        points={[[-10, 4.9, -58], [10, 4.9, -58]]}
-        thickness={0.024}
-        materials={['raceOrange']}
-      />
-
-      {SKYLINE.map((building, index) => {
-        const left = building.x - building.width / 2;
-        const right = building.x + building.width / 2;
-        const bottom = -1.52;
-        const top = bottom + building.height;
-        return (
-          <ViroPolyline
-            key={`city-${index}`}
-            points={[
-              [left, bottom, -58],
-              [left, top, -58],
-              [right, top, -58],
-              [right, bottom, -58],
-            ]}
-            thickness={0.025}
-            materials={[building.tone]}
-          />
-        );
-      })}
-    </>
+    [
+      { x: 0, z: -1 },
+      { x: 1, z: 0 },
+      { x: 0, z: 1 },
+      { x: -1, z: 0 },
+    ][direction] ?? { x: 0, z: -1 }
   );
+}
+
+function worldToLocal(point: GridPoint, player: GridRiderState): LocalPoint {
+  const forward = directionVector(player.direction);
+  const right = { x: -forward.z, z: forward.x };
+  const dx = point.x - player.position.x;
+  const dz = point.z - player.position.z;
+  const lateral = dx * right.x + dz * right.z;
+  const forwardDistance = dx * forward.x + dz * forward.z;
+
+  return [lateral, -1.5, CAMERA_PLAYER_Z - forwardDistance];
 }
 
 function Gateway() {
@@ -127,7 +94,6 @@ function Gateway() {
         height={0.5}
         style={{ fontSize: 15, color: '#00f3ff', textAlign: 'center' }}
       />
-
       <ViroBox position={[-2.7, 0.45, -8]} scale={[0.09, 2.1, 0.09]} materials={['raceOrange']} />
       <ViroBox position={[2.7, 0.45, -8]} scale={[0.09, 2.1, 0.09]} materials={['raceOrange']} />
       <ViroBox position={[0, 2.55, -8]} scale={[2.79, 0.09, 0.09]} materials={['raceOrange']} />
@@ -137,7 +103,6 @@ function Gateway() {
         materials={['raceDark']}
         onClick={gridRace.startRace}
       />
-
       {[-1.7, -0.85, 0, 0.85, 1.7].map((x) => (
         <ViroPolyline
           key={x}
@@ -150,118 +115,353 @@ function Gateway() {
   );
 }
 
+function ArenaGrid({ player }: { player: GridRiderState }) {
+  const floorLines = useMemo(() => {
+    const lines: Array<{ key: string; a: LocalPoint; b: LocalPoint }> = [];
+    for (const value of GRID_LINES) {
+      lines.push({
+        key: `x-${value}`,
+        a: worldToLocal({ x: value, z: -GRID_ARENA_HALF }, player),
+        b: worldToLocal({ x: value, z: GRID_ARENA_HALF }, player),
+      });
+      lines.push({
+        key: `z-${value}`,
+        a: worldToLocal({ x: -GRID_ARENA_HALF, z: value }, player),
+        b: worldToLocal({ x: GRID_ARENA_HALF, z: value }, player),
+      });
+    }
+    return lines;
+  }, [player]);
+
+  const perimeter = [
+    { x: -GRID_ARENA_HALF, z: -GRID_ARENA_HALF },
+    { x: GRID_ARENA_HALF, z: -GRID_ARENA_HALF },
+    { x: GRID_ARENA_HALF, z: GRID_ARENA_HALF },
+    { x: -GRID_ARENA_HALF, z: GRID_ARENA_HALF },
+    { x: -GRID_ARENA_HALF, z: -GRID_ARENA_HALF },
+  ].map((point) => worldToLocal(point, player));
+
+  return (
+    <>
+      {floorLines.map((line) => (
+        <ViroPolyline
+          key={line.key}
+          points={[line.a, line.b]}
+          thickness={0.012}
+          materials={['raceCyan']}
+        />
+      ))}
+      <ViroPolyline
+        points={perimeter}
+        thickness={0.055}
+        materials={['raceOrange']}
+      />
+      <ViroPolyline
+        points={perimeter.map(([x, , z]) => [x, 0.25, z] as LocalPoint)}
+        thickness={0.03}
+        materials={['raceOrange']}
+      />
+      {GRID_LINES.filter((_, index) => index % 3 === 0).flatMap((value) => {
+        const posts = [
+          { x: value, z: -GRID_ARENA_HALF },
+          { x: value, z: GRID_ARENA_HALF },
+          { x: -GRID_ARENA_HALF, z: value },
+          { x: GRID_ARENA_HALF, z: value },
+        ];
+        return posts.map((point, index) => {
+          const [x, , z] = worldToLocal(point, player);
+          return (
+            <ViroPolyline
+              key={`post-${value}-${index}`}
+              points={[[x, -1.5, z], [x, 1.2, z]]}
+              thickness={0.025}
+              materials={['raceOrange']}
+            />
+          );
+        });
+      })}
+    </>
+  );
+}
+
+function TrailWall({
+  segment,
+  player,
+}: {
+  segment: GridTrailSegment;
+  player: GridRiderState;
+}) {
+  const a = worldToLocal(segment.from, player);
+  const b = worldToLocal(segment.to, player);
+  const dx = Math.abs(a[0] - b[0]);
+  const dz = Math.abs(a[2] - b[2]);
+  const length = Math.max(dx, dz);
+  if (length < 0.06) return null;
+
+  const position: LocalPoint = [
+    (a[0] + b[0]) / 2,
+    -0.88,
+    (a[2] + b[2]) / 2,
+  ];
+
+  return (
+    <ViroBox
+      position={position}
+      scale={dx >= dz ? [length, 0.62, 0.045] : [0.045, 0.62, length]}
+      materials={[RIDER_MATERIAL[segment.owner]]}
+    />
+  );
+}
+
+function CycleModel({
+  rider,
+  player,
+}: {
+  rider: GridRiderState;
+  player: GridRiderState;
+}) {
+  if (!rider.alive) return null;
+
+  const position = worldToLocal(rider.position, player);
+  const relativeDirection = ((rider.direction - player.direction) * 90 + 360) % 360;
+  const material = RIDER_MATERIAL[rider.id];
+
+  return (
+    <ViroNode position={[position[0], -0.92, position[2]]} rotation={[0, relativeDirection, 0]}>
+      <ViroBox position={[0, 0, 0]} scale={[0.42, 0.14, 0.82]} materials={[material]} />
+      <ViroBox position={[0, 0.18, 0.02]} scale={[0.12, 0.22, 0.34]} materials={['raceDark']} />
+      <ViroBox position={[0, 0.25, -0.24]} scale={[0.08, 0.12, 0.18]} materials={[material]} />
+      <ViroBox position={[-0.31, -0.07, 0]} scale={[0.055, 0.28, 0.36]} materials={[material]} />
+      <ViroBox position={[0.31, -0.07, 0]} scale={[0.055, 0.28, 0.36]} materials={[material]} />
+      <ViroPolyline
+        points={[[-0.42, 0.1, 0.35], [0, 0.28, -0.62], [0.42, 0.1, 0.35]]}
+        thickness={0.045}
+        materials={[material]}
+      />
+    </ViroNode>
+  );
+}
+
+function CrashMarker({
+  rider,
+  player,
+}: {
+  rider: GridRiderState;
+  player: GridRiderState;
+}) {
+  if (rider.alive) return null;
+  const [x, , z] = worldToLocal(rider.position, player);
+  return (
+    <ViroNode position={[x, -0.75, z]}>
+      <ViroPolyline points={[[-0.5, 0, 0], [0.5, 0.8, 0]]} thickness={0.055} materials={['raceRed']} />
+      <ViroPolyline points={[[0.5, 0, 0], [-0.5, 0.8, 0]]} thickness={0.055} materials={['raceRed']} />
+      <ViroPolyline points={[[0, -0.05, -0.5], [0, 0.65, 0.5]]} thickness={0.035} materials={['raceWhite']} />
+    </ViroNode>
+  );
+}
+
+function RaceHud({ simulation }: { simulation: GridRaceSimulation }) {
+  const player = simulation.riders.player;
+  const liveRivals = RIVAL_IDS.filter((id) => simulation.riders[id].alive).length;
+  const boost = Math.round(player.energy * 100);
+  const speed = Math.round(player.speed * 10) / 10;
+
+  let headline = `ROUND ${simulation.round}`;
+  if (simulation.phase === 'countdown') {
+    headline = simulation.countdown > 0.35 ? String(Math.ceil(simulation.countdown)) : 'RUN';
+  } else if (simulation.phase === 'round-over') {
+    headline = simulation.winner === 'player' ? 'GRID CLEARED' : 'DEREZZED';
+  } else if (simulation.phase === 'match-over') {
+    headline = simulation.matchWinner === 'player' ? 'MATCH WON' : 'GRID WINS';
+  }
+
+  return (
+    <>
+      <ViroText
+        text={headline}
+        position={[0, 2.25, -4.8]}
+        width={6}
+        height={0.75}
+        style={{ fontSize: 24, color: '#fff6cf', textAlign: 'center' }}
+      />
+      <ViroText
+        text={`YOU ${simulation.scores.player}  /  GRID ${simulation.scores.grid}   •   RIVALS ${liveRivals}   •   BOOST ${boost}%   •   ${speed} U/S`}
+        position={[0, 1.73, -4.8]}
+        width={7.5}
+        height={0.45}
+        style={{ fontSize: 13, color: '#00f3ff', textAlign: 'center' }}
+      />
+      <ViroBox position={[0, 1.42, -4.82]} scale={[2.2, 0.035, 0.025]} materials={['raceDark']} />
+      <ViroBox
+        position={[-2.2 + player.energy * 2.2, 1.42, -4.77]}
+        scale={[Math.max(0.02, player.energy * 2.2), 0.025, 0.018]}
+        materials={[player.energy > 0.2 ? 'raceCyan' : 'raceRed']}
+      />
+      <ViroText
+        text="SWIPE / STICK L-R = 90° TURN   •   TRIGGER / A / STICK UP = BOOST"
+        position={[0, -1.82, -4.1]}
+        width={7}
+        height={0.35}
+        style={{ fontSize: 10, color: '#fff6cf', textAlign: 'center' }}
+      />
+    </>
+  );
+}
+
+function HeadsetInput() {
+  const Controller = ViroController as unknown as React.ComponentType<{
+    reticleVisibility?: boolean;
+    controllerVisibility?: boolean;
+    onSwipe?: (state: number, source: number) => void;
+    onClick?: (position: number[], source: number) => void;
+  }>;
+
+  return (
+    <Controller
+      reticleVisibility={false}
+      controllerVisibility={false}
+      onSwipe={(state) => {
+        if (state === 3) gridRace.queueTurn(-1);
+        if (state === 4) gridRace.queueTurn(1);
+        if (state === 1) gridRace.pulseBoost();
+      }}
+      onClick={() => gridRace.pulseBoost()}
+    />
+  );
+}
+
+function RaceWorld({
+  simulation,
+  onRestart,
+}: {
+  simulation: GridRaceSimulation;
+  onRestart: () => void;
+}) {
+  const player = simulation.riders.player;
+  const trails = [...simulation.trails, ...getActiveTrailSegments(simulation)];
+
+  return (
+    <>
+      <ArenaGrid player={player} />
+
+      {trails.map((segment) => (
+        <TrailWall key={`${segment.owner}-${segment.id}`} segment={segment} player={player} />
+      ))}
+
+      {(['player', 'rival-a', 'rival-b', 'rival-c'] as GridRiderId[]).map((id) => (
+        <CycleModel key={id} rider={simulation.riders[id]} player={player} />
+      ))}
+
+      {simulation.phase === 'round-over' || simulation.phase === 'match-over'
+        ? (['player', 'rival-a', 'rival-b', 'rival-c'] as GridRiderId[]).map((id) => (
+            <CrashMarker key={`crash-${id}`} rider={simulation.riders[id]} player={player} />
+          ))
+        : null}
+
+      <RaceHud simulation={simulation} />
+      <HeadsetInput />
+
+      <ViroBox
+        position={[-3.1, -0.45, -3.3]}
+        scale={[0.52, 0.22, 0.07]}
+        materials={['raceDark']}
+        onClick={() => gridRace.queueTurn(-1)}
+      />
+      <ViroText
+        text="TURN L"
+        position={[-3.1, -0.41, -3.2]}
+        width={1.2}
+        height={0.3}
+        style={{ fontSize: 14, color: '#00f3ff', textAlign: 'center' }}
+      />
+      <ViroBox
+        position={[3.1, -0.45, -3.3]}
+        scale={[0.52, 0.22, 0.07]}
+        materials={['raceDark']}
+        onClick={() => gridRace.queueTurn(1)}
+      />
+      <ViroText
+        text="TURN R"
+        position={[3.1, -0.41, -3.2]}
+        width={1.2}
+        height={0.3}
+        style={{ fontSize: 14, color: '#ff7a00', textAlign: 'center' }}
+      />
+
+      {simulation.phase === 'match-over' ? (
+        <>
+          <ViroBox
+            position={[0, 0.42, -5.1]}
+            scale={[1.35, 0.34, 0.06]}
+            materials={['raceDark']}
+            onClick={onRestart}
+          />
+          <ViroText
+            text="RESTART MATCH"
+            position={[0, 0.47, -5]}
+            width={2.8}
+            height={0.42}
+            style={{ fontSize: 16, color: '#fff6cf', textAlign: 'center' }}
+          />
+        </>
+      ) : null}
+    </>
+  );
+}
+
 export function GridRaceScene() {
   const phase = useGridRaceStore((state) => state.phase);
-  const [frame, setFrame] = useState<RaceFrame>({
-    x: 0,
-    distance: 0,
-    hits: 0,
-    hitCooldown: 0,
-  });
+  const [simulation, setSimulation] = useState<GridRaceSimulation>(() =>
+    createGridRaceSimulation(),
+  );
+  const lastTurnSerial = useRef(gridRace.getState().turnSerial);
+  const lastBoostPulseSerial = useRef(gridRace.getState().boostPulseSerial);
+  const boostPulseRemaining = useRef(0);
+
+  useEffect(() => {
+    if (phase === 'race') {
+      setSimulation(createGridRaceSimulation());
+      lastTurnSerial.current = gridRace.getState().turnSerial;
+      lastBoostPulseSerial.current = gridRace.getState().boostPulseSerial;
+      boostPulseRemaining.current = 0;
+    }
+  }, [phase]);
 
   const onFixedUpdate = useCallback(({ dt }: { dt: number }) => {
+    if (phase !== 'race') return;
+
     const input = gridRace.getState();
-    if (input.phase !== 'race') return;
+    let turn: GridTurn = 0;
 
-    setFrame((current) => {
-      const boost = Math.max(0, input.throttle);
-      const speed = 8.5 + boost * 6;
-      const nextDistance = current.distance + speed * dt;
-      let nextX = clamp(current.x + input.steer * 5.2 * dt, -3.2, 3.2);
-      let hits = current.hits;
-      let hitCooldown = Math.max(0, current.hitCooldown - dt);
+    if (input.turnSerial !== lastTurnSerial.current) {
+      turn = input.turn;
+      lastTurnSerial.current = input.turnSerial;
+    }
 
-      const collision = OBSTACLES.some((obstacle) => {
-        const z = obstacleZ(obstacle.offset, nextDistance);
-        return z > -4.9 && z < -3.25 && Math.abs(obstacle.x - nextX) < 0.7;
-      });
+    if (input.boostPulseSerial !== lastBoostPulseSerial.current) {
+      boostPulseRemaining.current = 0.72;
+      lastBoostPulseSerial.current = input.boostPulseSerial;
+    }
 
-      if (collision && hitCooldown <= 0) {
-        hits += 1;
-        hitCooldown = 1.1;
-        nextX = clamp(nextX + (nextX <= 0 ? 0.8 : -0.8), -3.2, 3.2);
-      }
+    boostPulseRemaining.current = Math.max(0, boostPulseRemaining.current - dt);
+    const boost = input.boostHeld || boostPulseRemaining.current > 0;
 
-      return { x: nextX, distance: nextDistance, hits, hitCooldown };
-    });
-  }, []);
-
-  const nudge = (delta: number) => {
-    setFrame((current) => ({
-      ...current,
-      x: clamp(current.x + delta, -3.2, 3.2),
-    }));
-  };
-
-  const score = Math.max(0, Math.floor(frame.distance * 12) - frame.hits * 50);
+    setSimulation((current) => advanceGridRace(current, { turn, boost }, dt));
+  }, [phase]);
 
   return (
     <ViroScene>
-      <ViroAmbientLight color="#7cf8ff" intensity={135} />
-      <ViroDirectionalLight color="#ff9b33" intensity={180} direction={[0, -1, -0.35]} />
+      <ViroAmbientLight color="#7cf8ff" intensity={125} />
+      <ViroDirectionalLight color="#ff9b33" intensity={165} direction={[0, -1, -0.35]} />
       <ViroGameLoop fixedHz={30} onFixedUpdate={onFixedUpdate} />
-
-      <GridWorld distance={phase === 'race' ? frame.distance : 0} />
 
       {phase === 'gateway' ? (
         <Gateway />
       ) : (
-        <>
-          {OBSTACLES.map((obstacle, index) => (
-            <ViroBox
-              key={index}
-              position={[obstacle.x, -0.9, obstacleZ(obstacle.offset, frame.distance)]}
-              scale={[0.34, 0.62, 0.09]}
-              materials={[obstacle.tone]}
-            />
-          ))}
-
-          <ViroNode position={[frame.x, 0, 0]}>
-            <ViroBox position={[0, -1.02, -4]} scale={[0.62, 0.19, 1.18]} materials={['raceCyan']} />
-            <ViroBox position={[0, -0.84, -4.62]} scale={[0.2, 0.18, 0.46]} materials={['raceWhite']} />
-            <ViroBox position={[0, -0.49, -2.8]} scale={[0.045, 0.62, 1.15]} materials={['raceCyan']} />
-            <ViroPolyline
-              points={[[0, -1.18, -4.72], [0, -1.18, -1.65]]}
-              thickness={0.075}
-              materials={['raceCyan']}
-            />
-          </ViroNode>
-
-          <ViroBox
-            position={[-3.2, -0.15, -3]}
-            scale={[0.58, 0.26, 0.08]}
-            materials={['raceDark']}
-            onClick={() => nudge(-0.95)}
-          />
-          <ViroText
-            text="LEFT"
-            position={[-3.2, -0.11, -2.9]}
-            width={1.2}
-            height={0.35}
-            style={{ fontSize: 17, color: '#00f3ff', textAlign: 'center' }}
-          />
-          <ViroBox
-            position={[3.2, -0.15, -3]}
-            scale={[0.58, 0.26, 0.08]}
-            materials={['raceDark']}
-            onClick={() => nudge(0.95)}
-          />
-          <ViroText
-            text="RIGHT"
-            position={[3.2, -0.11, -2.9]}
-            width={1.2}
-            height={0.35}
-            style={{ fontSize: 17, color: '#ff8a00', textAlign: 'center' }}
-          />
-
-          <ViroText
-            text={`GRID RUN  •  ${score.toString().padStart(5, '0')}  •  HITS ${frame.hits}`}
-            position={[0, 2.35, -5]}
-            width={6}
-            height={0.7}
-            style={{ fontSize: 20, color: '#fff6cf', textAlign: 'center' }}
-          />
-        </>
+        <RaceWorld
+          simulation={simulation}
+          onRestart={() => setSimulation((current) => restartGridRace(current))}
+        />
       )}
     </ViroScene>
   );
