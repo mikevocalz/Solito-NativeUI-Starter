@@ -11,10 +11,10 @@ overrides:
   react-dom: 19.3.0
   "@expo/dom-webview": 58.0.1
 
-onlyBuiltDependencies:
-  - sharp
-  - unrs-resolver
-  - esbuild
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+  esbuild: true
 
 # One version per dependency, declared once. Package manifests consume catalog:.
 catalog:
@@ -24,7 +24,7 @@ catalog:
   react-native: 0.88.0-rc.2
   react-native-web: 0.21.2
   expo: 58.0.0-preview.8
-  "@expo/metro-runtime": 58.0.7
+  "@expo/metro-runtime": 58.0.8
   expo-asset: 58.0.8
   expo-font: 58.0.3
   expo-haptics: 58.0.2

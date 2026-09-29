@@ -29,8 +29,8 @@ jobs:
 
       - name: Refresh npm catalog
         run: |
-          pnpm dlx pcu plan --target latest --out .pcu-plan.json
-          pnpm dlx pcu apply .pcu-plan.json --yes
+          pnpm dlx pnpm-catalog-updates@latest plan --target latest --out .pcu-plan.json
+          pnpm dlx pnpm-catalog-updates@latest apply .pcu-plan.json --yes
           node tooling/pin-sdk58-catalog.mjs
           rm -f .pcu-plan.json
           pnpm install --no-frozen-lockfile

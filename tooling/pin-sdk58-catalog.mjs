@@ -8,7 +8,7 @@ const sdk58 = {
   'react-native': '0.88.0-rc.2',
   'react-native-web': '0.21.2',
   expo: '58.0.0-preview.8',
-  '@expo/metro-runtime': '58.0.7',
+  '@expo/metro-runtime': '58.0.8',
   'expo-asset': '58.0.8',
   'expo-font': '58.0.3',
   'expo-haptics': '58.0.2',

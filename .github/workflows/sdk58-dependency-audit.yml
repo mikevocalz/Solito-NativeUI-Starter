@@ -19,7 +19,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - name: Capture latest npm versions
         shell: bash
         run: |
