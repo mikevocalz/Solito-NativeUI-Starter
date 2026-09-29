@@ -9,41 +9,62 @@ Spatial-Solotio-Starter is a spatial-first Expo SDK 58 / Next starter with a del
 
 ## Universal Skia graphics
 
-`@acme/ui` includes three related backgrounds:
+`@acme/ui` includes three related procedural backgrounds:
 
 - `GridFloor` — scrolling perspective floor.
 - `GridScene` — mirrored ceiling + floor planes around a shared horizon.
 - `GlyphCity` — deterministic neon city silhouettes, glyph-like vector cells, antenna lights and flying traffic.
 
-The drawing implementations live in `*.skia.tsx` and are shared. Native imports them directly. Web wrappers only load CanvasKit and then load the same Skia component. There is no second CSS/SVG renderer.
+The drawing implementations live in `*.skia.tsx` and are shared. Native imports them directly. Web wrappers only initialize CanvasKit and then load the same Skia component. There is no separate CSS/SVG rendering path.
 
-CanvasKit is copied to `/canvaskit` for Next, Storybook and Expo web during postinstall by `tooling/copy-skia-web-assets.mjs`.
+CanvasKit is copied to `/canvaskit` for Next, Storybook and Expo web during postinstall by `tooling/copy-skia-web-assets.mjs`. `SkiaWebGate` caches that initialization so multiple backgrounds do not load CanvasKit repeatedly.
+
+The default Grid composition intentionally layers:
+
+1. `GridScene` as the full-screen floor/ceiling field.
+2. `GlyphCity` as a transparent lower-horizon city layer.
+3. Normal semantic application UI above both.
 
 ## Futuristic UI kit
 
-The starter exports `CircuitButton` and `GridCard`. They are normal semantic UI components styled through the existing Tailwind 4 / Uniwind boundary; Skia is reserved for scene graphics.
+The starter exports `CircuitButton` and `GridCard`. They are universal semantic controls styled through the existing Tailwind 4 / Uniwind boundary; Skia remains reserved for scene graphics.
 
-Storybook includes a **Future Grid** section demonstrating Grid Floor, Grid Scene, the layered Glyph City composition, and futuristic controls/cards.
+Storybook contains **Spatial / Grid World** stories for:
 
-## XR entryway and Grid race
+- the complete Grid gateway composition;
+- Grid Scene + Glyph City;
+- Grid Floor;
+- cyan/orange CircuitButton variants;
+- futuristic GridCard variants.
 
-The `/spatial` route and Expo Spatial drawer screen are an entryway into the immersive sample.
+## XR entryway and light-cycle race
 
-The Viro scene uses an early-computer-world visual grammar without shipping film logos, characters, audio, models or copied production assets: black void, cyan vector grid, warm orange opponent geometry, emissive towers, sparse HUD typography and hard geometric silhouettes.
+The `/spatial` route and Expo Spatial drawer screen act as a gateway rather than dropping directly into a game.
 
-`GridRaceScene` is a playable starter race:
+The Viro world uses an early-1980s computer-world visual grammar without shipping film logos, characters, audio, models or copied production assets: black void, cyan vector floor grid, warm orange geometry, light walls/trails, sparse skyline outlines and minimal HUD typography.
 
-- auto-forward three-lane cycle motion;
-- controller/mouse-click LEFT and RIGHT pads;
-- looping obstacle field and score counter;
-- cyan player cycle and light trail;
-- period-inspired horizon/tower geometry.
+`GridRaceScene` is a playable Viro starter:
 
-For a production racing game, move movement/collision into a deterministic fixed-step simulation and use Viro physics/controller hooks rather than React state as the simulation clock.
+- a selectable in-world **GRID ACCESS** gate;
+- `ViroGameLoop` fixed-step simulation at 30 Hz;
+- analog steering and boost from `ViroVirtualJoystick` on web and flat native previews;
+- controller/hand-clickable LEFT/RIGHT pads inside the 3D world for headset fallback;
+- continuous track movement, obstacle wrapping, collisions, hit count and distance score;
+- a procedural player cycle silhouette and vertical light wall/trail;
+- sparse outlined horizon architecture designed to read like an early vector-computer world.
 
-## Viro research reference
+The old Viro AR Driving Car sample informed the input/simulation direction: acceleration, steering and continuously updated transforms are much closer to a light-cycle game than a static Viro scene. The starter does not copy the sample's art or vehicle assets.
 
-Viro Media's original sample suite included **AR Driving Car Demo**, which placed a car on a detected surface and let the user drive it around the scene. ReactVision's maintained sample app still lists **AR Car Driving** as functional. That sample is useful as historical input/vehicle reference; the Grid race here is newly authored for Viro/OpenXR.
+## Immersive routing
+
+`SpatialViroExperience.native.tsx` separates headset entry from ordinary app previews:
+
+- **Quest** uses `ViroXRSceneNavigator`, which hands the virtual scene to the headset VR activity.
+- **Pico** uses the same XR navigator when the mikevocalz fork is enabled; that fork adds PICO detection/routing and floor-origin support.
+- **iOS / ordinary Android** keep the scene in a `Viro3DSceneNavigator` preview with the same race module and virtual joystick.
+- **Web** uses Viro Web Renderer with the same race scene and the web `ViroVirtualJoystick`.
+
+The headset scene remains usable without the 2D joystick because the steering pads live inside the world.
 
 ## System spatial windows
 
@@ -55,7 +76,7 @@ Viro Media's original sample suite included **AR Driving Car Demo**, which place
 
 ## Use the mikevocalz Viro fork
 
-The public starter keeps `@reactvision/react-viro@3.0.1` so unauthenticated clones install cleanly. To enable the full fork feature set:
+The public starter keeps `@reactvision/react-viro@3.0.1` so unauthenticated clones install cleanly. To enable the full fork feature set, including PICO-specific XR routing and the native Viro/Rive surface:
 
 ```yaml
 overrides:
@@ -85,11 +106,11 @@ The Expo app declares `@metavr/layout-compat` and `@metavr/layout-window-compat`
 
 Both mount the same `SpatialScreen`.
 
-
 ## Design and interaction references
 
 - NeonBlade Grid Scene: https://neonbladeui.neuronrush.com/components/backgrounds/grid-scene
 - NeonBlade Glyph City: https://neonbladeui.neuronrush.com/components/backgrounds/glyph-city
 - ReactVision Viro sample app AR Car Driving: https://github.com/ReactVision/sample-app/tree/main/Screens/ARDrivingCarDemo
+- Legacy Viro AR Driving Car sample: https://github.com/viromedia/viro/tree/master/code-samples/js/ARDrivingCarDemo
 
-These are implementation references only. The starter's Skia scene and Viro race code are newly authored.
+These are implementation references only. The starter's Skia backgrounds, product UI and Viro race are newly authored.
