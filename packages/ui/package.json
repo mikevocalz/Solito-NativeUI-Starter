@@ -40,8 +40,11 @@
     "expo-symbols": "catalog:",
     "lucide-react": "catalog:",
     "lucide-react-native": "catalog:",
+    "react-native-audio-api": "catalog:",
     "react-native-css": "catalog:",
+    "react-native-keyboard-controller": "catalog:",
     "react-native-pulsar": "catalog:",
+    "react-native-reanimated": "catalog:",
     "react-native-safe-area-context": "catalog:",
     "react-native-svg": "catalog:",
     "solito": "catalog:",
@@ -49,7 +52,8 @@
     "sonner-native": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwind-variants": "catalog:",
-    "uniwind": "catalog:"
+    "uniwind": "catalog:",
+    "zustand": "catalog:"
   },
   "devDependencies": {
     "@acme/config": "workspace:*",

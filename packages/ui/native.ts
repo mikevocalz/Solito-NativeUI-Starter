@@ -22,7 +22,6 @@ export {
   ScrollView,
   Slider,
   Spacer,
-  State,
   Switch,
   Text,
   TextInput,
