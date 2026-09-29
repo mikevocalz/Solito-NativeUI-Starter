@@ -35,10 +35,10 @@ type ForkViroRuntime = typeof ViroRuntime & {
 };
 
 const forkRuntime = ViroRuntime as ForkViroRuntime;
+const useForkViewTag = forkRuntime.useVRViewTag ?? (() => null);
 
 export function useViroVRViewTag() {
-  const useForkViewTag = forkRuntime.useVRViewTag;
-  return useForkViewTag ? useForkViewTag() : null;
+  return useForkViewTag();
 }
 
 export function triggerViroHaptic(
