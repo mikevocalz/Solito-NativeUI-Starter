@@ -31,5 +31,6 @@
     "react-native": {
       "optional": true
     }
-  }
+  },
+  "type": "module"
 }
