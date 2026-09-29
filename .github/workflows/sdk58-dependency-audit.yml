@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - chore/sdk58-native-ui-modernization
+  pull_request:
 
 permissions:
   contents: read
