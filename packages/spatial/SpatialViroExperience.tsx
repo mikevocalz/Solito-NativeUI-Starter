@@ -65,7 +65,11 @@ ViroMaterials.createMaterials({
 export function SpatialViroExperience() {
   return (
     <Viro3DSceneNavigator
-      initialScene={{ scene: SpatialDemoScene }}
+      // Public Viro 3.0.1 still types this field as a ViroScene instance even
+      // though the navigator mounts it as a React component at runtime. The
+      // user's fork fixes the annotation; keep the compatibility cast localized
+      // here so consumers never inherit the upstream typing bug.
+      initialScene={{ scene: SpatialDemoScene as never }}
       webRendererOptions={{ assetBaseUrl: '/viro/wasm/' }}
       style={{ flex: 1 }}
     />
