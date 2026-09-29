@@ -21,10 +21,5 @@ jobs:
           # Bump .nvmrc and the root package.json "engines" together.
           node-version-file: .nvmrc
           cache: pnpm
-      - run: pnpm install --no-frozen-lockfile
-      - name: Upload regenerated lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-pnpm-lock
-          path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
       - run: pnpm turbo build typecheck lint
