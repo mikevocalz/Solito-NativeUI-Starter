@@ -47,11 +47,31 @@ const config: StorybookConfig = {
         ),
       ],
       alias: [
+        // @expo/html-elements imports RNW internals directly. Under pnpm's
+        // strict graph Vite can otherwise turn those optional-peer imports
+        // into virtual stubs, so resolve both the root and every deep RNW path
+        // to the Storybook workspace's concrete installation.
+        {
+          find: /^react-native-web\/(.*)$/,
+          replacement: `${resolve(here, '../node_modules/react-native-web')}/$1`,
+        },
+        {
+          find: /^react-native-web$/,
+          replacement: resolve(here, '../node_modules/react-native-web/dist/index.js'),
+        },
         {
           find: /^react-native$/,
           replacement: resolve(here, '../node_modules/react-native-web/dist/index.js'),
         },
-        ...aliasEntries.filter((entry) => entry.find !== 'react-native'),
+        ...aliasEntries.filter(
+          (entry) => entry.find !== 'react-native' && entry.find !== 'react-native-web',
+        ),
+      ],
+      dedupe: [
+        ...(viteConfig.resolve?.dedupe ?? []),
+        'react',
+        'react-dom',
+        'react-native-web',
       ],
     };
     viteConfig.server = { ...(viteConfig.server ?? {}), hmr: false };
