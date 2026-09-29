@@ -1,7 +1,6 @@
 // Expo Router 58 exposes the JavaScript tab navigator and its public types
 // from this stable export; do not reach into expo-router/build internals.
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pressable, Text, View } from '@acme/ui/tw';
 import { Home, Compass, Bell, User } from '@acme/ui/icons';
 import { MenuButton } from '@acme/app';
@@ -41,8 +40,7 @@ type RouteName = keyof typeof ICONS;
  * render gives the app's slab language, true M3 rail metrics, and somewhere to
  * put the menu button.
  */
-export function AppTabBar({ state, navigation, rail }: BottomTabBarProps & { rail: boolean }) {
-  const insets = useSafeAreaInsets();
+export function AppTabBar({ state, emitter, navigateToTab, insets, rail }: BottomTabBarProps & { rail: boolean }) {
 
   const items = state.routes.map((route, index) => {
     const focused = state.index === index;
@@ -52,9 +50,9 @@ export function AppTabBar({ state, navigation, rail }: BottomTabBarProps & { rai
 
     const onPress = () => {
       haptics.selection();
-      const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+      const event = emitter.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
       if (!focused && !event.defaultPrevented) {
-        navigation.navigate(route.name);
+        navigateToTab(route.key);
       }
     };
 
