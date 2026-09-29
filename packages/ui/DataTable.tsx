@@ -112,7 +112,7 @@ export function DataTable<T extends RowData>({
         <TableBody>
           {table.getRowModel().rows.map((row) => (
             <TableRow key={row.id} className={s.row()}>
-              {row.getVisibleCells().map((cell) => (
+              {row.getAllCells().map((cell) => (
                 <TableCell key={cell.id} className={s.cell()}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
