@@ -370,7 +370,7 @@ function chooseAiTurn(simulation: GridRaceSimulation, rider: GridRiderState): Gr
   const currentDistance = distance(rider.position, player.position);
   const leftHunts = distance(leftAfter, player.position) + 0.75 < currentDistance;
   const rightHunts = distance(rightAfter, player.position) + 0.75 < currentDistance;
-  const huntRoll = hash01(simulation.seed * 3 + simulation.tick * 11 + rider.id.charCodeAt(7));
+  const huntRoll = hash01(simulation.seed * 3 + simulation.tick * 11 + rider.id.charCodeAt(6));
 
   if (huntRoll > 0.7 && (leftHunts || rightHunts)) {
     if (leftHunts && left > 4.5 && (!rightHunts || left >= right)) return -1;
@@ -474,7 +474,7 @@ export function advanceGridRace(
     const aiTurn = chooseAiTurn(simulation, rider);
     if (aiTurn !== 0) {
       applyTurn(simulation, rider, aiTurn);
-      rider.decisionTimer = 0.18 + hash01(simulation.seed + simulation.tick + rivalId.charCodeAt(7)) * 0.28;
+      rider.decisionTimer = 0.18 + hash01(simulation.seed + simulation.tick + rivalId.charCodeAt(6)) * 0.28;
     } else if (rider.decisionTimer <= 0) {
       rider.decisionTimer = 0.12 + hash01(simulation.seed * 2 + simulation.tick * 3 + rivalId.charCodeAt(6)) * 0.22;
     }
@@ -493,7 +493,7 @@ export function advanceGridRace(
       riderId !== 'player' &&
       rider.energy > 0.3 &&
       forwardClearance > 6.5 &&
-      hash01(simulation.seed + simulation.tick * 0.07 + riderId.charCodeAt(7)) > 0.58;
+      hash01(simulation.seed + simulation.tick * 0.07 + riderId.charCodeAt(6)) > 0.58;
     const boosting = riderId === 'player' ? input.boost && rider.energy > 0.02 : aiBoost;
 
     rider.energy = clamp01(

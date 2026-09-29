@@ -80,7 +80,7 @@ export function SpatialScreen() {
               <Text className="text-sm leading-6 text-white/60">Reusable grid cards and circuit buttons remain semantic, responsive and Uniwind-driven.</Text>
             </GridCard>
             <GridCard className="flex-1" eyebrow="03 / Immersion" title="OpenXR race" tone="orange">
-              <Text className="text-sm leading-6 text-white/60">Enter a black-vector grid arena and steer the playable three-lane light-cycle prototype.</Text>
+              <Text className="text-sm leading-6 text-white/60">Enter a black-vector arena for 90° light-cycle combat with persistent jetwalls, boost, AI rivals, rounds, and derez collisions.</Text>
             </GridCard>
           </View>
 

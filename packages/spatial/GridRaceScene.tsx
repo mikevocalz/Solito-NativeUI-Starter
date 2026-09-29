@@ -1,5 +1,6 @@
 'use client';
 
+import type { ComponentType } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ViroAmbientLight,
@@ -309,7 +310,7 @@ function RaceHud({ simulation }: { simulation: GridRaceSimulation }) {
 }
 
 function HeadsetInput() {
-  const Controller = ViroController as unknown as React.ComponentType<{
+  const Controller = ViroController as unknown as ComponentType<{
     reticleVisibility?: boolean;
     controllerVisibility?: boolean;
     onSwipe?: (state: number, source: number) => void;

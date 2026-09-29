@@ -76,7 +76,7 @@ The headset scene remains usable without the 2D joystick because the steering pa
 
 ## Use the mikevocalz Viro fork
 
-The public starter keeps `@reactvision/react-viro@3.0.1` so unauthenticated clones install cleanly. To enable the full fork feature set, including PICO-specific XR routing and the native Viro/Rive surface:
+The Quest/PICO development target is `mikevocalz/viro#decax9-three-panel`. Because this starter repository is public while that fork is private, the checked-in catalog keeps `@reactvision/react-viro@3.0.1` as an unauthenticated install/CI fallback. For real headset development, enable the private fork so PICO routing, OpenXR additions, spatial windows and the native Viro/Rive surface are active:
 
 ```yaml
 overrides:
