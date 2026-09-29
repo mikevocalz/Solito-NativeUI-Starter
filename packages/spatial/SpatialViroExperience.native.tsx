@@ -1,6 +1,6 @@
 'use client';
 
-import { Viro3DSceneNavigator } from '@reactvision/react-viro';
+import { Viro3DSceneNavigator } from './viro';
 import { SpatialDemoScene } from './SpatialDemoScene';
 
 export function SpatialViroExperience() {
