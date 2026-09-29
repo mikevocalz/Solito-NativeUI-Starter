@@ -24,6 +24,8 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       '@acme/ui',
       '@acme/app',
+    '@acme/spatial',
+      '@acme/spatial',
       '@tanstack/react-table',
       '@tanstack/react-form',
       '@tanstack/react-virtual',
@@ -67,6 +69,9 @@ const nextConfig: NextConfig = {
     'react-native-web',
     'react-native-enriched-html',
     'react-native-gesture-handler',
+    '@reactvision/react-viro',
+    '@reactvision/viro-web-renderer',
+    '@rive-app/react-webgl2',
     'solito',
   ],
   turbopack: {
