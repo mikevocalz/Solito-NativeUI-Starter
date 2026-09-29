@@ -65,3 +65,5 @@ export {
 export { PressScale, type PressScaleProps } from './press-scale';
 export { useInstanceStore, useStore } from './use-instance-store';
 export * from './audio';
+
+export { GridFloor, type GridFloorProps } from './backgrounds/GridFloor';

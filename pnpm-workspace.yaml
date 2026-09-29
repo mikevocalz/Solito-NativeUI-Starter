@@ -21,6 +21,8 @@ allowBuilds:
 # selected Expo preview family to install immediately.
 minimumReleaseAgeExclude:
   - '@expo/*'
+  - '@rive-app/*'
+  - '@reactvision/*'
   - expo
   - 'expo-*'
   - babel-preset-expo
@@ -72,6 +74,12 @@ catalog:
   "@expo/ui": 58.0.8
   expo-paste-input: 0.2.2
   expo-drag-drop-content-view: 0.9.2
+
+  # spatial / XR / Rive
+  "@reactvision/react-viro": 3.0.1
+  "@reactvision/viro-web-renderer": 1.0.0
+  "@rive-app/react-native": 0.4.21
+  "@rive-app/react-webgl2": 4.35.0
 
   # web
   "@next/env": 16.3.6

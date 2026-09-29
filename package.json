@@ -1,8 +1,8 @@
 {
-  "name": "solito-nativeui-starter",
+  "name": "spatial-solotio-starter",
   "version": "0.1.0",
   "private": true,
-  "description": "Solito NativeUI Starter — universal Expo + Next.js (Payload) monorepo with a shared semantic Expo UI kit and Storybook.",
+  "description": "Spatial-Solotio-Starter — Expo SDK 58 + Next.js + Viro Web/OpenXR + Rive universal spatial starter.",
   "license": "MIT",
   "packageManager": "pnpm@12.7.0",
   "engines": {
@@ -14,7 +14,9 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
-    "gen": "node tooling/generators/gen.mjs"
+    "gen": "node tooling/generators/gen.mjs",
+    "spatial:prepare-web": "node tooling/copy-viro-web-assets.mjs",
+    "postinstall": "node tooling/copy-viro-web-assets.mjs"
   },
   "devDependencies": {
     "turbo": "catalog:"
