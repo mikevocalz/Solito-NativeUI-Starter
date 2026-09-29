@@ -5,6 +5,13 @@ import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';
 
 type ModuleWithDefault<P extends object> = { default: ComponentType<P> };
 
+let skiaReady: Promise<void> | null = null;
+
+function prepareSkia() {
+  skiaReady ??= LoadSkiaWeb({ locateFile: (file) => `/canvaskit/${file}` });
+  return skiaReady;
+}
+
 export function SkiaWebGate<P extends object>({
   load,
   props,
@@ -18,7 +25,7 @@ export function SkiaWebGate<P extends object>({
 
   useEffect(() => {
     let active = true;
-    void LoadSkiaWeb({ locateFile: (file) => `/canvaskit/${file}` })
+    void prepareSkia()
       .then(load)
       .then((module) => {
         if (active) setComponent(() => module.default);
