@@ -499,7 +499,9 @@ export function advanceGridRace(
     rider.energy = clamp01(
       rider.energy + (boosting ? -BOOST_DRAIN : BOOST_REGEN) * safeDt,
     );
-    rider.speed = BASE_SPEED * (boosting ? BOOST_MULTIPLIER : 1);
+    const aiDifficulty =
+      riderId === 'player' ? 1 : 1 + Math.min(0.14, (simulation.round - 1) * 0.025);
+    rider.speed = BASE_SPEED * aiDifficulty * (boosting ? BOOST_MULTIPLIER : 1);
 
     const vector = directionVector(rider.direction);
     const start = copyPoint(rider.position);

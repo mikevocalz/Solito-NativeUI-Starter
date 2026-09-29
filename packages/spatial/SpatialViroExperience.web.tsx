@@ -1,6 +1,7 @@
 'use client';
 
 import type { ComponentType } from 'react';
+import { useEffect } from 'react';
 import { Text, View } from '@acme/ui/tw';
 import {
   Viro3DSceneNavigator,
@@ -22,6 +23,46 @@ const WebViro3DSceneNavigator =
 export function SpatialViroExperience() {
   const phase = useGridRaceStore((state) => state.phase);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      const isTurnKey =
+        key === 'arrowleft' || key === 'a' || key === 'arrowright' || key === 'd';
+      const isBoostKey =
+        key === 'arrowup' || key === 'w' || key === ' ' || key === 'shift';
+
+      if (isTurnKey || isBoostKey) event.preventDefault();
+
+      if (!event.repeat && (key === 'arrowleft' || key === 'a')) {
+        gridRace.queueTurn(-1);
+      }
+      if (!event.repeat && (key === 'arrowright' || key === 'd')) {
+        gridRace.queueTurn(1);
+      }
+      if (isBoostKey) {
+        gridRace.setBoost(true);
+      }
+      if (!event.repeat && key === 'enter' && gridRace.getState().phase === 'gateway') {
+        gridRace.startRace();
+      }
+    };
+
+    const onKeyUp = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if (key === 'arrowup' || key === 'w' || key === ' ' || key === 'shift') {
+        gridRace.setBoost(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      gridRace.setBoost(false);
+    };
+  }, []);
+
   return (
     <View className="relative flex-1">
       <WebViro3DSceneNavigator
@@ -33,7 +74,7 @@ export function SpatialViroExperience() {
       <View className="pointer-events-box-none absolute inset-0">
         <View className="absolute bottom-4 left-4 gap-2">
           <Text className="text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-100">
-            {phase === 'gateway' ? 'Select gate or start race' : 'Tap stick left/right to turn • push up or A to boost'}
+            {phase === 'gateway' ? 'Select gate or start race' : 'Stick / A-D / arrows turn • push up / W / Space / A-button boosts'}
           </Text>
           <ViroVirtualJoystick
             controllerId="grid-racer"

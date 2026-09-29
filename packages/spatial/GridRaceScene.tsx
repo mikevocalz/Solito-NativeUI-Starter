@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ViroAmbientLight,
   ViroBox,
@@ -13,6 +13,8 @@ import {
   ViroPolyline,
   ViroScene,
   ViroText,
+  triggerViroHaptic,
+  useViroVRViewTag,
 } from './viro';
 import {
   advanceGridRace,
@@ -310,23 +312,44 @@ function RaceHud({ simulation }: { simulation: GridRaceSimulation }) {
 }
 
 function HeadsetInput() {
+  const viewTag = useViroVRViewTag();
   const Controller = ViroController as unknown as ComponentType<{
     reticleVisibility?: boolean;
     controllerVisibility?: boolean;
     onSwipe?: (state: number, source: number) => void;
-    onClick?: (position: number[], source: number) => void;
+    onClickState?: (state: number, position: number[], source: number) => void;
   }>;
+
+  const tick = (amplitude = 0.34, durationSec = 0.025) =>
+    triggerViroHaptic(viewTag, { hand: 'active', amplitude, durationSec });
 
   return (
     <Controller
       reticleVisibility={false}
       controllerVisibility={false}
       onSwipe={(state) => {
-        if (state === 3) gridRace.queueTurn(-1);
-        if (state === 4) gridRace.queueTurn(1);
-        if (state === 1) gridRace.pulseBoost();
+        if (state === 3) {
+          gridRace.queueTurn(-1);
+          tick();
+        }
+        if (state === 4) {
+          gridRace.queueTurn(1);
+          tick();
+        }
+        if (state === 1) {
+          gridRace.pulseBoost();
+          tick(0.5, 0.04);
+        }
       }}
-      onClick={() => gridRace.pulseBoost()}
+      onClickState={(state) => {
+        if (state === 1) {
+          gridRace.setBoost(true);
+          tick(0.42, 0.035);
+        }
+        if (state === 2 || state === 3) {
+          gridRace.setBoost(false);
+        }
+      }}
     />
   );
 }
@@ -418,6 +441,8 @@ export function GridRaceScene() {
   const lastTurnSerial = useRef(gridRace.getState().turnSerial);
   const lastBoostPulseSerial = useRef(gridRace.getState().boostPulseSerial);
   const boostPulseRemaining = useRef(0);
+  const playerWasAlive = useRef(true);
+  const viewTag = useViroVRViewTag();
 
   const startRace = useCallback(() => {
     const input = gridRace.getState();
@@ -425,8 +450,21 @@ export function GridRaceScene() {
     lastTurnSerial.current = input.turnSerial;
     lastBoostPulseSerial.current = input.boostPulseSerial;
     boostPulseRemaining.current = 0;
+    playerWasAlive.current = true;
     gridRace.startRace();
   }, []);
+
+  useEffect(() => {
+    const alive = simulation.riders.player.alive;
+    if (playerWasAlive.current && !alive) {
+      triggerViroHaptic(viewTag, {
+        hand: 'both',
+        amplitude: 0.9,
+        durationSec: 0.16,
+      });
+    }
+    playerWasAlive.current = alive;
+  }, [simulation.riders.player.alive, viewTag]);
 
   const onFixedUpdate = useCallback(({ dt }: { dt: number }) => {
     if (phase !== 'race') return;

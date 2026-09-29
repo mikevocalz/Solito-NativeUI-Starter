@@ -22,3 +22,29 @@ export {
 export const isPico = Boolean(
   (ViroRuntime as typeof ViroRuntime & { isPico?: boolean }).isPico,
 );
+
+type ForkHapticOptions = {
+  hand?: 'left' | 'right' | 'both' | 'active';
+  amplitude?: number;
+  durationSec?: number;
+};
+
+type ForkViroRuntime = typeof ViroRuntime & {
+  useVRViewTag?: () => number | null;
+  triggerHaptic?: (viewTag: number, options?: ForkHapticOptions) => void;
+};
+
+const forkRuntime = ViroRuntime as ForkViroRuntime;
+
+export function useViroVRViewTag() {
+  const useForkViewTag = forkRuntime.useVRViewTag;
+  return useForkViewTag ? useForkViewTag() : null;
+}
+
+export function triggerViroHaptic(
+  viewTag: number | null,
+  options?: ForkHapticOptions,
+) {
+  if (viewTag == null) return;
+  forkRuntime.triggerHaptic?.(viewTag, options);
+}
