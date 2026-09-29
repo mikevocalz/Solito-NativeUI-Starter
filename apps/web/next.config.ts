@@ -23,7 +23,8 @@ const nextConfig: NextConfig = {
     // re-export their whole surface from a single index.
     optimizePackageImports: [
       '@acme/ui',
-      '@acme/app',      '@acme/spatial',
+      '@acme/app',
+      '@acme/spatial',
       '@tanstack/react-table',
       '@tanstack/react-form',
       '@tanstack/react-virtual',
