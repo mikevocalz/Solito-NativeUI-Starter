@@ -46,7 +46,6 @@ function SpatialDemoScene() {
         position={[0, -0.1, -4]}
         scale={[0.65, 0.65, 0.65]}
         materials={['spatialViolet']}
-        animation={{ name: 'spatialIdle', run: true, loop: true }}
       />
       <ViroText
         text="SPATIAL / SOLITIO"
