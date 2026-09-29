@@ -2,6 +2,7 @@ import type { Preview } from '@storybook/react-vite';
 import '../globals.css';
 
 const preview: Preview = {
+  initialGlobals: { theme: 'dark', motion: 'full' },
   parameters: {
     controls: { matchers: { color: /(background|color)$/i } },
     viewport: {
