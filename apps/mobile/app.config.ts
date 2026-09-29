@@ -8,9 +8,9 @@ const appDir = dirname(fileURLToPath(import.meta.url));
 loadProjectEnv(join(appDir, '../..'), { silent: true, force: true });
 
 const config: ExpoConfig = {
-  name: 'Solito NativeUI Starter',
-  slug: 'solito-nativeui-starter',
-  scheme: 'solitostarter',
+  name: 'Spatial Solotio Starter',
+  slug: 'spatial-solotio-starter',
+  scheme: 'spatialsolotio',
   version: '0.1.0',
   orientation: 'default',
   icon: './assets/images/icon.png',
@@ -53,6 +53,7 @@ const config: ExpoConfig = {
       },
     ],
     'expo-image',
+    '@reactvision/react-viro',
   ],
   experiments: {
     typedRoutes: true,
