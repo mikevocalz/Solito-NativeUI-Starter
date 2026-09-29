@@ -1,27 +1,27 @@
-import * as ViroRuntime from '@reactvision/react-viro';
+export { Viro3DSceneNavigator } from '@reactvision/react-viro/dist/components/Viro3DSceneNavigator.web';
+export { ViroAmbientLight } from '@reactvision/react-viro/dist/components/ViroAmbientLight.web';
+export { ViroBox } from '@reactvision/react-viro/dist/components/ViroBox.web';
+export { ViroDirectionalLight } from '@reactvision/react-viro/dist/components/ViroDirectionalLight.web';
+export { ViroGameLoop } from '@reactvision/react-viro/dist/components/ViroGameLoop.web';
+export { ViroNode } from '@reactvision/react-viro/dist/components/ViroNode.web';
+export { ViroPolyline } from '@reactvision/react-viro/dist/components/ViroPolyline.web';
+export { ViroQuad } from '@reactvision/react-viro/dist/components/ViroQuad.web';
+export { ViroScene } from '@reactvision/react-viro/dist/components/ViroScene.web';
+export { ViroText } from '@reactvision/react-viro/dist/components/ViroText.web';
+export { ViroVirtualButton } from '@reactvision/react-viro/dist/components/ViroVirtualButton.web';
+export { ViroVirtualJoystick } from '@reactvision/react-viro/dist/components/ViroVirtualJoystick.web';
+export { ViroMaterials } from '@reactvision/react-viro/dist/components/Material/ViroMaterials.web';
 
-export {
-  Viro3DSceneNavigator,
-  ViroAmbientLight,
-  ViroBox,
-  ViroController,
-  ViroDirectionalLight,
-  ViroGameLoop,
-  ViroMaterials,
-  ViroNode,
-  ViroPolyline,
-  ViroQuad,
-  ViroScene,
-  ViroText,
-  ViroVirtualButton,
-  ViroVirtualJoystick,
-  ViroXRSceneNavigator,
-  isQuest,
-} from '@reactvision/react-viro';
+export const isQuest = false;
+export const isPico = false;
 
-export const isPico = Boolean(
-  (ViroRuntime as typeof ViroRuntime & { isPico?: boolean }).isPico,
-);
+export function ViroController() {
+  return null;
+}
+
+export function ViroXRSceneNavigator() {
+  return null;
+}
 
 type ForkHapticOptions = {
   hand?: 'left' | 'right' | 'both' | 'active';
@@ -29,22 +29,13 @@ type ForkHapticOptions = {
   durationSec?: number;
 };
 
-type ForkViroRuntime = typeof ViroRuntime & {
-  useVRViewTag?: () => number | null;
-  triggerHaptic?: (viewTag: number, options?: ForkHapticOptions) => void;
-};
-
-const forkRuntime = ViroRuntime as ForkViroRuntime;
-const useForkViewTag = forkRuntime.useVRViewTag ?? (() => null);
-
 export function useViroVRViewTag() {
-  return useForkViewTag();
+  return null;
 }
 
 export function triggerViroHaptic(
-  viewTag: number | null,
-  options?: ForkHapticOptions,
+  _viewTag: number | null,
+  _options?: ForkHapticOptions,
 ) {
-  if (viewTag == null) return;
-  forkRuntime.triggerHaptic?.(viewTag, options);
+  // Headset haptics are native-only. Keep the shared race scene portable on web.
 }
