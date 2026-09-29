@@ -1,7 +1,7 @@
 'use client';
 
 import Svg, { Line, Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
-import { View } from './tw';
+import { View } from '../tw';
 import type { GridFloorProps } from './GridFloor.types';
 
 const VERTICAL = Array.from({ length: 15 }, (_, index) => index);
