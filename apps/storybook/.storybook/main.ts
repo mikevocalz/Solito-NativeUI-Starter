@@ -10,6 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 // this app only configures and aggregates.
 const config: StorybookConfig = {
   framework: '@storybook/react-vite',
+  typescript: { reactDocgen: false },
   addons: ['@storybook/addon-a11y'],
   stories: [
     '../../../packages/ui/*.stories.@(ts|tsx)',
@@ -31,13 +32,10 @@ const config: StorybookConfig = {
       ...(viteConfig.resolve ?? {}),
       alias: {
         ...(viteConfig.resolve?.alias ?? {}),
-        // The package root re-exports through CJS, which Vite's optimizer
-        // can't statically analyze — point straight at the ESM build (absolute
-        // path: the deep specifier isn't in the package's exports map).
-        '@legendapp/motion': resolve(
-          here,
-          '../../../node_modules/@legendapp/motion/lib/module/index.js',
-        ),
+        // Keep the RNW alias absolute under Vite 8/Rolldown. The plugin's
+        // string alias works at runtime but Rolldown warns that it can produce
+        // duplicate module identities in a pnpm workspace.
+        'react-native': resolve(here, '../node_modules/react-native-web'),
       },
     };
     viteConfig.server = { ...(viteConfig.server ?? {}), hmr: false };
