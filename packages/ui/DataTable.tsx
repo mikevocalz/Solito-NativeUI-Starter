@@ -1,11 +1,14 @@
 'use client';
 import { tv } from 'tailwind-variants';
 import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
+  createSortedRowModel,
   flexRender,
-  type ColumnDef,
+  rowSortingFeature,
+  sortFns,
+  tableFeatures,
+  useTable,
+  type ColumnDef as TanStackColumnDef,
+  type RowData,
   type SortingState,
   type Updater,
 } from '@tanstack/react-table';
@@ -27,9 +30,19 @@ const dataTable = tv({
   },
 });
 
-export type { ColumnDef };
+// V9 requires the feature set to be explicit. Keep it module-stable so every
+// table instance shares the same feature definition and only sorting code is
+// bundled.
+const features = tableFeatures({
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  sortFns,
+});
 
-export interface DataTableProps<T> {
+export type ColumnDef<T extends RowData, TValue = unknown> =
+  TanStackColumnDef<typeof features, T, TValue>;
+
+export interface DataTableProps<T extends RowData> {
   data: T[];
   columns: ColumnDef<T, unknown>[];
   /** Enable click-to-sort headers. */
@@ -40,7 +53,12 @@ export interface DataTableProps<T> {
 // Headless @tanstack/react-table rendered through the semantic table
 // primitives (real <table> on web, role-mapped views on native).
 // Sorting state lives in a per-instance zustand store (repo rule).
-export function DataTable<T>({ data, columns, sortable = true, className }: DataTableProps<T>) {
+export function DataTable<T extends RowData>({
+  data,
+  columns,
+  sortable = true,
+  className,
+}: DataTableProps<T>) {
   const store = useInstanceStore<{ sorting: SortingState }>(() => ({ sorting: [] }));
   const sorting = useStore(store, (s) => s.sorting);
   const onSortingChange = (updater: Updater<SortingState>) =>
@@ -48,13 +66,12 @@ export function DataTable<T>({ data, columns, sortable = true, className }: Data
       sorting: typeof updater === 'function' ? updater(s.sorting) : updater,
     }));
 
-  const table = useReactTable({
+  const table = useTable({
+    features,
     data,
     columns,
     state: { sorting },
     onSortingChange,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     enableSorting: sortable,
   });
 
@@ -63,9 +80,9 @@ export function DataTable<T>({ data, columns, sortable = true, className }: Data
     <View className={s.root({ className })}>
       <Table className="w-full flex-col">
         <TableHeader>
-          {table.getHeaderGroups().map((hg) => (
-            <TableRow key={hg.id} className={s.headRow()}>
-              {hg.headers.map((header) => {
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id} className={s.headRow()}>
+              {headerGroup.headers.map((header) => {
                 const sorted = header.column.getIsSorted();
                 const label = header.isPlaceholder
                   ? null
@@ -95,7 +112,7 @@ export function DataTable<T>({ data, columns, sortable = true, className }: Data
         <TableBody>
           {table.getRowModel().rows.map((row) => (
             <TableRow key={row.id} className={s.row()}>
-              {row.getVisibleCells().map((cell) => (
+              {row.getAllCells().map((cell) => (
                 <TableCell key={cell.id} className={s.cell()}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>

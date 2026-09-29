@@ -7,7 +7,7 @@ import { slotsForResource } from './slots.ts';
 import { formatTime } from './format.ts';
 import { useScheduleStore } from './store.ts';
 import { NotesEditor } from './NotesEditor.tsx';
-import { pickNoteImage } from './pick-note-image.ts';
+import { pickNoteImage } from './pick-note-image';
 
 export interface BookingFormProps {
   /** Opens editor settings. Supplied by the route, which owns navigation. */

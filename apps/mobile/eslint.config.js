@@ -2,6 +2,16 @@
 const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 
+const reactNativeVisuals = {
+  name: 'react-native',
+  importNames: [
+    'View', 'Text', 'Pressable', 'TextInput', 'Button', 'Switch', 'Modal',
+    'ScrollView', 'FlatList', 'SectionList', 'Image',
+  ],
+  message:
+    'Visual primitives belong in @acme/ui. Direct react-native imports are reserved for non-visual platform APIs and hooks.',
+};
+
 module.exports = defineConfig([
   expoConfig,
   {
@@ -13,7 +23,13 @@ module.exports = defineConfig([
       'no-restricted-imports': [
         'error',
         {
+          paths: [reactNativeVisuals],
           patterns: [
+            {
+              group: ['@expo/ui', '@expo/ui/*', '@expo/html-elements'],
+              message:
+                'Expo UI is wrapped by @acme/ui. Consume the workspace UI contract instead of importing platform UI directly.',
+            },
             {
               group: [
                 'gsap',

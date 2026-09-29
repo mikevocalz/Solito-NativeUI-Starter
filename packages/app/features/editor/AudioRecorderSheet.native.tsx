@@ -1,6 +1,5 @@
 'use client';
-import { Modal } from 'react-native';
-import { VoiceRecorder } from '@acme/ui';
+import { Modal, VoiceRecorder } from '@acme/ui';
 import { Pressable, Text, View } from '@acme/ui/tw';
 import { Mic, X } from '@acme/ui/icons';
 import { useAudioStore } from './audio.store.ts';

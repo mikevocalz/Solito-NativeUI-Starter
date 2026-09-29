@@ -2,7 +2,6 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { StorybookConfig } from '@storybook/react-vite';
 import react from '@vitejs/plugin-react';
-import reactNativeWeb from 'vite-plugin-react-native-web';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -10,6 +9,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 // this app only configures and aggregates.
 const config: StorybookConfig = {
   framework: '@storybook/react-vite',
+  typescript: { reactDocgen: false },
   addons: ['@storybook/addon-a11y'],
   stories: [
     '../../../packages/ui/*.stories.@(ts|tsx)',
@@ -25,20 +25,54 @@ const config: StorybookConfig = {
     viteConfig.plugins = [
       ...(viteConfig.plugins ?? []),
       react(),
-      reactNativeWeb(),
     ];
+    const existingAlias = viteConfig.resolve?.alias;
+    const aliasEntries = Array.isArray(existingAlias)
+      ? existingAlias
+      : Object.entries(existingAlias ?? {}).map(([find, replacement]) => ({
+          find,
+          replacement,
+        }));
+
     viteConfig.resolve = {
       ...(viteConfig.resolve ?? {}),
-      alias: {
-        ...(viteConfig.resolve?.alias ?? {}),
-        // The package root re-exports through CJS, which Vite's optimizer
-        // can't statically analyze — point straight at the ESM build (absolute
-        // path: the deep specifier isn't in the package's exports map).
-        '@legendapp/motion': resolve(
-          here,
-          '../../../node_modules/@legendapp/motion/lib/module/index.js',
+      // Prefer web platform files exactly like Metro/Next do.
+      extensions: [
+        '.web.tsx',
+        '.web.ts',
+        '.web.jsx',
+        '.web.js',
+        ...(viteConfig.resolve?.extensions ?? []).filter(
+          (extension) => !['.web.tsx', '.web.ts', '.web.jsx', '.web.js'].includes(extension),
         ),
-      },
+      ],
+      alias: [
+        // @expo/html-elements imports RNW internals directly. Under pnpm's
+        // strict graph Vite can otherwise turn those optional-peer imports
+        // into virtual stubs, so resolve both the root and every deep RNW path
+        // to the Storybook workspace's concrete installation.
+        {
+          find: /^react-native-web\/(.*)$/,
+          replacement: `${resolve(here, '../node_modules/react-native-web')}/$1`,
+        },
+        {
+          find: /^react-native-web$/,
+          replacement: resolve(here, '../node_modules/react-native-web/dist/index.js'),
+        },
+        {
+          find: /^react-native$/,
+          replacement: resolve(here, '../node_modules/react-native-web/dist/index.js'),
+        },
+        ...aliasEntries.filter(
+          (entry) => entry.find !== 'react-native' && entry.find !== 'react-native-web',
+        ),
+      ],
+      dedupe: [
+        ...(viteConfig.resolve?.dedupe ?? []),
+        'react',
+        'react-dom',
+        'react-native-web',
+      ],
     };
     viteConfig.server = { ...(viteConfig.server ?? {}), hmr: false };
     viteConfig.optimizeDeps = {

@@ -1,9 +1,8 @@
 'use client';
 import { useRef } from 'react';
-import { Modal } from 'react-native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { createStore, useStore } from 'zustand';
-import { Button, TextField } from '@acme/ui';
+import { Button, Modal, TextField } from '@acme/ui';
 import { Pressable, Text, View } from '@acme/ui/tw';
 import { Link as LinkIcon, Video, X } from '@acme/ui/icons';
 import { YouTubeEmbed } from './YouTubeEmbed';

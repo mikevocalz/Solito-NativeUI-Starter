@@ -66,11 +66,16 @@ const nextConfig: NextConfig = {
     'react-native',
     'react-native-web',
     'react-native-enriched-html',
+    'react-native-gesture-handler',
     'solito',
   ],
   turbopack: {
     resolveAlias: {
       'react-native': 'react-native-web',
+      // RNGH's compiled ESM uses explicit .js imports, which bypass platform
+      // extension selection and pull native Fabric specs into Turbopack.
+      // Resolve the package root to source so .web.ts/.web.tsx wins normally.
+      'react-native-gesture-handler': 'react-native-gesture-handler/src/index.ts',
     },
     resolveExtensions: [
       '.web.tsx', '.web.ts', '.web.js',

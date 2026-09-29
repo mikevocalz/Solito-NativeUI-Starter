@@ -5,18 +5,30 @@ const { withUniwindConfig } = require("uniwind/metro");
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
+// Binary / authored assets used by Rive, Viro/OpenXR, WebXR and spatial UI.
+// Expo already handles common images/media. These extensions must remain
+// assets (not source transforms) so native and web runtimes receive a URI.
+const SPATIAL_ASSET_EXTS = [
+  "riv",
+  "glb", "gltf", "bin",
+  "obj", "mtl", "fbx", "vrx",
+  "hdr", "exr",
+  "ktx", "ktx2",
+  "arobject",
+  "spz",
+  "glxf",
+  "uikitml",
+  "wasm",
+];
+
+config.resolver.assetExts = Array.from(
+  new Set([...config.resolver.assetExts, ...SPATIAL_ASSET_EXTS]),
+);
+
 /**
- * Point solito's react-navigation imports at the copy expo-router VENDORS.
- *
- * expo-router 57 bundles its own react-navigation under
- * build/react-navigation/*, and it is that copy which mounts LinkingContext.
- * solito reaches for the standalone `@react-navigation/native`
- * (solito/build/router/use-link-to.js -> useLinkTo), which is a different module
- * instance with a different context object — so every solito `useRouter()` threw
- * "Couldn't find a LinkingContext context." at runtime.
- *
- * Redirecting the bare specifiers collapses the two instances back into one.
- * Subpath imports are left alone; only the package roots are ambiguous.
+ * Solito must resolve the same React Navigation instance Expo Router mounts.
+ * Keep Expo's resolver as the final fallback so SDK 58's package exports,
+ * tsconfig aliases, web/server conditions and monorepo resolution stay intact.
  */
 const VENDORED_NAVIGATION = {
   "@react-navigation/native": path.resolve(
@@ -29,28 +41,19 @@ const VENDORED_NAVIGATION = {
   ),
 };
 
-const upstreamResolveRequest = config.resolver.resolveRequest;
-
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   const vendored = VENDORED_NAVIGATION[moduleName];
   if (vendored) {
     return { type: "sourceFile", filePath: require.resolve(vendored) };
   }
-  return upstreamResolveRequest
-    ? upstreamResolveRequest(context, moduleName, platform)
-    : context.resolveRequest(context, moduleName, platform);
+  return context.resolveRequest(context, moduleName, platform);
 };
 
-// withUniwindConfig must be the OUTERMOST wrapper — it has to see the final
-// transformer chain. cssEntryFile must stay a relative path string; Uniwind
-// rejects path.resolve/path.join here, and the file's directory is what
-// Tailwind treats as the scan root (hence the @source lines in global.css).
+// Uniwind remains the outermost Metro wrapper.
 module.exports = withUniwindConfig(config, {
   cssEntryFile: "./global.css",
   dtsFile: "./uniwind-types.d.ts",
   polyfills: {
-    // NativeWind's rem base was 14, Uniwind defaults to 16. Keeping 14 means
-    // no spacing/sizing shift across the migration.
     rem: 14,
   },
 });

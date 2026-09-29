@@ -43,6 +43,24 @@ export const FORBID_DEEP_IMPORTS = [
   },
 ];
 
+// Feature/app code consumes the workspace UI contract. Platform UI packages
+// belong behind packages/ui so native/web implementations cannot drift.
+export const FORBID_DIRECT_PLATFORM_UI = [
+  {
+    group: ['@expo/ui', '@expo/ui/*', '@expo/html-elements'],
+    message: 'Platform UI belongs in @acme/ui. Import @acme/ui, @acme/ui/html, or @acme/ui/native instead.',
+  },
+];
+
+export const FORBID_REACT_NATIVE_VISUAL_PATH = {
+  name: 'react-native',
+  importNames: [
+    'View', 'Text', 'Pressable', 'TextInput', 'Button', 'Switch', 'Modal',
+    'ScrollView', 'FlatList', 'SectionList', 'Image',
+  ],
+  message: 'Visual primitives must come from @acme/ui; React Native is reserved here for non-visual platform APIs/hooks.',
+};
+
 // packages/ui is pure presentation: no domains, no backends, no navigation.
 export const FORBID_DOMAIN_FROM_UI = [
   {

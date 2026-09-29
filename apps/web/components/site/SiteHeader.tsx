@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Link } from 'solito/link';
 import { usePathname } from 'solito/navigation';
 import { create } from 'zustand';
-import { Header, Nav, View, Text as TWText } from '@acme/ui/tw';
+import { Header, Nav, Pressable, View, Text as TWText } from '@acme/ui/tw';
 import { Avatar, MotionView, useHydrated } from '@acme/ui';
 import { AVATAR_URI, useProfile } from '@acme/app';
 import { NAV_ITEMS, PROFILE, useMobileMenu } from './nav';
@@ -214,16 +214,16 @@ export function SiteHeader() {
           </MotionView>
 
           {/* Mobile menu button */}
-          <button
-            type="button"
+          <Pressable
+            role="button"
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
             aria-controls="mobile-menu"
-            onClick={toggle}
+            onPress={toggle}
             className="inline-flex h-10 w-10 items-center justify-center rounded-md border-2 border-border transition-colors duration-fast hover:bg-surface-sunken focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/50 active:opacity-80 md:hidden"
           >
             <TWText className="text-xl leading-none text-text">{open ? '✕' : '☰'}</TWText>
-          </button>
+          </Pressable>
         </View>
       </MotionView>
 
@@ -239,7 +239,7 @@ export function SiteHeader() {
             transition={{ type: 'timing', duration: 160 }}
             className="fixed inset-x-0 top-0 h-screen bg-ink-950/50 backdrop-blur-[2px] md:hidden"
           >
-            <button type="button" aria-label="Close menu" onClick={close} className="h-full w-full cursor-default" />
+            <Pressable role="button" aria-label="Close menu" onPress={close} className="h-full w-full cursor-default" />
           </MotionView>
           <MotionView
             initial={{ y: -12 }}

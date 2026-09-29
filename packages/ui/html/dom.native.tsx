@@ -9,20 +9,21 @@
  */
 import React from 'react';
 import { Children, isValidElement } from 'react';
-import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, type TextInputProps } from 'react-native';
+import { Div, Span } from '@expo/html-elements';
 import { Host, Picker } from '@expo/ui';
 import { NativeInput, type NativeInputProps } from './native-input.native';
 
 type P = { children?: React.ReactNode };
 
-export const FigcaptionBase = (props: P) => <Text {...props} />;
-export const AddressBase = (props: P) => <View {...props} />;
+export const FigcaptionBase = (props: P) => <Span {...props} />;
+export const AddressBase = (props: P) => <Div {...props} />;
 export const DetailsBase = ({ open: _open, ...props }: P & { open?: boolean }) => (
-  <View {...props} />
+  <Div {...props} />
 );
-export const SummaryBase = (props: P) => <Text {...props} />;
-export const FieldsetBase = (props: P & { disabled?: boolean }) => <View {...props} />;
-export const LegendBase = (props: P) => <Text {...props} />;
+export const SummaryBase = (props: P) => <Span {...props} />;
+export const FieldsetBase = (props: P & { disabled?: boolean }) => <Div {...props} />;
+export const LegendBase = (props: P) => <Span {...props} />;
 /**
  * Native select, rendered by `@expo/ui`'s universal Picker.
  *
@@ -53,7 +54,7 @@ export const SelectBase = (
   });
 
   return (
-    <View {...rest}>
+    <Div {...rest}>
       <Host matchContents>
         <Picker
           selectedValue={value ?? options[0]?.value ?? ''}
@@ -66,7 +67,7 @@ export const SelectBase = (
           ))}
         </Picker>
       </Host>
-    </View>
+    </Div>
   );
 };
 
@@ -83,7 +84,7 @@ export const ButtonBase = ({ role, onKeyDown: _onKeyDown, ...props }: PressBaseP
   <Pressable role={(role ?? 'button') as never} {...props} />
 );
 
-export type InputBaseProps = React.ComponentProps<typeof TextInput>;
+export type InputBaseProps = TextInputProps;
 
 /**
  * Text fields render through `@expo/ui`'s universal TextInput (SwiftUI /
@@ -141,5 +142,5 @@ function toNativeInputProps(
   };
 }
 
-export const LabelBase = (props: P) => <Text role={'label' as never} {...props} />;
-export const FormBase = (props: P) => <View role="form" {...props} />;
+export const LabelBase = (props: P) => <Span role={'label' as never} {...props} />;
+export const FormBase = (props: P) => <Div role="form" {...props} />;
