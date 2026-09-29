@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ViroAmbientLight,
   ViroBox,
@@ -78,7 +78,7 @@ function worldToLocal(point: GridPoint, player: GridRiderState): LocalPoint {
   return [lateral, -1.5, CAMERA_PLAYER_Z - forwardDistance];
 }
 
-function Gateway() {
+function Gateway({ onStart }: { onStart: () => void }) {
   return (
     <>
       <ViroText
@@ -102,7 +102,7 @@ function Gateway() {
         position={[0, 0.35, -8.05]}
         scale={[2.55, 1.95, 0.035]}
         materials={['raceDark']}
-        onClick={gridRace.startRace}
+        onClick={onStart}
       />
       {[-1.7, -0.85, 0, 0.85, 1.7].map((x) => (
         <ViroPolyline
@@ -118,7 +118,7 @@ function Gateway() {
 
 function ArenaGrid({ player }: { player: GridRiderState }) {
   const floorLines = useMemo(() => {
-    const lines: Array<{ key: string; a: LocalPoint; b: LocalPoint }> = [];
+    const lines: { key: string; a: LocalPoint; b: LocalPoint }[] = [];
     for (const value of GRID_LINES) {
       lines.push({
         key: `x-${value}`,
@@ -419,14 +419,14 @@ export function GridRaceScene() {
   const lastBoostPulseSerial = useRef(gridRace.getState().boostPulseSerial);
   const boostPulseRemaining = useRef(0);
 
-  useEffect(() => {
-    if (phase === 'race') {
-      setSimulation(createGridRaceSimulation());
-      lastTurnSerial.current = gridRace.getState().turnSerial;
-      lastBoostPulseSerial.current = gridRace.getState().boostPulseSerial;
-      boostPulseRemaining.current = 0;
-    }
-  }, [phase]);
+  const startRace = useCallback(() => {
+    const input = gridRace.getState();
+    setSimulation(createGridRaceSimulation());
+    lastTurnSerial.current = input.turnSerial;
+    lastBoostPulseSerial.current = input.boostPulseSerial;
+    boostPulseRemaining.current = 0;
+    gridRace.startRace();
+  }, []);
 
   const onFixedUpdate = useCallback(({ dt }: { dt: number }) => {
     if (phase !== 'race') return;
@@ -457,7 +457,7 @@ export function GridRaceScene() {
       <ViroGameLoop fixedHz={30} onFixedUpdate={onFixedUpdate} />
 
       {phase === 'gateway' ? (
-        <Gateway />
+        <Gateway onStart={startRace} />
       ) : (
         <RaceWorld
           simulation={simulation}
