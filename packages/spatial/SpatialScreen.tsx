@@ -28,14 +28,16 @@ export function SpatialScreen() {
   return (
     <ForkSpatialLayout panel={tools}>
       <GridScene className="flex-1" gap={0.06} speed={0.45} showCeiling={!showRace}>
-        <GlyphCity
-          className="absolute inset-x-0 bottom-0 h-[62%]"
-          variant="megacity"
-          colorPrimary="#00f3ff"
-          colorSecondary="#ff8a00"
-          colorTertiary="#fff4b0"
-          opacity={0.76}
-        />
+        <View pointerEvents="none" className="absolute inset-x-0 bottom-0 h-[62%]">
+          <GlyphCity
+            className="flex-1"
+            variant="megacity"
+            colorPrimary="#00f3ff"
+            colorSecondary="#ff8a00"
+            colorTertiary="#fff4b0"
+            opacity={0.76}
+          />
+        </View>
         <View className="mx-auto w-full max-w-screen-2xl flex-1 gap-6 px-4 py-8 sm:px-6 lg:px-8">
           <Section className="max-w-4xl gap-3">
             <Text className="text-xs font-semibold uppercase tracking-[0.32em] text-cyan-200">
