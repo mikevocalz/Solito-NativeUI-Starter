@@ -85,3 +85,18 @@ replaces Expo's package-exports or web/server condition handling.
 - Expo: drawer → **Spatial**
 
 The same `SpatialScreen` is mounted by both.
+
+
+### Next/Turbopack sidecar handling
+
+`@reactvision/viro-web-renderer@1.0.0` ships runtime fallbacks written as
+package-relative `new URL("../wasm/", import.meta.url)` and
+`new URL("../slam/", import.meta.url)` expressions. Next/Turbopack eagerly
+tries to resolve those asset directories as JavaScript modules even when the
+navigator is supplied an explicit public asset base.
+
+The root postinstall therefore performs two narrow, exact-string rewrites in
+the installed renderer so those unused fallbacks point at `/viro/wasm/` and
+`/viro/slam/`, then copies the package's sidecars to those public locations.
+The script resolves the renderer from `apps/web/package.json` so it works with
+pnpm 12's strict workspace dependency isolation.
