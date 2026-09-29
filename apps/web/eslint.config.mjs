@@ -57,6 +57,7 @@ const eslintConfig = defineConfig([
     '.next/**',
     'out/**',
     'build/**',
+    'public/viro/**',
     'next-env.d.ts',
   ]),
 ])
