@@ -75,6 +75,13 @@ const nextConfig: NextConfig = {
   ],
   turbopack: {
     resolveAlias: {
+      // React Native Skia's web bundle retains guarded Node/Metro branches.
+      // Turbopack needs the browser-only aliases that Skia documents for
+      // webpack expressed with its conditional alias syntax.
+      fs: { browser: './lib/skia-empty.ts' },
+      path: { browser: './lib/skia-empty.ts' },
+      os: { browser: './lib/skia-empty.ts' },
+      'react-native/Libraries/Image/AssetRegistry': 'react-native-web/dist/modules/AssetRegistry',
       'react-native': 'react-native-web',
       // RNGH's compiled ESM uses explicit .js imports, which bypass platform
       // extension selection and pull native Fabric specs into Turbopack.
