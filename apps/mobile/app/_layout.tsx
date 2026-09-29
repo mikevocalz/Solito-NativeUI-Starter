@@ -1,7 +1,6 @@
 import { Slot } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { withUniwind } from "uniwind";
@@ -43,15 +42,7 @@ export default function RootLayout() {
         <BottomSheetModalProvider>
           <AppQueryProvider>
             <Slot />
-            {/*
-              Mounted at the ROOT, directly under the provider. A Gorhom modal
-              nested deeper — in the split layout, or in a route inside the
-              split view's Slot — presents without rendering: present() fires
-              and the ref is set, but nothing appears. A minimal probe route
-              proved the modal itself works, so the host has to sit here.
-              Visibility is global Zustand state, so this is also where it
-              belongs architecturally.
-            */}
+            {/* Global overlays/sheets are mounted once at the app root. */}
             <BookingSheet />
             <AttachSheet />
             <AudioRecorderSheet />
@@ -59,7 +50,6 @@ export default function RootLayout() {
             {/* Last, so a toast paints above the sheets it reports on. */}
             <Toaster />
           </AppQueryProvider>
-        </BottomSheetModalProvider>
       </SafeAreaProvider>
       </KeyboardProvider>
     </GestureRoot>
