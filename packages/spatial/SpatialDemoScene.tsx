@@ -8,7 +8,7 @@ import {
   ViroPolyline,
   ViroScene,
   ViroText,
-} from '@reactvision/react-viro';
+} from './viro';
 
 ViroMaterials.createMaterials({
   spatialCyan: { diffuseColor: '#2cf6ff', lightingModel: 'Constant' },
