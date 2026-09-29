@@ -8,6 +8,7 @@
     ".": "./index.ts",
     "./tw": "./tw.tsx",
     "./primitives": "./primitives/index.tsx",
+    "./html": "./html/index.tsx",
     "./haptics": {
       "react-native": "./haptics.native.ts",
       "default": "./haptics.web.ts"
@@ -24,6 +25,7 @@
   "dependencies": {
     "@acme/theme": "workspace:*",
     "@expo/html-elements": "catalog:",
+    "@expo/material-symbols": "catalog:",
     "@expo/ui": "catalog:",
     "@legendapp/list": "catalog:",
     "@legendapp/motion": "catalog:",
@@ -32,7 +34,9 @@
     "@tanstack/react-table": "catalog:",
     "@tanstack/react-virtual": "catalog:",
     "expo-drag-drop-content-view": "catalog:",
+    "expo-glass-effect": "catalog:",
     "expo-paste-input": "catalog:",
+    "expo-symbols": "catalog:",
     "lucide-react": "catalog:",
     "lucide-react-native": "catalog:",
     "react-native-css": "catalog:",
@@ -40,15 +44,15 @@
     "react-native-safe-area-context": "catalog:",
     "react-native-svg": "catalog:",
     "solito": "catalog:",
-    "sonner": "2.0.8",
-    "sonner-native": "0.27.0",
+    "sonner": "catalog:",
+    "sonner-native": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwind-variants": "catalog:",
     "uniwind": "catalog:"
   },
   "devDependencies": {
     "@acme/config": "workspace:*",
-    "@storybook/react-vite": "10.5.3",
+    "@storybook/react-vite": "catalog:",
     "@types/react": "catalog:",
     "eslint": "catalog:",
     "eslint-config-expo": "catalog:",

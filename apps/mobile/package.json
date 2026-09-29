@@ -15,12 +15,11 @@
     "@acme/app": "workspace:*",
     "@acme/theme": "workspace:*",
     "@acme/ui": "workspace:*",
-    "@expo/metro-runtime": "catalog:",
     "@expo/ui": "catalog:",
-    "@gorhom/bottom-sheet": "catalog:",
     "@react-navigation/native": "catalog:",
     "@tanstack/react-query": "catalog:",
     "expo": "catalog:",
+    "expo-asset": "catalog:",
     "expo-drag-drop-content-view": "catalog:",
     "expo-font": "catalog:",
     "expo-image": "catalog:",
@@ -63,9 +62,7 @@
     "install": {
       "exclude": [
         "react",
-        "react-dom",
-        "react-native-reanimated",
-        "react-native-worklets"
+        "react-dom"
       ]
     }
   }

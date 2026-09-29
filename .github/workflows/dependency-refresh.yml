@@ -1,0 +1,50 @@
+name: Refresh dependencies
+
+on:
+  push:
+    branches:
+      - chore/sdk58-native-ui-modernization
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.6.0
+          run_install: false
+
+      - name: Refresh npm catalog
+        run: |
+          pnpm dlx pcu plan --target latest --out .pcu-plan.json
+          pnpm dlx pcu apply .pcu-plan.json --yes
+          node tooling/pin-sdk58-catalog.mjs
+          rm -f .pcu-plan.json
+          pnpm install --no-frozen-lockfile
+
+      - name: Validate
+        run: pnpm turbo build typecheck lint
+
+      - name: Commit refreshed catalog and lockfile
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-workspace.yaml pnpm-lock.yaml package.json apps packages
+          git commit -m "chore: refresh compatible dependencies"
+          git push
