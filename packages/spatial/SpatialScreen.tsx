@@ -6,6 +6,7 @@ import { Section, View } from '@acme/ui/tw';
 import { RiveStage } from './rive/RiveStage';
 import { ForkSpatialLayout, getSpatialForkCapabilities } from './ForkSpatialLayout';
 import { SpatialViroExperience } from './SpatialViroExperience';
+import { gridRace } from './gridRaceStore';
 
 const RIVE_DEMO = 'https://cdn.rive.app/animations/vehicles.riv';
 
@@ -48,8 +49,22 @@ export function SpatialScreen() {
               and Viro/OpenXR for the immersive world.
             </Text>
             <View className="mt-2 flex-row flex-wrap gap-3">
-              <CircuitButton onPress={() => setShowRace(true)}>Enter VR Grid</CircuitButton>
-              <CircuitButton tone="orange" variant="solid" onPress={() => setShowRace((value) => !value)}>
+              <CircuitButton onPress={() => { gridRace.enterGateway(); setShowRace(true); }}>
+                Enter VR Grid
+              </CircuitButton>
+              <CircuitButton
+                tone="orange"
+                variant="solid"
+                onPress={() => {
+                  if (showRace) {
+                    gridRace.enterGateway();
+                    setShowRace(false);
+                  } else {
+                    gridRace.startRace();
+                    setShowRace(true);
+                  }
+                }}
+              >
                 {showRace ? 'Exit Race View' : 'Start Cycle Race'}
               </CircuitButton>
             </View>
