@@ -23,9 +23,7 @@ const nextConfig: NextConfig = {
     // re-export their whole surface from a single index.
     optimizePackageImports: [
       '@acme/ui',
-      '@acme/app',
-    '@acme/spatial',
-      '@acme/spatial',
+      '@acme/app',      '@acme/spatial',
       '@tanstack/react-table',
       '@tanstack/react-form',
       '@tanstack/react-virtual',
@@ -71,6 +69,7 @@ const nextConfig: NextConfig = {
     'react-native-gesture-handler',
     '@reactvision/react-viro',
     '@reactvision/viro-web-renderer',
+    '@shopify/react-native-skia',
     '@rive-app/react-webgl2',
     'solito',
   ],

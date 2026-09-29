@@ -11,6 +11,17 @@ overrides:
   react-dom: 19.3.0
   "@expo/dom-webview": 58.0.1
 
+# ReactVision 3.0.1's published peer metadata predates Expo 58 / RN 0.88.
+# The same compatibility lane is validated in the mikevocalz Viro fork; this
+# extension keeps unauthenticated public clones on the public package while
+# declaring the tested peer matrix explicitly.
+packageExtensions:
+  '@reactvision/react-viro@3.0.1':
+    peerDependencies:
+      expo: '>=57.0.0 <59.0.0'
+      react-native: '>=0.86.0 <0.89.0'
+      '@reactvision/react-native-visionos': '>=0.86.0 <0.89.0'
+
 allowBuilds:
   sharp: true
   unrs-resolver: true
@@ -20,6 +31,8 @@ allowBuilds:
 # release-age protection for the rest of the graph while allowing the explicitly
 # selected Expo preview family to install immediately.
 minimumReleaseAgeExclude:
+  - '@shopify/*'
+  - 'canvaskit-wasm'
   - '@expo/*'
   - '@rive-app/*'
   - '@reactvision/*'
@@ -57,7 +70,7 @@ catalog:
   react-native-youtube-bridge: 2.2.3
   react-native-keyboard-controller: 1.22.5
   react-native-mmkv: 4.3.2
-  react-native-nitro-modules: 0.37.1
+  react-native-nitro-modules: 0.36.5
   react-native-enriched-html: 1.1.1
   react-native-gesture-handler: ~3.2.1
   react-native-reanimated: 4.7.0
@@ -75,12 +88,16 @@ catalog:
   expo-paste-input: 0.2.2
   expo-drag-drop-content-view: 0.9.2
 
+  # universal GPU graphics
+  "@shopify/react-native-skia": 2.13.0
+  canvaskit-wasm: 0.41.0
+
   # spatial / XR / Rive
   "@reactvision/react-viro": 3.0.1
   "@reactvision/viro-web-renderer": 1.0.0
   "@metavr/layout-compat": 1.0.0
   "@metavr/layout-window-compat": 1.0.0
-  "@rive-app/react-native": 0.4.21
+  "@rive-app/react-native": 0.5.0-beta.6
   "@rive-app/react-webgl2": 4.35.0
 
   # web

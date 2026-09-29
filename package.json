@@ -2,7 +2,7 @@
   "name": "spatial-solotio-starter",
   "version": "0.1.0",
   "private": true,
-  "description": "Spatial-Solotio-Starter — Expo SDK 58 + Next.js + Viro Web/OpenXR + Rive universal spatial starter.",
+  "description": "Spatial-Solotio-Starter — Expo SDK 58 + Next.js + Skia + Viro Web/OpenXR + Rive universal spatial starter.",
   "license": "MIT",
   "packageManager": "pnpm@12.7.0",
   "engines": {
@@ -16,7 +16,8 @@
     "test": "turbo test",
     "gen": "node tooling/generators/gen.mjs",
     "spatial:prepare-web": "node tooling/copy-viro-web-assets.mjs",
-    "postinstall": "node tooling/copy-viro-web-assets.mjs"
+    "skia:prepare-web": "node tooling/copy-skia-web-assets.mjs",
+    "postinstall": "node tooling/copy-viro-web-assets.mjs && node tooling/copy-skia-web-assets.mjs"
   },
   "devDependencies": {
     "turbo": "catalog:"
