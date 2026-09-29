@@ -1,6 +1,7 @@
 name: Refresh lockfile once
 
 on:
+  workflow_dispatch:
   push:
     branches: [spatial-solotio-starter]
     paths:
