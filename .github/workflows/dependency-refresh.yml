@@ -1,4 +1,4 @@
-name: Refresh dependencies
+name: Refresh lockfile
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  refresh:
+  refresh-lockfile:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
@@ -17,34 +17,19 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
-
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 12.6.0
-          run_install: false
-
-      - name: Refresh npm catalog
+          cache: pnpm
+      - run: pnpm install --no-frozen-lockfile
+      - name: Commit lockfile
         run: |
-          pnpm dlx pnpm-catalog-updates@latest plan --target latest --out .pcu-plan.json
-          pnpm dlx pnpm-catalog-updates@latest apply .pcu-plan.json --yes
-          node tooling/pin-sdk58-catalog.mjs
-          rm -f .pcu-plan.json
-          pnpm install --no-frozen-lockfile
-
-      - name: Validate
-        run: pnpm turbo build typecheck lint
-
-      - name: Commit refreshed catalog and lockfile
-        run: |
-          if git diff --quiet; then
+          if git diff --quiet -- pnpm-lock.yaml; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pnpm-workspace.yaml pnpm-lock.yaml package.json apps packages
-          git commit -m "chore: refresh compatible dependencies"
+          git add pnpm-lock.yaml
+          git commit -m "chore: regenerate pnpm 12 lockfile"
           git push

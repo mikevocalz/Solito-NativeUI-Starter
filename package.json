@@ -14,7 +14,7 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
-    "deps:refresh": "pnpm dlx pnpm-catalog-updates@latest plan --target latest --out .pcu-plan.json && pnpm dlx pnpm-catalog-updates@latest apply .pcu-plan.json --yes && node tooling/pin-sdk58-catalog.mjs && pnpm install",
+    "deps:refresh": "pnpm dlx pcu@latest update --target latest --force && node tooling/pin-sdk58-catalog.mjs && pnpm install",
     "gen": "node tooling/generators/gen.mjs"
   },
   "devDependencies": {
