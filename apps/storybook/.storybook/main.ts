@@ -2,7 +2,6 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { StorybookConfig } from '@storybook/react-vite';
 import react from '@vitejs/plugin-react';
-import reactNativeWeb from 'vite-plugin-react-native-web';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -26,17 +25,34 @@ const config: StorybookConfig = {
     viteConfig.plugins = [
       ...(viteConfig.plugins ?? []),
       react(),
-      reactNativeWeb(),
     ];
+    const existingAlias = viteConfig.resolve?.alias;
+    const aliasEntries = Array.isArray(existingAlias)
+      ? existingAlias
+      : Object.entries(existingAlias ?? {}).map(([find, replacement]) => ({
+          find,
+          replacement,
+        }));
+
     viteConfig.resolve = {
       ...(viteConfig.resolve ?? {}),
-      alias: {
-        ...(viteConfig.resolve?.alias ?? {}),
-        // Keep the RNW alias absolute under Vite 8/Rolldown. The plugin's
-        // string alias works at runtime but Rolldown warns that it can produce
-        // duplicate module identities in a pnpm workspace.
-        'react-native': resolve(here, '../node_modules/react-native-web'),
-      },
+      // Prefer web platform files exactly like Metro/Next do.
+      extensions: [
+        '.web.tsx',
+        '.web.ts',
+        '.web.jsx',
+        '.web.js',
+        ...(viteConfig.resolve?.extensions ?? []).filter(
+          (extension) => !['.web.tsx', '.web.ts', '.web.jsx', '.web.js'].includes(extension),
+        ),
+      ],
+      alias: [
+        {
+          find: /^react-native$/,
+          replacement: resolve(here, '../node_modules/react-native-web/dist/index.js'),
+        },
+        ...aliasEntries.filter((entry) => entry.find !== 'react-native'),
+      ],
     };
     viteConfig.server = { ...(viteConfig.server ?? {}), hmr: false };
     viteConfig.optimizeDeps = {
