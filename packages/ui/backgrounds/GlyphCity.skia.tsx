@@ -28,18 +28,18 @@ function mulberry32(seed: number) {
 function buildCity(width: number, height: number, variant: GlyphCityVariant): Building[] {
   const random = mulberry32(42 + variant.charCodeAt(0));
   const config = {
-    downtown: [0.055, 0.11, 0.35, 0.76],
-    megacity: [0.038, 0.082, 0.42, 0.88],
-    district: [0.07, 0.145, 0.25, 0.62],
-    ruins: [0.052, 0.105, 0.18, 0.48],
+    downtown: { minWidth: 0.055, maxWidth: 0.11, minHeight: 0.35, maxHeight: 0.76 },
+    megacity: { minWidth: 0.038, maxWidth: 0.082, minHeight: 0.42, maxHeight: 0.88 },
+    district: { minWidth: 0.07, maxWidth: 0.145, minHeight: 0.25, maxHeight: 0.62 },
+    ruins: { minWidth: 0.052, maxWidth: 0.105, minHeight: 0.18, maxHeight: 0.48 },
   }[variant];
   const result: Building[] = [];
   let x = -12;
   let seed = 0;
 
   while (x < width + 20) {
-    const buildingWidth = width * (config[0] + random() * (config[1] - config[0]));
-    const buildingHeight = height * (config[2] + random() * (config[3] - config[2]));
+    const buildingWidth = width * (config.minWidth + random() * (config.maxWidth - config.minWidth));
+    const buildingHeight = height * (config.minHeight + random() * (config.maxHeight - config.minHeight));
     result.push({
       x,
       width: buildingWidth,
