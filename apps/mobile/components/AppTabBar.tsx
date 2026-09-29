@@ -1,6 +1,6 @@
-// expo-router's `react-navigation` entry does not re-export the bottom-tabs
-// types, so this reaches the module that declares them.
-import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
+// Expo Router 58 exposes the JavaScript tab navigator and its public types
+// from this stable export; do not reach into expo-router/build internals.
+import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Pressable, Text, View } from '@acme/ui/tw';
 import { Home, Compass, Bell, User } from '@acme/ui/icons';
