@@ -26,6 +26,7 @@
     "@vitejs/plugin-react": "catalog:",
     "eslint": "catalog:",
     "eslint-config-expo": "catalog:",
+    "expo": "catalog:",
     "storybook": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
