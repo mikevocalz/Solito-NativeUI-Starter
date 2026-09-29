@@ -22,24 +22,16 @@ const GestureRoot = withUniwind(GestureHandlerRootView);
 export default function RootLayout() {
   return (
     <GestureRoot className="flex-1">
-      {/* Follows the system theme; without this the bar is unstyled and its
-          icons can vanish against a matching surface. */}
       <StatusBar style="auto" />
       {/*
         Installs the native WindowInsetsAnimationCallback subscription on
         Android and handles edge-to-edge. RN's built-in KeyboardAvoidingView
         relies on LayoutAnimation and a late keyboardDidShow, so Android content
-        SNAPS instead of tracking the keyboard curve; this gives per-frame
-        insets that both platforms map onto one animated value.
+        snaps instead of tracking the keyboard curve; this gives both platforms
+        the same animated keyboard-inset source.
       */}
       <KeyboardProvider>
-      <SafeAreaProvider>
-        {/*
-          Gorhom's modals mount into this provider, so it has to sit above every
-          route that presents one. It must also be INSIDE GestureHandlerRootView
-          — the sheet is gesture-driven and will not respond without it.
-        */}
-        <BottomSheetModalProvider>
+        <SafeAreaProvider>
           <AppQueryProvider>
             <Slot />
             {/* Global overlays/sheets are mounted once at the app root. */}
@@ -47,10 +39,9 @@ export default function RootLayout() {
             <AttachSheet />
             <AudioRecorderSheet />
             <UrlSheet />
-            {/* Last, so a toast paints above the sheets it reports on. */}
             <Toaster />
           </AppQueryProvider>
-      </SafeAreaProvider>
+        </SafeAreaProvider>
       </KeyboardProvider>
     </GestureRoot>
   );
