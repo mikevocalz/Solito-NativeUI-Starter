@@ -99,8 +99,6 @@ catalog:
   "@metavr/layout-window-compat": 1.0.0
   "@rive-app/react-native": 0.5.0-beta.6
   "@rive-app/react-webgl2": 4.35.0
-  "@shopify/react-native-skia": 2.13.0
-  canvaskit-wasm: 0.41.0
 
   # web
   "@next/env": 16.3.6
