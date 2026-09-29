@@ -84,3 +84,12 @@ The Expo app declares `@metavr/layout-compat` and `@metavr/layout-window-compat`
 - Expo: drawer → **Spatial**
 
 Both mount the same `SpatialScreen`.
+
+
+## Design and interaction references
+
+- NeonBlade Grid Scene: https://neonbladeui.neuronrush.com/components/backgrounds/grid-scene
+- NeonBlade Glyph City: https://neonbladeui.neuronrush.com/components/backgrounds/glyph-city
+- ReactVision Viro sample app AR Car Driving: https://github.com/ReactVision/sample-app/tree/main/Screens/ARDrivingCarDemo
+
+These are implementation references only. The starter's Skia scene and Viro race code are newly authored.
