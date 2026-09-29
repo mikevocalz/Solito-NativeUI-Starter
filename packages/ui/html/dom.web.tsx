@@ -155,3 +155,20 @@ const FormPlain = dom('form');
 export const FormBase = ({ className, ...props }: P) => (
   <FormPlain className={`flex flex-col ${className ?? ''}`} {...props} />
 );
+
+
+export type DropSurfaceProps =
+  Omit<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'> &
+  P;
+
+/**
+ * Browser drag/drop boundary. Raw DOM event types stay inside /ui/html so
+ * feature code never imports or renders browser elements directly.
+ */
+export const DropSurface = ({
+  className,
+  style,
+  ...props
+}: DropSurfaceProps) => (
+  <div {...toDom(className, style)} {...props} />
+);
