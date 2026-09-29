@@ -78,6 +78,8 @@ catalog:
   # spatial / XR / Rive
   "@reactvision/react-viro": 3.0.1
   "@reactvision/viro-web-renderer": 1.0.0
+  "@metavr/layout-compat": 1.0.0
+  "@metavr/layout-window-compat": 1.0.0
   "@rive-app/react-native": 0.4.21
   "@rive-app/react-webgl2": 4.35.0
 
