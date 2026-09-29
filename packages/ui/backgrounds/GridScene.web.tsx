@@ -1,15 +1,15 @@
 'use client';
 
-import type { GridFloorProps } from './GridFloor.types';
+import type { GridSceneProps } from './GridScene.types';
 import { View } from '../tw';
 import { SkiaWebGate } from './SkiaWebGate';
 
-const loadGridFloor = () => import('./GridFloor.skia');
+const loadGridScene = () => import('./GridScene.skia');
 
-export function GridFloor(props: GridFloorProps) {
+export function GridScene(props: GridSceneProps) {
   return (
     <SkiaWebGate
-      load={loadGridFloor}
+      load={loadGridScene}
       props={props}
       fallback={<View className={`flex-1 bg-black ${props.className ?? ''}`}>{props.children}</View>}
     />

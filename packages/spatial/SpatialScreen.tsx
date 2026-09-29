@@ -1,6 +1,7 @@
 'use client';
 
-import { GridFloor, Heading, Text } from '@acme/ui';
+import { useState } from 'react';
+import { CircuitButton, GlyphCity, GridCard, GridScene, Heading, Text } from '@acme/ui';
 import { Section, View } from '@acme/ui/tw';
 import { RiveStage } from './rive/RiveStage';
 import { ForkSpatialLayout, getSpatialForkCapabilities } from './ForkSpatialLayout';
@@ -10,51 +11,82 @@ const RIVE_DEMO = 'https://cdn.rive.app/animations/vehicles.riv';
 
 export function SpatialScreen() {
   const capabilities = getSpatialForkCapabilities();
+  const [showRace, setShowRace] = useState(false);
 
   const tools = (
-    <View className="gap-3 rounded-2xl border border-cyan-300/20 bg-black/70 p-4">
-      <Text className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">
-        Layout backend
+    <GridCard eyebrow="Runtime" title="Spatial backend">
+      <Text className="text-sm text-white/70">
+        {capabilities.metaSpatialWindows ? 'Meta Layout spatial window' : 'Inline / Viro spatial fallback'}
       </Text>
-      <Text className="text-sm text-white">
-        {capabilities.metaSpatialWindows ? 'Meta VR Layout SDK spatial window' : 'Inline / Viro spatial fallback'}
-      </Text>
-      <Text className="text-xs text-white/60">
+      <Text className="text-xs text-white/50">
         Viro Rive surface: {capabilities.viroRivePanel ? 'fork bridge detected' : 'stock fallback'}
       </Text>
-    </View>
+    </GridCard>
   );
 
   return (
     <ForkSpatialLayout panel={tools}>
-      <GridFloor className="flex-1">
+      <GridScene className="flex-1" gap={0.06} speed={0.45} showCeiling={!showRace}>
+        <GlyphCity
+          className="absolute inset-x-0 bottom-0 h-[62%]"
+          variant="megacity"
+          colorPrimary="#00f3ff"
+          colorSecondary="#ff8a00"
+          colorTertiary="#fff4b0"
+          opacity={0.76}
+        />
         <View className="mx-auto w-full max-w-screen-2xl flex-1 gap-6 px-4 py-8 sm:px-6 lg:px-8">
-          <Section className="gap-2">
-            <Text className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200">
-              Spatial-Solotio-Starter
+          <Section className="max-w-4xl gap-3">
+            <Text className="text-xs font-semibold uppercase tracking-[0.32em] text-cyan-200">
+              Spatial-Solotio-Starter / Grid Program
             </Text>
             <Heading level={1} size="display-sm" className="text-white">
-              One scene. Expo, WebXR, Quest and Pico.
+              Build once for screen, spatial windows, WebXR, Quest and Pico.
             </Heading>
             <Text className="max-w-3xl text-white/65">
-              Expo SDK 58 universal UI outside the scene, Viro for shared immersive 3D,
-              Rive for animated interface surfaces, and Meta system windows when the
-              Viro fork exposes the Layout SDK bridge.
+              Tailwind 4 + Uniwind for product UI, Skia for universal GPU scenes, Rive for animated surfaces,
+              and Viro/OpenXR for the immersive world.
             </Text>
+            <View className="mt-2 flex-row flex-wrap gap-3">
+              <CircuitButton onPress={() => setShowRace(true)}>Enter VR Grid</CircuitButton>
+              <CircuitButton tone="orange" variant="solid" onPress={() => setShowRace((value) => !value)}>
+                {showRace ? 'Exit Race View' : 'Start Cycle Race'}
+              </CircuitButton>
+            </View>
           </Section>
 
-          <View className="min-h-[420px] overflow-hidden rounded-3xl border border-cyan-300/25 bg-black/45 shadow-2xl">
-            <SpatialViroExperience />
+          <View className="gap-4 lg:flex-row">
+            <GridCard className="flex-1" eyebrow="01 / Universal graphics" title="Skia scenes">
+              <Text className="text-sm leading-6 text-white/60">Grid Floor, Grid Scene and Glyph City share one Skia renderer across Expo and web.</Text>
+            </GridCard>
+            <GridCard className="flex-1" eyebrow="02 / Interface" title="Future controls">
+              <Text className="text-sm leading-6 text-white/60">Reusable grid cards and circuit buttons remain semantic, responsive and Uniwind-driven.</Text>
+            </GridCard>
+            <GridCard className="flex-1" eyebrow="03 / Immersion" title="OpenXR race" tone="orange">
+              <Text className="text-sm leading-6 text-white/60">Enter a black-vector grid arena and steer the playable three-lane light-cycle prototype.</Text>
+            </GridCard>
           </View>
 
+          {showRace ? (
+            <View className="min-h-[460px] overflow-hidden border border-cyan-300/25 bg-black/70">
+              <SpatialViroExperience />
+            </View>
+          ) : (
+            <GridCard eyebrow="XR Gateway" title="The portal is armed" tone="orange">
+              <Text className="text-sm leading-6 text-white/60">
+                Choose Enter VR Grid to mount the shared Viro scene. Quest/Pico use the same scene module as the web preview.
+              </Text>
+            </GridCard>
+          )}
+
           <View className="gap-3">
-            <Text className="text-sm font-semibold uppercase tracking-[0.18em] text-violet-200">
+            <Text className="text-sm font-semibold uppercase tracking-[0.18em] text-orange-200">
               Universal Rive surface
             </Text>
             <RiveStage source={RIVE_DEMO} />
           </View>
         </View>
-      </GridFloor>
+      </GridScene>
     </ForkSpatialLayout>
   );
 }
