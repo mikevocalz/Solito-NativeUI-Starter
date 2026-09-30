@@ -1,0 +1,40 @@
+name: Refresh Light Cycle GPU lockfile
+
+on:
+  push:
+    branches:
+      - spatial-solotio-starter
+    paths:
+      - .github/workflows/refresh-lightcycle-gpu-lock.yml
+
+permissions:
+  contents: write
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: spatial-solotio-starter
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.7.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          cache: pnpm
+      - name: Resolve current GPU dependencies
+        run: pnpm install --lockfile-only --no-frozen-lockfile
+      - name: Commit generated lockfile
+        run: |
+          if git diff --quiet -- pnpm-lock.yaml; then
+            echo "pnpm-lock.yaml is already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          git commit -m "chore: refresh GPU dependency lockfile"
+          git push origin HEAD:spatial-solotio-starter
