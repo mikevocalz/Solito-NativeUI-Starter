@@ -23,6 +23,7 @@ import {
   worldToLocation,
 } from './viro';
 import { LIGHTCYCLE_REPLICATION_IDS } from './lightcycle/sessionProtocol';
+import { TabletopRaceRuntime } from './TabletopRaceRuntime.native';
 import {
   tabletopSession,
   useTabletopSessionStore,
@@ -339,6 +340,25 @@ function SharedTabletopRoom({
   const remoteEntityId = LIGHTCYCLE_REPLICATION_IDS.player(remotePlayerId);
   const localEntity = replication.byId(localEntityId);
   const remoteEntity = replication.byId(remoteEntityId);
+  const p1Entity = replication.byId(LIGHTCYCLE_REPLICATION_IDS.player('p1'));
+  const p2Entity = replication.byId(LIGHTCYCLE_REPLICATION_IDS.player('p2'));
+  const p1Ready = Boolean(p1Entity?.fields.ready) && Boolean(p1Entity?.fields.localized);
+  const p2Ready = Boolean(p2Entity?.fields.ready) && Boolean(p2Entity?.fields.localized);
+  const bothReady = placementReady && p1Ready && p2Ready;
+  const playerNames = {
+    p1:
+      typeof p1Entity?.fields.name === 'string'
+        ? p1Entity.fields.name
+        : localPlayerId === 'p1'
+          ? name
+          : 'PLAYER 1',
+    p2:
+      typeof p2Entity?.fields.name === 'string'
+        ? p2Entity.fields.name
+        : localPlayerId === 'p2'
+          ? name
+          : 'PLAYER 2',
+  };
 
   useEffect(() => {
     if (replication.state !== 'synced') return;
@@ -389,15 +409,14 @@ function SharedTabletopRoom({
     }
     if (!replication.isMine(matchId)) return;
 
-    const p1 = replication.byId(LIGHTCYCLE_REPLICATION_IDS.player('p1'));
-    const p2 = replication.byId(LIGHTCYCLE_REPLICATION_IDS.player('p2'));
-    const p1Ready =
-      Boolean(p1?.fields.ready) && Boolean(p1?.fields.localized);
-    const p2Ready =
-      Boolean(p2?.fields.ready) && Boolean(p2?.fields.localized);
-    const nextPhase =
-      placementReady && p1Ready && p2Ready ? 'ready' : 'lobby';
+    const activePhase =
+      match.fields.phase === 'countdown' ||
+      match.fields.phase === 'running' ||
+      match.fields.phase === 'round-over' ||
+      match.fields.phase === 'match-over';
+    if (activePhase) return;
 
+    const nextPhase = bothReady ? 'ready' : 'lobby';
     if (
       match.fields.phase !== nextPhase ||
       match.fields.placementReady !== placementReady ||
@@ -417,7 +436,10 @@ function SharedTabletopRoom({
       );
     }
   }, [
+    bothReady,
     mode,
+    p1Ready,
+    p2Ready,
     placementReady,
     replication,
   ]);
@@ -448,6 +470,14 @@ function SharedTabletopRoom({
   return (
     <ViroNode position={placementPosition}>
       <GridMatVisual />
+      <TabletopRaceRuntime
+        roomId={roomId}
+        replication={replication}
+        localPlayerId={localPlayerId}
+        placementReady={placementReady}
+        playerNames={playerNames}
+        bothReady={bothReady}
+      />
 
       <ViroText
         text={
