@@ -56,9 +56,15 @@ const config: ExpoConfig = {
     [
       '@reactvision/react-viro',
       {
-        provider: 'none',
+        provider: 'reactvision',
+        rvApiKey: process.env.EXPO_PUBLIC_REACTVISION_API_KEY,
+        rvProjectId: process.env.EXPO_PUBLIC_REACTVISION_PROJECT_ID,
+        rvEndpoint: process.env.EXPO_PUBLIC_REACTVISION_ENDPOINT,
         android: {
           xRMode: ['AR', 'QUEST', 'PICO'],
+          questAppId:
+            process.env.EXPO_PUBLIC_META_QUEST_APP_ID ??
+            process.env.META_QUEST_APP_ID,
           metaSpatialLayout: true,
           metaSpatialLayoutBomVersion: '1.2026.0.0',
           questArm64Only: true,
