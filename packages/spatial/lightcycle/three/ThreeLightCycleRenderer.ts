@@ -11,10 +11,11 @@ import {
   createLightCycleRenderFrame,
   type LightCycleClipName,
 } from '../assetContract';
-import type {
-  LightCycleDerezEvent,
-  LightCycleMatchState,
-  LightCyclePlayerId,
+import {
+  getLightCycleActiveTrails,
+  type LightCycleDerezEvent,
+  type LightCycleMatchState,
+  type LightCyclePlayerId,
 } from '../tabletopCore';
 import { createLightCycleEnergyMaterial } from './energyMaterial';
 import {
@@ -480,13 +481,16 @@ export class ThreeLightCycleRenderer {
     this.updateCrashPresentations(now);
 
     let trailIndex = 0;
-    for (const segment of state.trails) {
-      const frame = createLightCycleRenderFrame(state, segment.owner);
-      const rendered = frame.trails.find((trail) => trail.id === segment.id);
-      if (!rendered) continue;
+    const visibleTrails = [
+      ...state.trails,
+      ...getLightCycleActiveTrails(state),
+    ];
 
-      const [x0, , z0] = rendered.fromMeters;
-      const [x1, , z1] = rendered.toMeters;
+    for (const segment of visibleTrails) {
+      const x0 = segment.from.x * LIGHTCYCLE_METERS_PER_FIXED_UNIT;
+      const z0 = segment.from.z * LIGHTCYCLE_METERS_PER_FIXED_UNIT;
+      const x1 = segment.to.x * LIGHTCYCLE_METERS_PER_FIXED_UNIT;
+      const z1 = segment.to.z * LIGHTCYCLE_METERS_PER_FIXED_UNIT;
       const dx = Math.abs(x1 - x0);
       const dz = Math.abs(z1 - z0);
       const mesh = this.acquireTrail(trailIndex++, segment.owner);
