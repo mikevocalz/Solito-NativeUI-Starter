@@ -7,6 +7,7 @@ import type { RNCanvasContext } from 'react-native-webgpu';
 import {
   LIGHTCYCLE_ASSET_NODES,
   LIGHTCYCLE_CLIPS,
+  LIGHTCYCLE_METERS_PER_FIXED_UNIT,
   createLightCycleRenderFrame,
   type LightCycleClipName,
 } from '../assetContract';
@@ -35,6 +36,19 @@ type CycleNodes = {
 };
 
 type TrailMesh = THREE.Mesh<THREE.BoxGeometry, THREE.Material>;
+
+type CrashFragment = {
+  mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial>;
+  velocity: THREE.Vector3;
+  spin: THREE.Vector3;
+};
+
+type CrashPresentation = {
+  startedAt: number;
+  until: number;
+  group: THREE.Group;
+  fragments: CrashFragment[];
+};
 
 const PLAYER_COLOR: Record<LightCyclePlayerId, string> = {
   p1: '#00f3ff',
@@ -155,6 +169,10 @@ export class ThreeLightCycleRenderer {
     p2: createLightCycleEnergyMaterial(PLAYER_COLOR.p2),
   };
   private readonly crashSeen = new Set<string>();
+  private readonly crashPresentations = new Map<
+    LightCyclePlayerId,
+    CrashPresentation
+  >();
   private lastFrameAt = 0;
   private disposed = false;
 
@@ -303,7 +321,7 @@ export class ThreeLightCycleRenderer {
     action.play();
   }
 
-  private handleDerez(event: LightCycleDerezEvent) {
+  private handleDerez(event: LightCycleDerezEvent, now: number) {
     const key = `${event.playerId}:${event.tick}:${event.seed}`;
     if (this.crashSeen.has(key)) return;
     this.crashSeen.add(key);
@@ -320,6 +338,93 @@ export class ThreeLightCycleRenderer {
     const cycle = this.cycles.get(event.playerId);
     if (cycle?.chassis) {
       cycle.chassis.rotation.z += event.playerId === 'p1' ? 0.55 : -0.55;
+    }
+
+    const group = new THREE.Group();
+    group.position.set(
+      event.point.x * LIGHTCYCLE_METERS_PER_FIXED_UNIT,
+      0.08,
+      event.point.z * LIGHTCYCLE_METERS_PER_FIXED_UNIT,
+    );
+
+    const fragmentMaterial = new THREE.MeshBasicMaterial({
+      color: PLAYER_COLOR[event.playerId],
+      transparent: true,
+      opacity: 1,
+    });
+    const fragments: CrashFragment[] = [];
+
+    let seed = event.seed >>> 0;
+    const random = () => {
+      seed ^= seed << 13;
+      seed ^= seed >>> 17;
+      seed ^= seed << 5;
+      return (seed >>> 0) / 0xffffffff;
+    };
+
+    for (let index = 0; index < 10; index += 1) {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(
+          0.014 + random() * 0.018,
+          0.008 + random() * 0.014,
+          0.018 + random() * 0.024,
+        ),
+        fragmentMaterial.clone(),
+      );
+      mesh.position.set(
+        (random() - 0.5) * 0.08,
+        random() * 0.06,
+        (random() - 0.5) * 0.08,
+      );
+      group.add(mesh);
+      fragments.push({
+        mesh,
+        velocity: new THREE.Vector3(
+          (random() - 0.5) * 0.45,
+          0.18 + random() * 0.4,
+          (random() - 0.5) * 0.45,
+        ),
+        spin: new THREE.Vector3(
+          (random() - 0.5) * 8,
+          (random() - 0.5) * 8,
+          (random() - 0.5) * 8,
+        ),
+      });
+    }
+
+    this.scene.add(group);
+    this.crashPresentations.set(event.playerId, {
+      startedAt: now,
+      until: now + 1050,
+      group,
+      fragments,
+    });
+  }
+
+  private updateCrashPresentations(now: number) {
+    for (const [playerId, presentation] of this.crashPresentations) {
+      const elapsed = Math.max(0, (now - presentation.startedAt) / 1000);
+      const fade = Math.max(0, 1 - elapsed / 1.05);
+
+      for (const fragment of presentation.fragments) {
+        fragment.mesh.position.x += fragment.velocity.x / 60;
+        fragment.mesh.position.y +=
+          (fragment.velocity.y - 1.35 * elapsed) / 60;
+        fragment.mesh.position.z += fragment.velocity.z / 60;
+        fragment.mesh.rotation.x += fragment.spin.x / 60;
+        fragment.mesh.rotation.y += fragment.spin.y / 60;
+        fragment.mesh.rotation.z += fragment.spin.z / 60;
+        fragment.mesh.material.opacity = fade;
+      }
+
+      if (now >= presentation.until) {
+        this.scene.remove(presentation.group);
+        for (const fragment of presentation.fragments) {
+          fragment.mesh.geometry.dispose();
+          fragment.mesh.material.dispose();
+        }
+        this.crashPresentations.delete(playerId);
+      }
     }
   }
 
@@ -352,7 +457,11 @@ export class ThreeLightCycleRenderer {
       const cycle = this.cycles.get(id);
       if (!cycle) continue;
 
-      cycle.root.visible = frame.alive || Boolean(frame.derez);
+      const crashPresentation = this.crashPresentations.get(id);
+      cycle.root.visible =
+        frame.alive ||
+        Boolean(frame.derez) ||
+        Boolean(crashPresentation && now < crashPresentation.until);
       cycle.root.position.set(...frame.positionMeters);
       cycle.root.rotation.set(
         0,
@@ -365,8 +474,10 @@ export class ThreeLightCycleRenderer {
       if (cycle.rearWheel) cycle.rearWheel.rotation.x = wheelAngle;
 
       cycle.mixer.update(dt);
-      if (frame.derez) this.handleDerez(frame.derez);
+      if (frame.derez) this.handleDerez(frame.derez, now);
     }
+
+    this.updateCrashPresentations(now);
 
     let trailIndex = 0;
     for (const segment of state.trails) {
@@ -422,6 +533,14 @@ export class ThreeLightCycleRenderer {
     }
 
     this.trailPool.forEach((mesh) => mesh.geometry.dispose());
+    for (const presentation of this.crashPresentations.values()) {
+      this.scene.remove(presentation.group);
+      for (const fragment of presentation.fragments) {
+        fragment.mesh.geometry.dispose();
+        fragment.mesh.material.dispose();
+      }
+    }
+    this.crashPresentations.clear();
     this.trailMaterials.p1.material.dispose();
     this.trailMaterials.p2.material.dispose();
     this.typegpu.destroy();
