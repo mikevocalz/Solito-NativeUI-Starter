@@ -3,7 +3,9 @@
 import { useEffect } from 'react';
 import { Text, View } from '@acme/ui/tw';
 import { ThreeLightCycleCanvas } from './lightcycle/three/ThreeLightCycleCanvas.web';
+import { TabletopRiveScoreboardWeb } from './TabletopRiveScoreboard.web';
 import { tabletopSoloInput } from './tabletopSoloInputStore';
+import { useTabletopRaceStore } from './tabletopRaceStore';
 import { useTabletopSoloDriver } from './useTabletopSoloDriver';
 import { useTabletopSessionStore } from './tabletopSessionStore';
 
@@ -17,8 +19,14 @@ const MCP_GNM_ASSET =
   process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL ??
   undefined;
 
+const SOLO_PRESENCE = {
+  p1: { connected: true, localized: true, ready: true },
+  p2: { connected: true, localized: true, ready: true },
+} as const;
+
 export function TabletopThreeExperience() {
   const playerName = useTabletopSessionStore((state) => state.playerName);
+  const state = useTabletopRaceStore((race) => race.hostRenderState);
   const { getState } = useTabletopSoloDriver(playerName);
 
   useEffect(() => {
@@ -70,6 +78,18 @@ export function TabletopThreeExperience() {
         mcpAssetUri={MCP_GNM_ASSET}
         style={{ flex: 1 }}
       />
+
+      <View
+        pointerEvents="none"
+        className="absolute left-4 right-4 top-4 items-center"
+      >
+        <TabletopRiveScoreboardWeb
+          state={state}
+          presence={SOLO_PRESENCE}
+          className="w-full max-w-2xl"
+          height={150}
+        />
+      </View>
       <View
         pointerEvents="none"
         className="absolute inset-x-0 bottom-0 bg-black/55 px-4 py-3"
