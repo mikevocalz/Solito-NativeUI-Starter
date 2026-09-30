@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { LightCycleMatchState } from './lightcycle/tabletopCore';
 import {
+  LIGHTCYCLE_SCOREBOARD_ARTBOARD,
+  LIGHTCYCLE_SCOREBOARD_MACHINE,
   createLightCycleRiveBindings,
   createLightCycleScoreboardModel,
   type LightCycleLobbyPresence,
@@ -91,8 +93,8 @@ export function TabletopRiveScoreboard({
       <SpatialRivePanel
         bytes={bytes}
         bindings={bindings}
-        artboard="LightCycleScoreboard"
-        stateMachine="Main"
+        artboard={LIGHTCYCLE_SCOREBOARD_ARTBOARD}
+        stateMachine={LIGHTCYCLE_SCOREBOARD_MACHINE}
         position={[0, 0.31, 0.51]}
         rotation={[0, 0, 0]}
         width={0.92}
