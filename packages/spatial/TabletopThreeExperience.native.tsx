@@ -1,6 +1,6 @@
 'use client';
 
-import { Pressable, Text, View } from '@acme/ui/tw';
+import { Pressable, Text, View } from '@acme/ui/tw';\nimport { Image } from 'react-native';
 import { ThreeLightCycleCanvas } from './lightcycle/three/ThreeLightCycleCanvas.native';
 import { tabletopSoloInput } from './tabletopSoloInputStore';
 import { useTabletopSoloDriver } from './useTabletopSoloDriver';
@@ -9,8 +9,7 @@ import { useTabletopSessionStore } from './tabletopSessionStore';
 const LIGHTCYCLE_ASSET =
   process.env.EXPO_PUBLIC_LIGHTCYCLE_GLB_URL ?? undefined;
 
-const MCP_GNM_ASSET =
-  process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL ?? undefined;
+// Resolve the bundled GLB through React Native's Metro asset registry so\n// Three/GLTFLoader receives a URI without introducing component state.\n// eslint-disable-next-line @typescript-eslint/no-require-imports\nconst BUNDLED_MCP_GNM_MODULE = require('./assets/mcp/mcp-gnm-head.glb') as number;\nconst BUNDLED_MCP_GNM_ASSET =\n  Image.resolveAssetSource(BUNDLED_MCP_GNM_MODULE)?.uri;\nconst MCP_GNM_ASSET =\n  process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL ?? BUNDLED_MCP_GNM_ASSET;
 
 function Control({
   label,
