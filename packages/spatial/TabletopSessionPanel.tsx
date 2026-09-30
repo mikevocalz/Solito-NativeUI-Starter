@@ -39,7 +39,6 @@ export function TabletopSessionPanel({
           label="Player name"
           value={playerName}
           maxLength={16}
-          autoCapitalize="words"
           placeholder="Enter name"
           onChangeText={setPlayerName}
           hint="1–16 characters. This name is bound into the Rive scoreboard."
@@ -58,7 +57,6 @@ export function TabletopSessionPanel({
           <TextField
             label="Join table"
             value={joinCode}
-            autoCapitalize="characters"
             maxLength={8}
             placeholder="K7M2QX"
             onChangeText={setJoinCode}
