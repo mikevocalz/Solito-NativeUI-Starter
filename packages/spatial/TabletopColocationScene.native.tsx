@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
+  ViroAnimations,
   ViroARPlaneSelector,
   ViroARScene,
   ViroAmbientLight,
@@ -17,7 +18,10 @@ import {
   isQuest,
   isVisionOS,
   metaSpatialAnchorFrameSource,
+  invertTransform,
   parseLocationTransform,
+  poseCsv,
+  transformDirection,
   useViroColocation,
   useViroColocationRoom,
   useViroReplicatedState,
@@ -41,6 +45,25 @@ const MAT_WIDTH = 1.24;
 const MAT_DEPTH = 0.84;
 
 type Vec3 = [number, number, number];
+
+ViroAnimations.registerAnimations({
+  gridMatPreviewPulse: {
+    properties: { scaleX: 1.025, scaleY: 1.025, scaleZ: 1.025, opacity: 0.82 },
+    duration: 720,
+    easing: 'EaseInEaseOut',
+  },
+  gridMatScan: [
+    {
+      properties: { positionZ: -0.31, opacity: 0.25 },
+      duration: 1,
+    },
+    {
+      properties: { positionZ: 0.31, opacity: 1 },
+      duration: 900,
+      easing: 'Linear',
+    },
+  ],
+});
 
 ViroMaterials.createMaterials({
   raceCyan: { diffuseColor: '#00f3ff', lightingModel: 'Constant' },
@@ -113,7 +136,13 @@ function GridMatVisual({
   const zLines = [-0.28, -0.14, 0, 0.14, 0.28];
 
   return (
-    <ViroNode>
+    <ViroNode
+      animation={
+        placementPreview
+          ? { name: 'gridMatPreviewPulse', loop: true, run: true }
+          : undefined
+      }
+    >
       <ViroBox
         position={[0, 0.012, 0]}
         scale={[MAT_WIDTH / 2, 0.012, MAT_DEPTH / 2]}
@@ -169,6 +198,15 @@ function GridMatVisual({
           materials={['raceOrange']}
         />
       ))}
+
+      {placementPreview ? (
+        <ViroBox
+          position={[0, 0.06, -0.31]}
+          scale={[MAT_WIDTH / 2.15, 0.008, 0.012]}
+          materials={['raceWhite']}
+          animation={{ name: 'gridMatScan', loop: true, run: true }}
+        />
+      ) : null}
 
       <ViroText
         text={placementPreview ? 'GRID MAT PREVIEW' : 'CLASSIC GRID DUEL'}
@@ -375,8 +413,8 @@ function SharedTabletopRoom({
           peerId: replication.localPeerId,
           name,
           ready,
-          localized: true,
-          connected: true,
+          localized: localFrameLocalized && colocated.state === 'joined',
+          connected: colocated.state === 'joined',
           cycleColor: localPlayerId === 'p1' ? 'cyan' : 'orange',
         },
         { optimistic: true },
@@ -388,6 +426,8 @@ function SharedTabletopRoom({
     localPlayerId,
     name,
     ready,
+    localFrameLocalized,
+    colocated.state,
     replication,
   ]);
 
@@ -444,6 +484,41 @@ function SharedTabletopRoom({
   const peers = colocated.peers.filter(
     (peer) => peer.peerId !== colocated.localPeerId,
   );
+  const remotePeerLocalized = peers.some((peer) => peer.localized);
+  const localFrameLocalized = useTabletopSessionStore(
+    (state) => state.localized,
+  );
+  const localCanReady =
+    localFrameLocalized &&
+    colocated.state === 'joined' &&
+    remotePeerLocalized &&
+    placementReady;
+
+  useEffect(() => {
+    const publish = (state: ReturnType<typeof useTabletopSessionStore.getState>) => {
+      const transform = parseLocationTransform(state.sharedFrameTransform);
+      const camera = state.cameraPose;
+      if (!transform || !camera || colocated.state !== 'joined') return;
+
+      const inverse = invertTransform(transform);
+      const position = worldToLocation(transform, camera.position);
+      if (!inverse || !position) return;
+
+      const forward = transformDirection(inverse, camera.forward);
+      const up = transformDirection(inverse, camera.up);
+      colocated.publishPose(poseCsv(position, forward, up));
+    };
+
+    publish(useTabletopSessionStore.getState());
+    return useTabletopSessionStore.subscribe((state, previous) => {
+      if (
+        state.cameraPose !== previous.cameraPose ||
+        state.sharedFrameTransform !== previous.sharedFrameTransform
+      ) {
+        publish(state);
+      }
+    });
+  }, [colocated.publishPose, colocated.state]);
 
   if (!placementPosition) {
     return (
@@ -529,11 +604,23 @@ function SharedTabletopRoom({
         scale={[0.18, 0.04, 0.07]}
         materials={[ready ? 'raceCyan' : 'raceOrange']}
         onClick={() => {
-          if (placementReady) setReady(!ready);
+          if (localCanReady) setReady(!ready);
+          else {
+            tabletopSession.setState({
+              error:
+                'Player 2 must be physically localized to the same Grid before Ready.',
+            });
+          }
         }}
       />
       <ViroText
-        text={ready ? 'READY ✓' : 'PRESS TO READY'}
+        text={
+          ready
+            ? 'READY ✓'
+            : localCanReady
+              ? 'PRESS TO READY'
+              : 'WAITING FOR CO-LOCATION'
+        }
         position={[0, 0.137, 0.28]}
         rotation={[-90, 0, 0]}
         width={0.45}
@@ -593,6 +680,10 @@ export function TabletopColocationScene({
   const setHostPlacement = useTabletopSessionStore(
     (state) => state.setHostPlacement,
   );
+  const setSharedFrameTransform = useTabletopSessionStore(
+    (state) => state.setSharedFrameTransform,
+  );
+  const setCameraPose = useTabletopSessionStore((state) => state.setCameraPose);
 
   const navigator = arSceneNavigator ?? sceneNavigator;
   const configured = Boolean(API_KEY && PROJECT_ID);
@@ -723,6 +814,17 @@ export function TabletopColocationScene({
 
   return (
     <ViroARScene
+      anchorDetectionTypes="planesHorizontal"
+      toneMappingEnabled={false}
+      onCameraTransformUpdate={(camera: any) => {
+        const pose = camera?.cameraTransform ?? camera;
+        if (!pose?.position || !pose?.forward || !pose?.up) return;
+        setCameraPose({
+          position: pose.position,
+          forward: pose.forward,
+          up: pose.up,
+        });
+      }}
       onAnchorFound={(anchor: any) =>
         selectorRef.current?.handleAnchorFound(anchor)
       }
@@ -840,10 +942,12 @@ export function TabletopColocationScene({
               });
             }
 
+            setSharedFrameTransform(event.transform ?? null);
             setLocalized(true);
             setError(null);
           }}
           onLocalizeError={(error) => {
+            setSharedFrameTransform(null);
             setLocalized(false);
             setError(error);
           }}

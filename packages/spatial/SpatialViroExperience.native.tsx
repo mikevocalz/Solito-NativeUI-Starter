@@ -31,6 +31,7 @@ type HeadsetNavigatorProps = {
   bloomEnabled?: boolean;
   shadowsEnabled?: boolean;
   multisamplingEnabled?: boolean;
+  onExitViro?: () => void;
   style?: Record<string, unknown>;
 };
 
@@ -148,6 +149,9 @@ export function SpatialViroExperience() {
         bloomEnabled={false}
         shadowsEnabled
         multisamplingEnabled
+        onExitViro={() => {
+          tabletopSession.getState().setSpatialViewOpen(false);
+        }}
         style={{ flex: 1 }}
       />
     );
@@ -162,6 +166,9 @@ export function SpatialViroExperience() {
         passthroughEnabled={false}
         handTrackingEnabled
         trackingOrigin="floor"
+        onExitViro={() => {
+          tabletopSession.getState().setSpatialViewOpen(false);
+        }}
         style={{ flex: 1 }}
       />
     );
@@ -171,6 +178,9 @@ export function SpatialViroExperience() {
     <View className="relative flex-1">
       <Viro3DSceneNavigator
         initialScene={{ scene: SpatialDemoScene as never }}
+        onExitViro={() => {
+          tabletopSession.getState().setSpatialViewOpen(false);
+        }}
         style={{ flex: 1 }}
       />
       <FlatPreviewControls />

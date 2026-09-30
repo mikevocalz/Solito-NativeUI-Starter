@@ -2,6 +2,7 @@ import * as ViroRuntime from '@reactvision/react-viro';
 
 export {
   Viro3DSceneNavigator,
+  ViroAnimations,
   ViroARScene,
   ViroARPlaneSelector,
   ViroSharedFrame,
@@ -27,7 +28,10 @@ export {
   visionOSSharedSpaceFrameSource,
   normaliseJoinCode,
   formatJoinCode,
+  invertTransform,
   parseLocationTransform,
+  poseCsv,
+  transformDirection,
   worldToLocation,
   isQuest,
 } from '@reactvision/react-viro';

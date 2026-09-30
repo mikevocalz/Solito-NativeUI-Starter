@@ -38,7 +38,8 @@ export function TabletopSessionPanel({
 
         <Text className="text-xs leading-5 text-cyan-100/65">
           Quest placement uses the Horizon OS room model. Run Physical Space / Space Setup once if
-          table or floor surfaces do not appear.
+          table or floor surfaces do not appear. Player 2 cannot Ready until the shared frame and
+          co-location channel both confirm localization to the same physical Grid.
         </Text>
 
         <TextField

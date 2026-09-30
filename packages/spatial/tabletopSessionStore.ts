@@ -18,6 +18,12 @@ export type SharedPlacement = {
   surface: string;
 };
 
+export type TabletopCameraPose = {
+  position: TabletopVec3;
+  forward: TabletopVec3;
+  up: TabletopVec3;
+};
+
 type TabletopSessionState = {
   mode: TabletopSessionMode;
   spatialViewOpen: boolean;
@@ -35,6 +41,8 @@ type TabletopSessionState = {
   phoneCloudAnchorId: string | null;
   phoneAnchorWorking: boolean;
   hostPlacement: SharedPlacement | null;
+  sharedFrameTransform: string | null;
+  cameraPose: TabletopCameraPose | null;
 
   setSpatialViewOpen: (open: boolean) => void;
   setPlayerName: (name: string) => void;
@@ -53,6 +61,8 @@ type TabletopSessionState = {
   setPhoneCloudAnchorId: (id: string | null) => void;
   setPhoneAnchorWorking: (working: boolean) => void;
   setHostPlacement: (placement: SharedPlacement | null) => void;
+  setSharedFrameTransform: (transform: string | null) => void;
+  setCameraPose: (pose: TabletopCameraPose | null) => void;
   clearPlacement: () => void;
   reset: () => void;
 };
@@ -99,6 +109,8 @@ const placementReset = {
   phoneCloudAnchorId: null,
   phoneAnchorWorking: false,
   hostPlacement: null,
+  sharedFrameTransform: null,
+  cameraPose: null,
 };
 
 export const useTabletopSessionStore = create<TabletopSessionState>((set, get) => ({
@@ -184,6 +196,8 @@ export const useTabletopSessionStore = create<TabletopSessionState>((set, get) =
       phoneCloudAnchorId: null,
       phoneAnchorWorking: false,
       hostPlacement: null,
+      sharedFrameTransform: null,
+      cameraPose: null,
     });
     return true;
   },
@@ -203,6 +217,9 @@ export const useTabletopSessionStore = create<TabletopSessionState>((set, get) =
   setPhoneCloudAnchorId: (phoneCloudAnchorId) => set({ phoneCloudAnchorId }),
   setPhoneAnchorWorking: (phoneAnchorWorking) => set({ phoneAnchorWorking }),
   setHostPlacement: (hostPlacement) => set({ hostPlacement }),
+  setSharedFrameTransform: (sharedFrameTransform) =>
+    set({ sharedFrameTransform }),
+  setCameraPose: (cameraPose) => set({ cameraPose }),
 
   clearPlacement: () =>
     set({
@@ -214,6 +231,8 @@ export const useTabletopSessionStore = create<TabletopSessionState>((set, get) =
       phoneCloudAnchorId: null,
       phoneAnchorWorking: false,
       hostPlacement: null,
+      sharedFrameTransform: null,
+      cameraPose: null,
       roomDisplayCode: null,
       error: null,
     }),
