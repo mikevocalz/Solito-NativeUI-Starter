@@ -86,7 +86,6 @@ export function ThreeLightCycleCanvas({
     <Canvas
       ref={canvasRef}
       opaque={false}
-      android={{ surfaceType: 'HardwareBufferView' }}
       style={[{ flex: 1 }, style]}
     />
   );
