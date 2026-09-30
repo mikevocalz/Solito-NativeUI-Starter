@@ -29,7 +29,6 @@ export function ThreeLightCycleCanvas({
     if (!device || !canvasRef.current) return;
 
     let disposed = false;
-    let frame = 0;
     let renderer: ThreeLightCycleRenderer | null = null;
 
     void (async () => {
@@ -65,16 +64,14 @@ export function ThreeLightCycleCanvas({
         return;
       }
 
-      const tick = (now: number) => {
+      renderer.renderer.setAnimationLoop((now) => {
         renderer?.render(stateRef.current, now);
-        frame = requestAnimationFrame(tick);
-      };
-      frame = requestAnimationFrame(tick);
+      });
     })();
 
     return () => {
       disposed = true;
-      cancelAnimationFrame(frame);
+      renderer?.renderer.setAnimationLoop(null);
       renderer?.dispose();
     };
   }, [assetUri, device]);
