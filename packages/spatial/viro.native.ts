@@ -2,6 +2,8 @@ import * as ViroRuntime from '@reactvision/react-viro';
 
 export {
   Viro3DSceneNavigator,
+  ViroARScene,
+  ViroSharedFrame,
   ViroAmbientLight,
   ViroBox,
   ViroController,
@@ -16,7 +18,16 @@ export {
   ViroVirtualButton,
   ViroVirtualJoystick,
   ViroXRSceneNavigator,
+  useViroColocation,
+  useViroColocationRoom,
+  useViroReplicatedState,
+  metaSpatialAnchorFrameSource,
+  cloudAnchorFrameSource,
+  visionOSSharedSpaceFrameSource,
+  normaliseJoinCode,
+  formatJoinCode,
   isQuest,
+  isVisionOS,
 } from '@reactvision/react-viro';
 
 export const isPico = Boolean(
