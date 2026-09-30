@@ -21,7 +21,9 @@ export function ThreeLightCycleCanvas({
   const stateRef = useRef(state);
   const { device } = useDevice();
 
-  stateRef.current = state;
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   useEffect(() => {
     if (!device || !canvasRef.current) return;
