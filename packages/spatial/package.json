@@ -10,7 +10,11 @@
       "react-native": "./rive/RiveStage.native.tsx",
       "default": "./rive/RiveStage.web.tsx"
     },
-    "./lightcycle": "./lightcycle/index.ts"
+    "./lightcycle": "./lightcycle/index.ts",
+    "./lightcycle/three": {
+      "react-native": "./lightcycle/three/index.native.ts",
+      "default": "./lightcycle/three/index.web.ts"
+    }
   },
   "scripts": {
     "lint": "eslint",
@@ -25,7 +29,11 @@
     "@rive-app/react-native": "catalog:",
     "@rive-app/react-webgl2": "catalog:",
     "react-native-nitro-modules": "catalog:",
-    "zustand": "catalog:"
+    "zustand": "catalog:",
+    "@typegpu/three": "catalog:",
+    "react-native-webgpu": "catalog:",
+    "three": "catalog:",
+    "typegpu": "catalog:"
   },
   "devDependencies": {
     "@acme/config": "workspace:*",
@@ -35,7 +43,10 @@
     "expo": "catalog:",
     "react": "catalog:",
     "react-native": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/three": "catalog:",
+    "@webgpu/types": "catalog:",
+    "unplugin-typegpu": "catalog:"
   },
   "peerDependencies": {
     "react": "*",
