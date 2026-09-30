@@ -10,7 +10,7 @@
       "react-native": "./rive/RiveStage.native.tsx",
       "default": "./rive/RiveStage.web.tsx"
     },
-    "./lightcycle": "./lightcycle/tabletopCore.ts"
+    "./lightcycle": "./lightcycle/index.ts"
   },
   "scripts": {
     "lint": "eslint",
