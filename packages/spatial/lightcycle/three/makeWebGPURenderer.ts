@@ -54,16 +54,15 @@ export function disposeLightCycleWebGPURenderer(
   if (!ThreeWithQuad.QuadMesh) return;
 
   const quad = new ThreeWithQuad.QuadMesh();
-  const targets: Array<
-    | (THREE.BufferGeometry & { _listeners?: Record<string, unknown> })
-    | (THREE.BufferAttribute & { _listeners?: Record<string, unknown> })
-    | null
-    | undefined
-  > = [
+  const targets = [
     quad.geometry,
     quad.geometry.index,
     ...Object.values(quad.geometry.attributes),
-  ];
+  ] as Array<
+    | ({ _listeners?: Record<string, unknown> } & object)
+    | null
+    | undefined
+  >;
 
   for (const target of targets) {
     if (target?._listeners) target._listeners = {};
