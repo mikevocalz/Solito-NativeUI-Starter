@@ -163,12 +163,12 @@ function GridMatVisual({
         />
       ))}
 
-      {[
+      {([
         [-MAT_WIDTH / 2, -MAT_DEPTH / 2],
         [MAT_WIDTH / 2, -MAT_DEPTH / 2],
         [-MAT_WIDTH / 2, MAT_DEPTH / 2],
         [MAT_WIDTH / 2, MAT_DEPTH / 2],
-      ].map(([x, z], index) => (
+      ] as [number, number][]).map(([x, z], index) => (
         <ViroBox
           key={'corner-' + index}
           position={[x, 0.045, z]}
