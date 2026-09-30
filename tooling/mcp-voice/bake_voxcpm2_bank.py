@@ -15,7 +15,9 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import numpy as np
 import soundfile as sf
+import torch
 from voxcpm import VoxCPM
 
 SEED = 1982
@@ -123,11 +125,12 @@ def main() -> None:
     anchor_raw = raw_dir / f"{anchor_name}.raw.wav"
 
     print("Designing stable MCP identity...", flush=True)
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
     anchor = model.generate(
         text=f"({VOICE}; {anchor_style}){anchor_text}",
         cfg_value=2.0,
         inference_timesteps=8,
-        seed=SEED,
     )
     sf.write(anchor_raw, anchor, sample_rate)
 
@@ -146,12 +149,13 @@ def main() -> None:
         raw = raw_dir / f"{name}.raw.wav"
         if name != anchor_name:
             print(f"Rendering {name}...", flush=True)
+            np.random.seed(SEED + index)
+            torch.manual_seed(SEED + index)
             wav = model.generate(
                 text=f"({style}){text}",
                 reference_wav_path=str(anchor_raw),
                 cfg_value=2.0,
                 inference_timesteps=8,
-                seed=SEED + index,
             )
             sf.write(raw, wav, sample_rate)
 
