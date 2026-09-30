@@ -26,6 +26,7 @@ import {
 } from './lightcycle/sessionProtocol';
 import { tabletopRace, useTabletopRaceStore } from './tabletopRaceStore';
 import { gridFx } from './rive-fx/store';
+import { McpPresence } from './mcp/McpPresence.native';
 
 type ReplicatedEntity = {
   id: string;
@@ -60,6 +61,7 @@ const SNAPSHOT_INTERVAL_TICKS = 6;
 const HOST_INPUT_LEAD_TICKS = 2;
 const GUEST_INPUT_LEAD_TICKS = 8;
 const INPUT_HISTORY_LIMIT = 32;
+const MCP_GNM_ASSET = process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL || undefined;
 
 function isInputEvent(value: unknown): value is LightCycleInputEvent {
   if (!value || typeof value !== 'object') return false;
@@ -548,6 +550,11 @@ export function TabletopRaceRuntime({
       {displayState ? (
         <>
           <RaceVisual state={displayState} />
+          <McpPresence
+            state={displayState}
+            localPlayerId={localPlayerId}
+            assetUri={MCP_GNM_ASSET}
+          />
 
           {displayState.phase === 'running' ? (
             <>
