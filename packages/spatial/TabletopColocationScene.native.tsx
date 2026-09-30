@@ -15,6 +15,7 @@ import {
   cloudAnchorFrameSource,
   isPico,
   isQuest,
+  isVisionOS,
   metaSpatialAnchorFrameSource,
   parseLocationTransform,
   useViroColocation,
@@ -630,7 +631,7 @@ export function TabletopColocationScene({
     if (isQuest && hostFrameRef) {
       return metaSpatialAnchorFrameSource(hostFrameRef, 'create');
     }
-    if (!isQuest && !isPico && phoneCloudAnchorId) {
+    if (!isQuest && !isPico && !isVisionOS && phoneCloudAnchorId) {
       return cloudAnchorFrameSource(phoneCloudAnchorId);
     }
     return null;
@@ -685,6 +686,7 @@ export function TabletopColocationScene({
   let status = 'PREPARING GRID';
   if (!configured) status = 'CO-LOCATION CREDENTIALS MISSING';
   else if (isPico) status = 'PICO SHARED-FRAME MODE NOT AVAILABLE';
+  else if (isVisionOS) status = 'VISIONOS SHARED-SPACE TRANSPORT NOT CONFIGURED';
   else if (mode === 'host' && !candidate) {
     status =
       detectedSurfaceCount > 0
@@ -748,7 +750,7 @@ export function TabletopColocationScene({
         />
       ) : null}
 
-      {mode === 'host' && !placementConfirmed && !isPico ? (
+      {mode === 'host' && !placementConfirmed && !isPico && !isVisionOS ? (
         <ViroARPlaneSelector
           ref={selectorRef}
           alignment="Horizontal"
