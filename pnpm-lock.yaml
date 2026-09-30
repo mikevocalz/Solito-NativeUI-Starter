@@ -1015,7 +1015,7 @@ importers:
         version: 0.37.1(react-native@0.88.0-rc.2(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.87.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1))(react@19.3.0)
       react-native-webgpu:
         specifier: 'catalog:'
-        version: 0.10.2(6b288e9c833953b8065d51b9d0649eb2)
+        version: 0.10.4(6b288e9c833953b8065d51b9d0649eb2)
       three:
         specifier: 'catalog:'
         version: 0.186.1
@@ -7912,8 +7912,7 @@ packages:
       react: 19.3.0
       react-dom: 19.3.0
 
-  react-native-webgpu@0.10.2:
-    resolution: {integrity: sha512-lRoBIpo9uXG0rRSGaf9XOY3SynV5YePrsJUlyy3jN5ySHEaVkcQtF6L7zA/Frn22BgWKOZ+Kk5W6No+0Kut6/g==}
+  react-native-webgpu@0.10.4:
     peerDependencies:
       react: 19.3.0
       react-native: '>=0.81.0'
@@ -17745,7 +17744,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  react-native-webgpu@0.10.2(6b288e9c833953b8065d51b9d0649eb2):
+  react-native-webgpu@0.10.4(6b288e9c833953b8065d51b9d0649eb2):
     dependencies:
       react: 19.3.0
       react-native: 0.88.0-rc.2(@babel/core@7.29.7(supports-color@8.1.1))(@react-native/metro-config@0.87.0(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.0)(supports-color@8.1.1)
