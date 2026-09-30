@@ -29,6 +29,7 @@ import {
 } from './viro';
 import { LIGHTCYCLE_REPLICATION_IDS } from './lightcycle/sessionProtocol';
 import { TabletopRaceRuntime } from './TabletopRaceRuntime.native';
+import { TabletopRiveScoreboard } from './TabletopRiveScoreboard.native';
 import {
   tabletopSession,
   useTabletopSessionStore,
@@ -289,6 +290,12 @@ function SharedTabletopRoom({
   const mode = useTabletopSessionStore((state) => state.mode);
   const name = useTabletopSessionStore((state) => state.playerName);
   const ready = useTabletopSessionStore((state) => state.ready);
+  const roomDisplayCode = useTabletopSessionStore(
+    (state) => state.roomDisplayCode,
+  );
+  const localFrameLocalized = useTabletopSessionStore(
+    (state) => state.localized,
+  );
   const setReady = useTabletopSessionStore((state) => state.setReady);
   const localPlayerId = mode === 'host' ? 'p1' : 'p2';
   const remotePlayerId = localPlayerId === 'p1' ? 'p2' : 'p1';
@@ -372,6 +379,9 @@ function SharedTabletopRoom({
   const remoteEntity = replication.byId(remoteEntityId);
   const p1Entity = replication.byId(LIGHTCYCLE_REPLICATION_IDS.player('p1'));
   const p2Entity = replication.byId(LIGHTCYCLE_REPLICATION_IDS.player('p2'));
+  const snapshotEntity = replication.byId(
+    LIGHTCYCLE_REPLICATION_IDS.snapshot,
+  );
   const peers = colocated.peers.filter(
     (peer) => peer.peerId !== colocated.localPeerId,
   );
@@ -496,9 +506,6 @@ function SharedTabletopRoom({
       ? remoteEntity.fields.name
       : 'WAITING…';
   const remoteReady = Boolean(remoteEntity?.fields.ready);
-  const localFrameLocalized = useTabletopSessionStore(
-    (state) => state.localized,
-  );
   const localCanReady =
     localFrameLocalized &&
     colocated.state === 'joined' &&
@@ -563,22 +570,25 @@ function SharedTabletopRoom({
         bothReady={bothReady}
       />
 
-      <ViroText
-        text={
-          name +
-          '  ' +
-          (ready ? 'READY' : 'NOT READY') +
-          '   /   ' +
-          remoteName +
-          '  ' +
-          (remoteReady ? 'READY' : 'WAITING')
-        }
-        position={[0, 0.085, 0.49]}
-        rotation={[-90, 0, 0]}
-        width={1.2}
-        height={0.15}
-        style={{ fontSize: 12, color: '#00f3ff', textAlign: 'center' }}
+      <TabletopRiveScoreboard
+        replicatedState={snapshotEntity?.fields.state}
+        joinCode={roomDisplayCode}
+        presence={{
+          p1: {
+            name: playerNames.p1,
+            ready: p1Ready,
+            connected: Boolean(p1Entity?.fields.connected),
+            localized: Boolean(p1Entity?.fields.localized),
+          },
+          p2: {
+            name: playerNames.p2,
+            ready: p2Ready,
+            connected: Boolean(p2Entity?.fields.connected),
+            localized: Boolean(p2Entity?.fields.localized),
+          },
+        }}
       />
+
       <ViroText
         text={
           'SHARED ' +
@@ -588,7 +598,7 @@ function SharedTabletopRoom({
           ' · PEERS ' +
           String(peers.length + 1)
         }
-        position={[0, 0.085, -0.49]}
+        position={[0, 0.085, -0.36]}
         rotation={[-90, 180, 0]}
         width={1.2}
         height={0.12}
