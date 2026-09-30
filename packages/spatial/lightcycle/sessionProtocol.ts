@@ -3,8 +3,8 @@ import type {
   LightCycleMatchState,
   LightCyclePhase,
   LightCyclePlayerId,
-} from './tabletopCore';
-import { lightCycleStateHash } from './tabletopCore';
+} from './tabletopCore.ts';
+import { lightCycleStateHash } from './tabletopCore.ts';
 
 export const LIGHTCYCLE_REPLICATION_IDS = {
   match: 'lightcycle:match',
