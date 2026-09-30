@@ -30,6 +30,7 @@ import {
 import { LIGHTCYCLE_REPLICATION_IDS } from './lightcycle/sessionProtocol';
 import { TabletopRaceRuntime } from './TabletopRaceRuntime.native';
 import { TabletopRiveScoreboard } from './TabletopRiveScoreboard.native';
+import { gridFx } from './rive-fx/store';
 import {
   tabletopSession,
   useTabletopSessionStore,
@@ -512,6 +513,23 @@ function SharedTabletopRoom({
     remotePeerLocalized &&
     placementReady;
 
+  const syncFxSent = useRef(false);
+
+  useEffect(() => {
+    if (localCanReady && !syncFxSent.current) {
+      syncFxSent.current = true;
+      gridFx.emit({
+        type: 'room-sync',
+        intensity: 1,
+        localPlayer: localPlayerId,
+        playerColor: localPlayerId === 'p1' ? '#00f3ff' : '#ff7a00',
+        opponentColor: localPlayerId === 'p1' ? '#ff7a00' : '#00f3ff',
+      });
+    } else if (!localCanReady) {
+      syncFxSent.current = false;
+    }
+  }, [localCanReady, localPlayerId]);
+
   useEffect(() => {
     if (!localCanReady && ready) {
       setReady(false);
@@ -720,6 +738,15 @@ export function TabletopColocationScene({
 
     setPlacementConfirmed(true);
     setError(null);
+    gridFx.emit({
+      type: 'mat-lock',
+      intensity: 1,
+      world: {
+        x: candidate.worldPosition[0],
+        y: candidate.worldPosition[1],
+        z: candidate.worldPosition[2],
+      },
+    });
 
     if (isQuest) return;
 

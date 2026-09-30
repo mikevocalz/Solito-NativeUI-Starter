@@ -25,6 +25,7 @@ import {
   LightCycleInputQueue,
 } from './lightcycle/sessionProtocol';
 import { tabletopRace, useTabletopRaceStore } from './tabletopRaceStore';
+import { gridFx } from './rive-fx/store';
 
 type ReplicatedEntity = {
   id: string;
@@ -298,6 +299,7 @@ export function TabletopRaceRuntime({
   });
   const localSequence = useRef(0);
   const localHistory = useRef<LightCycleInputEvent[]>([]);
+  const lastDerezFxTick = useRef(-1);
   const hostRenderState = useTabletopRaceStore(
     (state) => state.hostRenderState,
   );
@@ -383,7 +385,48 @@ export function TabletopRaceRuntime({
   const pulseBoost = useCallback(() => {
     sendCommand('BOOST_DOWN');
     sendCommand('BOOST_UP', Math.round(LIGHTCYCLE_FIXED_HZ * 0.45));
-  }, [sendCommand]);
+    gridFx.emit({
+      type: 'boost',
+      intensity: 0.9,
+      localPlayer: localPlayerId,
+      playerColor: localPlayerId === 'p1' ? '#00f3ff' : '#ff7a00',
+      opponentColor: localPlayerId === 'p1' ? '#ff7a00' : '#00f3ff',
+      velocity: displayState?.riders[localPlayerId].speedUnitsPerTick ?? 0,
+    });
+  }, [displayState, localPlayerId, sendCommand]);
+
+  useEffect(() => {
+    if (!displayState?.derezEvents.length) return;
+
+    for (const event of displayState.derezEvents) {
+      if (event.tick <= lastDerezFxTick.current) continue;
+      lastDerezFxTick.current = event.tick;
+
+      const playerColor = event.playerId === 'p1' ? '#00f3ff' : '#ff7a00';
+      const opponentColor = event.playerId === 'p1' ? '#ff7a00' : '#00f3ff';
+
+      gridFx.emit({
+        type: 'derez',
+        seed: event.seed,
+        intensity: 1,
+        playerColor,
+        opponentColor,
+        localPlayer: localPlayerId,
+        winner:
+          event.byPlayerId === 'p1'
+            ? 'p1'
+            : event.byPlayerId === 'p2'
+              ? 'p2'
+              : 'none',
+        collisionCause: event.cause,
+        world: {
+          x: toMeters(event.point.x),
+          y: 0.08,
+          z: toMeters(event.point.z),
+        },
+      });
+    }
+  }, [displayState, localPlayerId]);
 
   const onFixedUpdate = useCallback(() => {
     if (

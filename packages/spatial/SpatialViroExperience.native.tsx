@@ -14,6 +14,7 @@ import {
 } from './viro';
 import { SpatialDemoScene } from './SpatialDemoScene';
 import { TabletopColocationScene } from './TabletopColocationScene.native';
+import { GridCoreSpinner } from './rive-fx/GridFxStage.native';
 import { gridRace, useGridRaceStore } from './gridRaceStore';
 import { tabletopSession, useTabletopSessionStore } from './tabletopSessionStore';
 
@@ -37,6 +38,9 @@ type HeadsetNavigatorProps = {
 
 const HeadsetNavigator =
   ViroXRSceneNavigator as unknown as ComponentType<HeadsetNavigatorProps>;
+
+const GRID_FX_RIV_SOURCE =
+  process.env.EXPO_PUBLIC_GRID_FX_RIV_URL ?? '';
 
 function FlatPreviewControls() {
   const phase = useGridRaceStore((state) => state.phase);
@@ -120,6 +124,9 @@ export function SpatialViroExperience() {
   if (sharedTabletop && isQuest && questSpatialPermission !== 'granted') {
     return (
       <View className="flex-1 items-center justify-center gap-2 bg-black px-6">
+        {GRID_FX_RIV_SOURCE ? (
+          <GridCoreSpinner source={GRID_FX_RIV_SOURCE} size={104} />
+        ) : null}
         <Text className="text-sm font-bold uppercase tracking-[0.18em] text-cyan-100">
           {questSpatialPermission === 'checking'
             ? 'Authorizing spatial placement…'
