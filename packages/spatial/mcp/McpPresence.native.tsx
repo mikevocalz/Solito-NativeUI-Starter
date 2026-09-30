@@ -18,7 +18,7 @@ import { deriveMcpPresentation } from './mcpBrain';
 type Props = {
   state: LightCycleMatchState;
   localPlayerId: LightCyclePlayerId;
-  assetUri?: string;
+  assetSource?: number | { uri: string };
 };
 
 type Vec3 = [number, number, number];
@@ -115,7 +115,7 @@ const HALO_B_RIGHT = arcPoints(
 export function McpPresence({
   state,
   localPlayerId,
-  assetUri,
+  assetSource,
 }: Props) {
   const presentation = deriveMcpPresentation(state, localPlayerId);
   const alert =
@@ -173,9 +173,9 @@ export function McpPresence({
         materials={['mcpRed']}
       />
 
-      {assetUri ? (
+      {assetSource ? (
         <Viro3DObject
-          source={{ uri: assetUri }}
+          source={assetSource}
           type="GLB"
           position={[0, 0, 0]}
           scale={[1, 1, 1]}
