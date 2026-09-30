@@ -23,4 +23,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm spatial:verify-android
+      - run: pnpm spatial:verify-typegpu
       - run: pnpm turbo build typecheck lint
