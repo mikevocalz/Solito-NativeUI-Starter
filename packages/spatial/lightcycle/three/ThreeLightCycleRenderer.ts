@@ -234,10 +234,7 @@ export class ThreeLightCycleRenderer {
     }
 
     for (const id of ['p1', 'p2'] as LightCyclePlayerId[]) {
-      const root =
-        id === 'p1'
-          ? cloneSkeleton(source)
-          : cloneSkeleton(source);
+      const root = cloneSkeleton(source) as THREE.Group;
       root.name = `${LIGHTCYCLE_ASSET_NODES.root}-${id}`;
 
       if (!assetUri && id === 'p2') {
