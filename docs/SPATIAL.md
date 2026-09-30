@@ -114,3 +114,1503 @@ Both mount the same `SpatialScreen`.
 - Legacy Viro AR Driving Car sample: https://github.com/viromedia/viro/tree/master/code-samples/js/ARDrivingCarDemo
 
 These are implementation references only. The starter's Skia backgrounds, product UI and Viro race are newly authored.
+
+
+---
+
+## Production tabletop Light Cycle game
+
+The current `GridRaceScene` is only the starting point. The intended Light Cycle experience is a complete tabletop competitive game that preserves iconic light-wall trapping gameplay while sharing one deterministic gameplay core across Viro and Three.js.
+
+This section is the implementation contract for that work.
+
+### Product goal
+
+The primary tabletop mode is a two-player **Classic Grid Duel** played on a shared miniature Grid placed on a real table.
+
+Both players must be able to:
+
+- enter their own player name before Play/Ready;
+- create or join the same tabletop session;
+- see the same arena in the same physical tabletop location on supported Viro device families;
+- see the same cycle positions, turns, trails and collisions;
+- ready up independently;
+- start on the exact same authoritative simulation tick;
+- collide with light walls, arena boundaries and valid obstacles;
+- derez/destroy on collision;
+- score synchronized rounds;
+- continue into subsequent rounds without state divergence;
+- see synchronized Rive scoreboard/leaderboard panels.
+
+The experience should feel like two people standing around a miniature Grid trying to trap each other with walls of light, not like two disconnected AR demos that happen to display motorcycles.
+
+The broader Light Cycle race remains separate and must preserve the previously selected **37-cycle** race target. Do not reduce, replace or silently redefine that race scope while implementing this two-player tabletop duel.
+
+### Research and gameplay references
+
+Use the game-design lineage of:
+
+- the 1982 TRON Light Cycle sequence;
+- the original Bally/Midway TRON Light Cycles game;
+- TRON 2.0 / Killer App;
+- TRON: Evolution;
+- TRON: Evolution — Battle Grids;
+- TRON RUN/r;
+- mature open-source light-cycle implementations such as Armagetron-family projects and 3dLightCycles.
+
+Extract mechanics and engineering ideas only. Do not copy proprietary TRON models, logos, audio, characters, film assets or game code.
+
+Useful engineering references:
+
+- ReactVision Viro AR Driving Car sample:
+  https://github.com/ReactVision/sample-app/tree/main/Screens/ARDrivingCarDemo
+- Legacy Viro AR Driving Car sample:
+  https://github.com/viromedia/viro/tree/master/code-samples/js/ARDrivingCarDemo
+- 3dLightCycles:
+  https://github.com/erichlof/3dLightCycles
+
+The tabletop mode should retain the recognizable Light Cycle fundamentals:
+
+- continuous forward movement while alive;
+- fast left/right turns;
+- hard 90-degree **logical** turns by default;
+- a luminous wall generated behind every living cycle;
+- opponent-wall collision is lethal;
+- own-wall collision is lethal;
+- arena-boundary collision is lethal;
+- tactical speed/boost use;
+- trapping, boxing-in and cutting across an opponent's projected path;
+- immediate authoritative derez when a lethal collision occurs;
+- dramatic destruction/derez presentation after the gameplay result is known.
+
+Do not turn the default mode into a conventional free-steering motorcycle racer. Visual steering and lean may be smooth, but gameplay truth remains deterministic Grid movement.
+
+### Engineering roster and skills
+
+Treat this as work owned by:
+
+- principal gameplay engineer;
+- principal multiplayer/network engineer;
+- principal XR/spatial engineer;
+- principal Three.js/WebGL engineer;
+- principal Rive engineer;
+- senior technical artist;
+- senior game designer;
+- QA/performance engineer.
+
+Use current project skills/tools before implementation, including:
+
+- Viro MCP and current Viro docs/source;
+- Three.js expertise/current docs;
+- Rive current runtime/Data Binding guidance;
+- current React Native/Expo guidance;
+- any enabled game-development plugins/skills that are available in the coding environment.
+
+The game plugins should be used to strengthen gameplay architecture, collision testing, game-loop design and multiplayer validation where applicable. They do not replace deterministic tests or current Viro/Rive documentation.
+
+Do not invent APIs.
+
+## Shared Light Cycle runtime
+
+Do **not** make Viro or Three.js the gameplay engine.
+
+Create a portable runtime above both renderers:
+
+    @lightcycle/core
+            |
+            | deterministic GameFrame
+            |
+       +----+--------------------+
+       |                         |
+       v                         v
+    @lightcycle/viro       @lightcycle/three
+
+Suggested package split:
+
+    packages/
+      lightcycle-core/
+      lightcycle-assets/
+      lightcycle-viro/
+      lightcycle-three/
+      lightcycle-rive-ui/
+      lightcycle-multiplayer/
+
+The shared core owns:
+
+- fixed simulation tick;
+- player inputs;
+- movement;
+- direction;
+- speed;
+- boost;
+- wheel angle;
+- trail topology;
+- collision;
+- arena bounds;
+- score;
+- round lifecycle;
+- match lifecycle;
+- deterministic destruction events;
+- deterministic random seeds;
+- replay input logs;
+- AI decisions;
+- authoritative outcomes.
+
+Renderer adapters own:
+
+- GLB loading;
+- mesh hierarchy;
+- node transforms;
+- skeletal/morph animation playback;
+- wheel rendering;
+- shaders;
+- particles;
+- trail geometry;
+- visual interpolation;
+- camera;
+- audio playback;
+- XR/world placement.
+
+Renderer physics may be used for non-gameplay debris **after** an authoritative result is decided, but Viro or Three.js physics must never decide whether a cycle lives, dies, scores or wins.
+
+## Deterministic simulation
+
+Use a fixed **60 Hz** gameplay simulation.
+
+Rendering may run at the display refresh rate and interpolate between authoritative simulation states.
+
+Authoritative gameplay coordinates should use integer or fixed-point Grid units rather than arbitrary renderer-space floating-point positions.
+
+Logical Grid coordinates are mapped into metres separately by each renderer.
+
+The same:
+
+- seed;
+- match configuration;
+- ordered input log;
+
+must produce the same:
+
+- turn points;
+- trail segments;
+- collision tick;
+- derez event;
+- round winner;
+- score;
+
+in Node/core tests, Three.js and Viro.
+
+## Core movement rules
+
+A living Light Cycle:
+
+- always moves forward;
+- cannot directly reverse;
+- accepts LEFT and RIGHT relative turns;
+- uses hard 90-degree logical turns by default;
+- may accelerate/boost according to mode;
+- cannot simply stop to avoid collision.
+
+Recommended input commands:
+
+    TURN_LEFT
+    TURN_RIGHT
+    BOOST_DOWN
+    BOOST_UP
+
+Reject illegal 180-degree reversals.
+
+Visual turn interpolation must never change collision truth.
+
+## Light Cycle model and animation contract
+
+Do not depend on one monolithic GLB animation to provide wheel spin, steering, lean, boost and crash behavior.
+
+The bike may look seamless but expose controllable nodes similar to:
+
+    LightCycleRoot
+    ├─ Chassis
+    ├─ FrontWheelPivot
+    │  └─ FrontWheel
+    ├─ RearWheelPivot
+    │  └─ RearWheel
+    ├─ RiderRoot
+    ├─ TrailSocket
+    ├─ RearFXSocket
+    ├─ FrontImpactSocket
+    ├─ CameraSocket
+    └─ ExplosionOrigin
+
+Pre-fractured destruction pieces should be prepared for major components such as:
+
+- front cowling;
+- left/right body;
+- front wheel;
+- rear wheel;
+- canopy;
+- energy core;
+- selected chassis fragments.
+
+Authored GLB clips may include:
+
+- spawn;
+- idle;
+- rider_accelerate;
+- rider_brace;
+- rider_crash;
+- bike_powerup;
+- bike_impact;
+- bike_crumple;
+- respawn.
+
+Critical gameplay behavior must not require simultaneous clip blending that one renderer cannot reproduce.
+
+### Wheel motion
+
+Wheel spin is procedural:
+
+    angularVelocity = linearVelocity / wheelRadius
+    wheelAngle += angularVelocity * dt
+
+The shared core calculates wheel angle. Viro and Three.js consume the same result.
+
+This keeps wheel behavior correct under:
+
+- acceleration;
+- cruise;
+- boost;
+- slowdown;
+- impact;
+- wheel separation during destruction.
+
+### Steering and lean
+
+Logical turn:
+
+    exact deterministic Grid direction change
+
+Visual presentation may animate:
+
+- front-wheel steering;
+- chassis lean;
+- rider lean;
+- suspension;
+- acceleration squat;
+- a short curved visual interpolation.
+
+The visual arc must never alter the authoritative collision path.
+
+## Light wall / jet wall
+
+Every living cycle continuously generates a lethal energy wall behind itself.
+
+Represent gameplay walls as deterministic trail segments, **not** renderer meshes.
+
+Each trail segment needs at minimum:
+
+- owner player ID;
+- start Grid coordinate;
+- end Grid coordinate;
+- creation tick;
+- active/completed state.
+
+When a player turns:
+
+1. close the current straight segment;
+2. record the exact deterministic turn point;
+3. create a new segment from that point;
+4. extend the new segment as the cycle advances.
+
+The renderer converts those logical segments into luminous wall geometry.
+
+### Default trail rule
+
+Classic Grid Duel uses **persistent trails for the entire round**.
+
+Optional later variants may support:
+
+- timed trails;
+- finite/receding trails.
+
+Persistent trails are the default.
+
+### Trail rendering
+
+Both engines should reproduce the same high-level look:
+
+- white-hot energy near the cycle;
+- strong player-color emission;
+- emissive halo/bloom where supported;
+- Fresnel-like edge;
+- subtle moving energy/noise;
+- vertical energy striations;
+- impact ripple;
+- brief instability near newly generated wall.
+
+Three.js should use batched/dynamic geometry and a custom shader.
+
+Viro should use the best current procedural/batched geometry path plus matching custom material/shader behavior.
+
+Do not create one React component per tiny trail section.
+
+## Collision system
+
+Collision is gameplay-critical and lives in `lightcycle-core`.
+
+A cycle derezzes when its swept path intersects:
+
+1. arena boundary;
+2. opponent completed trail;
+3. opponent active trail;
+4. own completed trail;
+5. own active trail when geometrically valid;
+6. a lethal arena obstacle;
+7. another cycle under explicit simultaneous-collision rules.
+
+High speed/boost must never tunnel through a wall.
+
+Use deterministic swept segment intersection with fixed-point/integer math. Add deterministic microsteps only if required.
+
+### Same-tick collision resolution
+
+Never resolve Player 1 first and Player 2 second in a way that grants player-order advantage.
+
+For every authoritative tick:
+
+1. collect eligible inputs;
+2. compute proposed movement for every living cycle;
+3. compute prospective new trail pieces;
+4. evaluate all collisions against the same relevant world state;
+5. resolve all same-tick outcomes;
+6. commit valid movement/trails;
+7. emit derez events;
+8. update round/score.
+
+Required cases:
+
+- same-cell head-on: both derez;
+- head swap: both derez;
+- both hit separate walls on same tick: both derez;
+- perpendicular crossing: resolve by deterministic intersection timing;
+- endpoint collision: deterministic and tested;
+- boost crossing a wall: still collides;
+- illegal reverse: rejected before movement.
+
+## Derez / destruction
+
+Do not simply hide the cycle.
+
+The gameplay result occurs immediately. The presentation follows.
+
+Core emits a deterministic event similar to:
+
+    DEREZ_EVENT {
+      playerId,
+      tick,
+      position,
+      impactNormal,
+      impactType,
+      seed
+    }
+
+The seed controls corresponding fragment motion/effect variation across renderers.
+
+Recommended visual timeline:
+
+    0 ms    collision result committed
+    15 ms   energy overload
+    35 ms   impact flash
+    60 ms   wall impact ripple
+    80 ms   sparks
+    100 ms  shell destabilization
+    130 ms  chassis fracture
+    160 ms  major energy explosion
+    180 ms  fragments separate
+    250 ms  light wall flicker
+    350 ms  cycle/program dissolution
+    600 ms  trail round-end fade
+    1000 ms residual debris/energy fade
+
+Use pre-fractured meshes for important pieces.
+
+The core should provide deterministic initial fragment velocity/angular velocity where useful.
+
+## Game mode 1 — Classic Grid Duel
+
+Finish this mode completely before adding multiple half-finished variants.
+
+Default:
+
+- 2 players;
+- persistent trails;
+- no random powerups;
+- continuous forward movement;
+- hard 90-degree logical turns;
+- limited boost;
+- lethal trail walls;
+- lethal arena edge;
+- one life per round;
+- first to 5 round wins.
+
+Configurable:
+
+    Rounds to Win:
+      3
+      5
+      7
+
+    Boost:
+      Off
+      Limited
+      Regenerating
+
+    Trail:
+      Persistent
+      Timed
+      Receding
+
+Default:
+
+    First to 5
+    Limited Boost
+    Persistent Trail
+
+### Round state machine
+
+    LOBBY
+      ↓
+    PLAYER_READY
+      ↓
+    COUNTDOWN
+      ↓
+    ROUND_ACTIVE
+      ↓
+    DEREZ / ROUND_END
+      ↓
+    ROUND_RESULT
+      ↓
+    RESET_GRID
+      ↓
+    NEXT_ROUND
+      ↓
+    MATCH_RESULT
+
+Countdown:
+
+    3
+    2
+    1
+    GRID!
+
+Both cycles become active on the same authoritative simulation tick.
+
+Never start gameplay because a local animation happened to finish.
+
+### Scoring
+
+Default Classic rules:
+
+- opponent crashes into your trail: you win the round;
+- opponent hits own trail: you win, cause = SELF_DEREZ;
+- opponent hits arena wall: you win, cause = ARENA;
+- both derez on same authoritative tick: draw round, no point, restart.
+
+At 4–4 in first-to-5, Rive should announce:
+
+    FINAL GRID
+
+## Boost
+
+Boost should add strategy without replacing the wall-trapping game.
+
+Example tunable values:
+
+    capacity: 100
+    drain while boosting: 28/sec
+    recharge delay: 1.5 sec
+    recharge: 14/sec
+
+Boost should:
+
+- increase forward speed;
+- increase procedural wheel RPM;
+- intensify trail emission;
+- intensify engine/core light;
+- alter audio pitch;
+- increase motion intensity.
+
+Boost never grants invulnerability.
+
+Boosting into a wall derezzes the player sooner.
+
+## Tabletop arena
+
+The arena should feel like a physical miniature Grid board sitting on a real table.
+
+Suggested physical footprint:
+
+- approximately 1.0–1.4 m wide;
+- approximately 0.65–0.9 m deep;
+- user-resizable before the match begins.
+
+Include:
+
+- dark glass-like Grid floor;
+- luminous grid subdivisions;
+- raised perimeter;
+- cycle spawn gates;
+- readable light walls;
+- animated countdown/start gate;
+- spatial Rive score panels;
+- dramatic derez effects readable from all sides.
+
+Players must be able to physically walk around the board in XR.
+
+Do not force a fixed spectator camera in tabletop XR.
+
+## Table placement
+
+Host flow:
+
+    Scan environment
+      ↓
+    Detect/select tabletop
+      ↓
+    Preview arena
+      ↓
+    Scale/orient arena
+      ↓
+    Confirm placement
+      ↓
+    Establish shared spatial frame
+      ↓
+    Create multiplayer room
+
+Once placement is confirmed, normal gameplay transforms are represented relative to the shared frame.
+
+The physical tabletop surface does not determine gameplay collision. The virtual arena boundary does.
+
+## Viro co-location
+
+Use **current Viro co-location APIs and source**. Do not rebuild spatial coordinate sharing from scratch if the fork/current Viro already provides it.
+
+Use the current equivalents of:
+
+- `ViroSharedFrame`;
+- `useViroColocationRoom`;
+- `useViroColocation`;
+- `useViroReplicatedState`;
+- `ViroReplicationClient`;
+- peer/entity smoothing helpers where appropriate.
+
+Treat spatial multiplayer as two separate concerns:
+
+    SHARED FRAME
+      = where the tabletop exists physically
+
+    REPLICATION
+      = what the game currently contains
+
+Do not confuse them.
+
+### Shared/location coordinates
+
+Shared spatial positions must use Viro's shared/location coordinate frame.
+
+Never transmit raw device-session world coordinates as authoritative shared tabletop coordinates.
+
+Where supported, render shared game content inside the shared frame root.
+
+### Platform-family behavior
+
+Respect the actual current Viro support matrix and feature-detect.
+
+Expected co-located families:
+
+- phone ↔ phone;
+- Quest ↔ Quest;
+- Vision ↔ Vision where supported by the current fork/runtime.
+
+Do **not** advertise Quest↔phone, Quest↔Vision or phone↔Vision physical co-location unless a real tested cross-family spatial-alignment solution exists.
+
+### Quest
+
+Quest shared tabletop mode must use the correct mixed-reality/AR scene root required by the current Viro co-location implementation.
+
+Use current Meta spatial-anchor/group-sharing support exposed by the Viro fork.
+
+Enable all required current permissions/config-plugin flags.
+
+### Phone
+
+Use the current supported cloud/shared-anchor path exposed by Viro.
+
+Host places/publishes the frame; guest resolves/localizes before becoming Ready.
+
+### Vision Pro
+
+Use the current shared-space alignment path available in the fork/runtime.
+
+If alignment packets require explicit transport, implement that transport rather than assuming automatic propagation.
+
+## Three.js parity
+
+The Three.js build uses the exact same `lightcycle-core`.
+
+It must reproduce:
+
+- movement;
+- trail topology;
+- collision;
+- score;
+- match state;
+- derez event;
+- replay.
+
+Three.js does not magically gain Viro physical shared-frame support.
+
+Provide separate capabilities such as:
+
+- local browser game;
+- remote multiplayer over a web transport adapter;
+- spectator mode where backend transport exists.
+
+Use an abstraction similar to:
+
+    interface MultiplayerTransport {
+      connect(roomId: string): Promise<void>;
+      sendInput(input: PlayerInput): void;
+      subscribe(handler: GameNetworkHandler): Unsubscribe;
+      disconnect(): void;
+    }
+
+Implement platform adapters rather than coupling the core to Viro networking.
+
+## Player name and lobby flow
+
+The player must enter a valid name **before** Play/Create/Join becomes available.
+
+Recommended validation:
+
+- required;
+- trim whitespace;
+- 1–16 visible characters;
+- reject all-whitespace;
+- reject control characters.
+
+Flow:
+
+    ENTER NAME
+      ↓
+    CREATE TABLE
+    JOIN TABLE
+    SOLO / AI
+
+Rive displays the supplied name.
+
+Application/native UI owns actual text entry. Do not force Rive to become a text editor/IME.
+
+Bind the final name string into the Rive View Model.
+
+## Two-player join flow
+
+### Player 1 — Host
+
+    1. Open app.
+    2. Enter player name.
+    3. Press CREATE TABLE.
+    4. Scan/place tabletop arena.
+    5. Confirm placement.
+    6. Establish shared spatial frame.
+    7. Create Viro co-location room.
+    8. Receive/display six-character join code.
+    9. Rive shows WAITING FOR PLAYER.
+    10. Host remains in lobby until guest localizes and both players are Ready.
+
+The displayed room code is the baseline join mechanism.
+
+QR/share can be added only if implemented correctly; do not make them prerequisites.
+
+### Player 2 — Guest
+
+    1. Open app.
+    2. Enter player name.
+    3. Press JOIN TABLE.
+    4. Enter six-character code.
+    5. Resolve room.
+    6. Resolve the platform's shared frame source.
+    7. Localize into the same physical coordinate frame.
+    8. Join replication channel.
+    9. Publish player presence.
+    10. Rive shows LOCATING GRID…
+    11. Once localized, Rive shows GRID FOUND / READY.
+
+Both users must see the arena occupying the same physical tabletop location before the guest can Ready.
+
+## Player presence and slots
+
+Maintain shared player state similar to:
+
+    player:p1
+    player:p2
+
+Fields should include:
+
+- peer ID;
+- slot;
+- name;
+- ready;
+- localized;
+- connected;
+- cycle color;
+- score;
+- rounds won.
+
+Slot assignment must be authoritative.
+
+Never allow both peers to claim the same player slot.
+
+## Ready system
+
+Joining does not immediately start gameplay.
+
+Require:
+
+- P1 localized;
+- P2 localized;
+- P1 ready;
+- P2 ready;
+- host match state ready.
+
+Then host schedules an authoritative start tick.
+
+Rive sequence:
+
+    PLAYER 2 CONNECTED
+      ↓
+    BOTH PLAYERS READY
+      ↓
+    3
+    2
+    1
+    GRID!
+
+## Network authority
+
+Use **host-authoritative gameplay**.
+
+The host owns the authoritative match simulation.
+
+The guest sends input intents.
+
+The guest must never directly decide:
+
+- winner;
+- score;
+- opponent death;
+- trail collision result.
+
+Input event shape should be compact, for example:
+
+    {
+      playerId,
+      sequence,
+      targetTick,
+      command:
+        TURN_LEFT |
+        TURN_RIGHT |
+        BOOST_DOWN |
+        BOOST_UP
+    }
+
+Do not stream the whole bike transform as the primary gameplay protocol.
+
+Deterministic simulation reconstructs movement from ordered inputs.
+
+## Client prediction and reconciliation
+
+For responsiveness, a guest may predict their own valid local inputs immediately.
+
+Host processes the same command.
+
+Host publishes periodic authoritative snapshots.
+
+If prediction differs:
+
+- smooth harmless render drift;
+- hard-correct gameplay truth when state/collision differs;
+- never visually allow a cycle to continue through a wall after authoritative derez.
+
+## Replication strategy
+
+Use current Viro replicated state / long-lived replication client where appropriate.
+
+Good replicated concepts:
+
+- match;
+- player:p1;
+- player:p2;
+- compact input state/events;
+- compact authoritative snapshots.
+
+Do **not** create one replicated network entity per trail segment forever.
+
+Trail state should be reconstructed from deterministic turn/input history and periodic authoritative snapshots.
+
+Suggested ownership:
+
+    match
+      host-owned
+
+    player input
+      respective player-owned/requested
+
+    authoritative snapshots
+      host-owned
+
+    score
+      host-owned
+
+The guest may never write authoritative score.
+
+## Snapshots and desync detection
+
+Host periodically emits compact snapshots containing:
+
+- authoritative tick;
+- round;
+- phase;
+- each player's Grid coordinate;
+- each player's direction;
+- speed/boost state;
+- alive state;
+- score;
+- compact trail hash/state hash.
+
+Create a deterministic hash over critical gameplay state.
+
+On hash mismatch:
+
+    DESYNC_DETECTED
+      ↓
+    request authoritative snapshot
+      ↓
+    repair local core state
+      ↓
+    continue
+
+Log desyncs in development.
+
+## Disconnect/reconnect
+
+During lobby:
+
+- reserve a disconnected slot briefly;
+- show RECONNECTING.
+
+During a live match:
+
+- allow a short network grace window;
+- pause if peer loss exceeds that window;
+- allow rejoin for a configurable timeout;
+- end match cleanly if reconnect fails.
+
+Do not silently replace the human with AI.
+
+Host disconnect is more serious because host is authoritative.
+
+For the first production implementation:
+
+- pause;
+- attempt host reconnect;
+- if host cannot return, end the match cleanly.
+
+Do not claim host migration exists until it is implemented and tested.
+
+## Solo / AI
+
+Single-player uses the same core and the same input-event interface.
+
+AI may produce:
+
+    TURN_LEFT
+    TURN_RIGHT
+    BOOST_DOWN
+    BOOST_UP
+
+AI should not use privileged collision knowledge unavailable to a human.
+
+Possible behaviors:
+
+- Survivor: maximize open space;
+- Hunter: cut predicted opponent route;
+- Trapper: build corridors and enclosures;
+- Aggressor: use speed for cutoffs;
+- Adaptive: switch strategies based on reachable area.
+
+Use flood-fill/reachable-area evaluation for higher difficulties.
+
+## Rive scoreboard and leaderboard
+
+Use the project's existing Rive panel infrastructure.
+
+Do not reinvent the Rive XR panel.
+
+Create/reuse a dedicated scoreboard artboard/file such as:
+
+    lightcycle_scoreboard.riv
+
+Use current Rive:
+
+- View Models;
+- Data Binding;
+- State Machines;
+- nested reusable components;
+- string/number/color properties;
+- runtime events.
+
+Rive is a presentation layer.
+
+The game core owns score and match state.
+
+### Rive View Model
+
+Model should expose at minimum:
+
+    MatchScoreboard
+    ├─ player1
+    │  ├─ name
+    │  ├─ score
+    │  ├─ roundsWon
+    │  ├─ color
+    │  ├─ ready
+    │  ├─ connected
+    │  └─ state
+    ├─ player2
+    │  ├─ name
+    │  ├─ score
+    │  ├─ roundsWon
+    │  ├─ color
+    │  ├─ ready
+    │  ├─ connected
+    │  └─ state
+    └─ match
+       ├─ round
+       ├─ roundsToWin
+       ├─ countdown
+       ├─ phase
+       ├─ winnerName
+       ├─ joinCode
+       └─ overtime/final-grid state
+
+### Rive scoreboard states
+
+Include animated states for:
+
+- LOBBY;
+- WAITING_FOR_PLAYER;
+- PLAYER_JOINING;
+- LOCALIZING;
+- PLAYER_CONNECTED;
+- READY_CHECK;
+- COUNTDOWN;
+- PLAYING;
+- P1_DEREZZED;
+- P2_DEREZZED;
+- ROUND_RESULT;
+- MATCH_POINT;
+- FINAL_GRID;
+- MATCH_WINNER;
+- RECONNECTING;
+- INVALID_CODE;
+- ROOM_NOT_FOUND;
+- ROOM_FULL;
+- COLOCATION_UNSUPPORTED;
+- LOCALIZATION_FAILED;
+- NETWORK_ERROR.
+
+### Spatial placement
+
+In tabletop XR:
+
+- P1 gets a readable panel on one long edge;
+- P2 gets an appropriately oriented panel on the opposite edge;
+- a center match-status/countdown panel may float above the arena.
+
+Do not mirror text backward for the opposite player.
+
+Panels remain spatially tied to the shared arena frame.
+
+### Score animation
+
+When a player scores:
+
+    old score
+      ↓
+    number pulse
+      ↓
+    energy sweep
+      ↓
+    new score
+
+When a player derezzes:
+
+- loser panel shows DEREZZED;
+- winner panel shows ROUND +1.
+
+At match point show MATCH POINT.
+
+At victory show:
+
+    WINNER
+    PLAYER_NAME
+
+## Session leaderboard
+
+Track, at minimum:
+
+- Name;
+- Wins;
+- Losses;
+- Rounds Won;
+- Derezzes Caused;
+- Self-Derezzes;
+- Current Streak;
+- Best Streak;
+- Longest Survival;
+- Longest Trail;
+- Fastest Win.
+
+For two players, present this as a polished animated head-to-head summary in Rive.
+
+Persistent storage should sit behind an interface such as:
+
+    interface LeaderboardStore {
+      submitMatch(result: MatchResult): Promise<void>;
+      getLeaderboard(): Promise<LeaderboardEntry[]>;
+    }
+
+Use the project's existing backend pattern if persistence already exists. Do not add a second database unnecessarily.
+
+## Controls
+
+### Phone/tablet
+
+Primary controls:
+
+- LEFT;
+- RIGHT;
+- BOOST.
+
+Optional swipe left/right may supplement them.
+
+Do not require tiny analogue joystick precision for the Classic Grid mode.
+
+### Quest
+
+Use controller actions for:
+
+- left turn;
+- right turn;
+- boost.
+
+Hand input can be added only if robust on the current stack.
+
+### Vision Pro
+
+Use the current supported spatial input path.
+
+### Web
+
+Keyboard defaults:
+
+- A / LeftArrow = LEFT;
+- D / RightArrow = RIGHT;
+- Space = BOOST.
+
+Optional gamepad support is welcome.
+
+LEFT and RIGHT are relative to the current cycle heading.
+
+## Audio
+
+Create an engine-independent event contract including:
+
+- ENGINE_START;
+- ENGINE_IDLE;
+- ENGINE_ACCELERATE;
+- BOOST_START;
+- BOOST_END;
+- TURN;
+- TRAIL_HUM;
+- IMPACT;
+- DEREZ;
+- ROUND_WIN;
+- MATCH_WIN;
+- COUNTDOWN.
+
+Use Viro spatial audio where appropriate and Web Audio/positional audio on Three.js.
+
+Game events drive audio timing.
+
+## Replay
+
+Because the simulation is deterministic, store lightweight replay data:
+
+- seed;
+- match configuration;
+- player names/colors;
+- spawn positions;
+- ordered input events;
+- authoritative derez events;
+- final score.
+
+Do not store every rendered frame.
+
+Replay should re-run the simulation.
+
+Use replay data for:
+
+- debugging;
+- desync reproduction;
+- short round highlights;
+- winner recap.
+
+## Visual style
+
+Preserve the starter's early-computer-world / TRON-inspired direction:
+
+- black/deep charcoal void;
+- cyan/blue player;
+- orange/red opponent;
+- bright white energy cores;
+- luminous Grid;
+- dark glass;
+- sparse futuristic architecture;
+- restrained high-contrast HUD treatment.
+
+Avoid generic cyberpunk clutter.
+
+The player must instantly read:
+
+- MY CYCLE;
+- THEIR CYCLE;
+- MY WALL;
+- THEIR WALL;
+- OPEN SPACE;
+- ARENA EDGE.
+
+Do not rely on color alone. Add distinct player labels/icons or subtle wall-pattern differences for accessibility.
+
+## Effect parity contract
+
+Create a renderer contract similar to:
+
+    interface LightCycleEffectRenderer {
+      setTrail(state): void;
+      setEmission(state): void;
+      playImpact(event): void;
+      playDerez(event): void;
+      playBoost(event): void;
+      updateFragments(frame): void;
+    }
+
+Implement Viro and Three.js adapters.
+
+Neither renderer may invent gameplay outcome state.
+
+Baseline GLB materials should stick to portable PBR features where practical:
+
+- base color;
+- metallic;
+- roughness;
+- normal;
+- emissive;
+- AO.
+
+High-end energy treatment belongs behind renderer adapters so Three.js-only material extensions do not become required for visual identity.
+
+## Performance rules
+
+### Viro
+
+- do not React-rerender every simulation transform;
+- use current Viro game-loop/direct transform mechanisms;
+- pool trail geometry;
+- pool particles;
+- reuse materials;
+- minimize allocations;
+- avoid creating/destroying React nodes every frame.
+
+### Three.js
+
+- reuse BufferGeometry;
+- prefer typed arrays;
+- pool particles;
+- avoid per-frame garbage;
+- batch updates where sensible.
+
+### Rive
+
+Update bound values only when semantic values change.
+
+Do not resend identical score/name/readiness values every frame.
+
+## Automated collision test matrix
+
+At minimum, test:
+
+1. arena edge collision;
+2. own trail collision;
+3. opponent trail collision;
+4. perpendicular T-bone;
+5. same-cell head-on;
+6. head swap;
+7. both players hit separate walls same tick;
+8. boost tunneling attempt;
+9. rapid double turn;
+10. illegal reverse command;
+11. exact trail endpoint collision;
+12. collision immediately after turn;
+13. spawn safety;
+14. stale input;
+15. duplicate sequence;
+16. out-of-order input;
+17. reconnect;
+18. desync repair;
+19. round reset;
+20. match reset.
+
+The same deterministic input log must produce the same gameplay result in core tests, Three.js and Viro.
+
+## Real two-device QA
+
+Do not mark co-location complete using mocks alone.
+
+### Two phones
+
+Validate:
+
+- create room;
+- enter code;
+- localize same table;
+- same spawn positions;
+- same walls;
+- same collision;
+- same scoreboard;
+- same replay.
+
+### Two Quest headsets
+
+Validate:
+
+- host room;
+- spatial frame creation;
+- guest join;
+- guest localization;
+- same physical board;
+- full round;
+- multiple rounds;
+- disconnect/rejoin.
+
+### Vision pair
+
+If hardware/runtime support is available, validate shared-space alignment and convergence.
+
+## Latency and race-condition tests
+
+Simulate:
+
+- 30 ms;
+- 75 ms;
+- 125 ms;
+- 200 ms;
+- jitter;
+- packet reordering;
+- brief disconnect.
+
+Also test:
+
+- both players turn same tick;
+- both boost same tick;
+- both collide same tick;
+- player disconnects on collision tick;
+- round ends while late input arrives;
+- guest reconnects during countdown;
+- host requests rematch while guest is not Ready.
+
+Never award duplicate points.
+
+## Diagnostics
+
+Development diagnostics should expose:
+
+- simulation tick;
+- host/client role;
+- peer IDs;
+- room ID/code;
+- shared-frame state;
+- localization state;
+- latency/ping;
+- latest input sequence;
+- authoritative tick;
+- prediction delta;
+- trail segment count;
+- gameplay-state hash;
+- desync count;
+- FPS.
+
+Hide this in production unless diagnostics are enabled.
+
+## Security / trust boundary
+
+The guest may request legal control inputs.
+
+The guest may **not** directly submit:
+
+- "I won";
+- arbitrary score;
+- "opponent died";
+- arbitrary authoritative trail/collision state.
+
+Host validates gameplay commands.
+
+Persistent leaderboard submissions must also be validated by the backend if implemented.
+
+## Implementation order
+
+Complete in this order:
+
+1. audit the current Light Cycle model and starter code;
+2. create `lightcycle-core`;
+3. implement deterministic movement and trail topology;
+4. implement collision plus automated tests;
+5. connect Three.js renderer;
+6. connect Viro renderer;
+7. finish wheel/lean/trail model hierarchy;
+8. finish crash/derez pipeline;
+9. create Rive scoreboard View Model and state machine;
+10. finish single-device Classic Grid Duel against AI;
+11. implement Viro host co-location;
+12. implement six-character guest join flow;
+13. implement host-authoritative two-player synchronization;
+14. implement prediction/reconciliation/desync repair;
+15. test on two real devices;
+16. performance profile;
+17. polish audio/effects/Rive transitions;
+18. only then expand secondary modes and the separate 37-cycle race.
+
+Do not skip deterministic core testing and jump straight to multiplayer visuals.
+
+## Required implementation report
+
+When the feature is implemented, report:
+
+1. architecture summary;
+2. exact files created/changed;
+3. package versions;
+4. GLB hierarchy;
+5. core simulation design;
+6. collision rules;
+7. Viro co-location implementation;
+8. host/join flow;
+9. platform support matrix;
+10. Rive View Model schema;
+11. Three.js renderer implementation;
+12. Viro renderer implementation;
+13. network authority model;
+14. automated test results;
+15. real two-device test results;
+16. performance results;
+17. known limitations;
+18. anything genuinely remaining.
+
+Do not call scaffolding "complete."
+
+## Tabletop definition of done
+
+The tabletop duel is done only when:
+
+- Light Cycle wheels move correctly;
+- bikes lean correctly;
+- bikes create persistent lethal walls;
+- own trail can destroy the player;
+- opponent trail can destroy the player;
+- arena edge can destroy the player;
+- boost cannot tunnel through a wall;
+- derez/destruction works;
+- Viro and Three.js use the same gameplay core;
+- effects exist in both renderers;
+- each player enters a name first;
+- Player 1 can create a shared table;
+- Player 1 receives a six-character room code;
+- Player 2 can enter their own name;
+- Player 2 can join using that code;
+- supported Viro devices spatially align the board;
+- both users see the board in the same real-world position;
+- both can Ready;
+- countdown/start is synchronized;
+- host is authoritative;
+- score remains synchronized;
+- Rive displays both names;
+- Rive displays both scores;
+- Rive displays readiness/match state;
+- Rive displays derez and winner states;
+- session leaderboard works;
+- disconnect/reconnect has defined behavior;
+- deterministic tests pass;
+- real two-device testing passes.
+
+### Canonical two-player acceptance scenario
+
+Player 1:
+
+    enters "Michael"
+    creates tabletop
+    places arena
+    receives join code
+    waits
+
+Player 2:
+
+    enters "Alex"
+    chooses Join
+    enters the code
+    localizes
+    sees the same arena on the same physical table
+
+Both Rive panels show:
+
+    MICHAEL        ALEX
+    READY          READY
+
+Then:
+
+    3
+    2
+    1
+    GRID!
+
+Both cycles start on the same authoritative tick.
+
+Michael creates a blue wall.
+
+Alex creates an orange wall.
+
+Alex turns too late and intersects Michael's trail.
+
+The host-authoritative deterministic simulation resolves:
+
+    ALEX DEREZZED
+    MICHAEL +1
+
+Alex's Light Cycle destroys/derezzes at the same tabletop location on both devices.
+
+Both Rive scoreboards update to:
+
+    MICHAEL 1
+    ALEX    0
+
+The Grid resets and the next round starts in sync.
+
+That exact scenario is the minimum bar for calling the two-player tabletop experience complete.
