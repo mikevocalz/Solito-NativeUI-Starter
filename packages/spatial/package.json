@@ -41,7 +41,8 @@
     "@typegpu/three": "catalog:",
     "react-native-webgpu": "catalog:",
     "three": "catalog:",
-    "typegpu": "catalog:"
+    "typegpu": "catalog:",
+    "react-native-audio-api": "catalog:"
   },
   "devDependencies": {
     "@acme/config": "workspace:*",
