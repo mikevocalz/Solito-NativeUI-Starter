@@ -4,8 +4,8 @@ import {
   createLightCycleMatch,
   startLightCycleRoundImmediately,
   type LightCycleMatchState,
-} from '../lightcycle/tabletopCore';
-import { deriveMcpPresentation } from './mcpBrain';
+} from '../lightcycle/tabletopCore.ts';
+import { deriveMcpPresentation } from './mcpBrain.ts';
 
 test('MCP projects synchronized countdown state', () => {
   const match = createLightCycleMatch({
