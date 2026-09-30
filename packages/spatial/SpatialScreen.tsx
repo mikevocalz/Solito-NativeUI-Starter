@@ -6,7 +6,9 @@ import { ScrollView, Section, View } from '@acme/ui/tw';
 import { RiveStage } from './rive/RiveStage';
 import { ForkSpatialLayout, getSpatialForkCapabilities } from './ForkSpatialLayout';
 import { SpatialViroExperience } from './SpatialViroExperience';
+import { TabletopSessionPanel } from './TabletopSessionPanel';
 import { gridRace } from './gridRaceStore';
+import { tabletopSession } from './tabletopSessionStore';
 
 const RIVE_DEMO = 'https://cdn.rive.app/animations/vehicles.riv';
 
@@ -56,7 +58,7 @@ export function SpatialScreen() {
               and Viro/OpenXR for the immersive world.
             </Text>
             <View className="mt-2 flex-row flex-wrap gap-3">
-              <CircuitButton onPress={() => { gridRace.enterGateway(); setShowRace(true); }}>
+              <CircuitButton onPress={() => { tabletopSession.getState().reset(); gridRace.enterGateway(); setShowRace(true); }}>
                 Enter VR Grid
               </CircuitButton>
               <CircuitButton
@@ -65,14 +67,16 @@ export function SpatialScreen() {
                 onPress={() => {
                   if (showRace) {
                     gridRace.enterGateway();
+                    tabletopSession.getState().reset();
                     setShowRace(false);
                   } else {
+                    tabletopSession.getState().reset();
                     gridRace.startRace();
                     setShowRace(true);
                   }
                 }}
               >
-                {showRace ? 'Exit Race View' : 'Start Cycle Race'}
+                {showRace ? 'Exit Spatial View' : 'Start 37-Cycle Race'}
               </CircuitButton>
             </View>
           </Section>
@@ -88,6 +92,8 @@ export function SpatialScreen() {
               <Text className="text-sm leading-6 text-white/60">Enter a black-vector arena for 90° light-cycle combat with persistent jetwalls, boost, AI rivals, rounds, and derez collisions.</Text>
             </GridCard>
           </View>
+
+          <TabletopSessionPanel onLaunch={() => setShowRace(true)} />
 
           {showRace ? (
             <View className="min-h-[460px] overflow-hidden border border-cyan-300/25 bg-black/70">
