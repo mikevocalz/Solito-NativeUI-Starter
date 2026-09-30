@@ -1,0 +1,60 @@
+'use client';
+
+import { Pressable, Text, View } from '@acme/ui/tw';
+import { ThreeLightCycleCanvas } from './lightcycle/three/ThreeLightCycleCanvas.native';
+import { tabletopSoloInput } from './tabletopSoloInputStore';
+import { useTabletopSoloDriver } from './useTabletopSoloDriver';
+import { useTabletopSessionStore } from './tabletopSessionStore';
+
+const LIGHTCYCLE_ASSET =
+  process.env.EXPO_PUBLIC_LIGHTCYCLE_GLB_URL ?? undefined;
+
+function Control({
+  label,
+  onPress,
+}: {
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      className="min-h-12 min-w-24 items-center justify-center border border-cyan-300/60 bg-black/80 px-4"
+    >
+      <Text className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-100">
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+export function TabletopThreeExperience() {
+  const playerName = useTabletopSessionStore((state) => state.playerName);
+  const { getState } = useTabletopSoloDriver(playerName);
+
+  return (
+    <View className="relative flex-1 overflow-hidden bg-black">
+      <ThreeLightCycleCanvas
+        getState={getState}
+        assetUri={LIGHTCYCLE_ASSET}
+        style={{ flex: 1 }}
+      />
+
+      <View className="pointer-events-box-none absolute inset-x-0 bottom-5 flex-row items-end justify-between px-5">
+        <Control label="Left" onPress={() => tabletopSoloInput.queueTurn(-1)} />
+
+        <Pressable
+          onPressIn={() => tabletopSoloInput.setBoost(true)}
+          onPressOut={() => tabletopSoloInput.setBoost(false)}
+          className="min-h-14 min-w-28 items-center justify-center border border-orange-300/70 bg-orange-500/20 px-4"
+        >
+          <Text className="text-xs font-bold uppercase tracking-[0.18em] text-orange-100">
+            Boost
+          </Text>
+        </Pressable>
+
+        <Control label="Right" onPress={() => tabletopSoloInput.queueTurn(1)} />
+      </View>
+    </View>
+  );
+}
