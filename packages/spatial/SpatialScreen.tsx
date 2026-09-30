@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { CircuitButton, GlyphCity, GridCard, GridScene, Heading, Text } from '@acme/ui';
-import { Section, View } from '@acme/ui/tw';
+import { ScrollView, Section, View } from '@acme/ui/tw';
 import { RiveStage } from './rive/RiveStage';
 import { ForkSpatialLayout, getSpatialForkCapabilities } from './ForkSpatialLayout';
 import { SpatialViroExperience } from './SpatialViroExperience';
@@ -38,7 +38,12 @@ export function SpatialScreen() {
             opacity={0.76}
           />
         </View>
-        <View className="mx-auto w-full max-w-screen-2xl flex-1 gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="mx-auto w-full max-w-screen-2xl gap-6 px-4 py-8 sm:px-6 lg:px-8"
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <Section className="max-w-4xl gap-3">
             <Text className="text-xs font-semibold uppercase tracking-[0.32em] text-cyan-200">
               Spatial-Solotio-Starter / Grid Program
@@ -102,7 +107,7 @@ export function SpatialScreen() {
             </Text>
             <RiveStage source={RIVE_DEMO} />
           </View>
-        </View>
+        </ScrollView>
       </GridScene>
     </ForkSpatialLayout>
   );
