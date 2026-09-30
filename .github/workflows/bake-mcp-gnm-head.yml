@@ -1,0 +1,51 @@
+name: Bake MCP GNM Head
+
+on:
+  push:
+    branches:
+      - feat/gnm-mcp-baked-head
+    paths:
+      - .github/workflows/bake-mcp-gnm-head.yml
+      - tooling/gnm-mcp/export_mcp_head.py
+
+permissions:
+  contents: read
+
+jobs:
+  bake:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install GNM Head authoring dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "git+https://github.com/google/GNM.git@main#subdirectory=gnm/shape"
+
+      - name: Bake deterministic MCP GNM head
+        run: |
+          mkdir -p .artifacts/mcp
+          python tooling/gnm-mcp/export_mcp_head.py \
+            --output .artifacts/mcp/mcp-gnm-head.glb \
+            --seed 1982 \
+            --identity-spread 0.18 \
+            --target-height-meters 0.255
+          sha256sum .artifacts/mcp/mcp-gnm-head.glb | tee .artifacts/mcp/mcp-gnm-head.sha256
+          ls -lh .artifacts/mcp/
+
+      - name: Upload baked runtime asset
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-gnm-head
+          path: .artifacts/mcp/
+          if-no-files-found: error
+          retention-days: 3
