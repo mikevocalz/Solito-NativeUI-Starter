@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ViroARPlaneSelector,
   ViroARScene,
@@ -553,63 +553,47 @@ export function TabletopColocationScene({
   const navigator = arSceneNavigator ?? sceneNavigator;
   const configured = Boolean(API_KEY && PROJECT_ID);
 
-  useEffect(() => {
-    if (
-      mode !== 'host' ||
-      isQuest ||
-      isPico ||
-      !placementConfirmed ||
-      !candidate ||
-      phoneCloudAnchorId ||
-      phoneAnchorWorking
-    ) {
+  const confirmPlacement = useCallback(async () => {
+    if (!candidate) return;
+
+    setPlacementConfirmed(true);
+    setError(null);
+
+    if (isQuest) return;
+
+    if (isPico) {
+      setPlacementConfirmed(false);
+      setError('Physical co-location is not available on PICO in this runtime.');
       return;
     }
 
     if (!navigator?.hostCloudAnchor) {
+      setPlacementConfirmed(false);
       setError('This device does not expose cloud-anchor hosting.');
       return;
     }
 
-    let cancelled = false;
     setPhoneAnchorWorking(true);
-
-    void navigator
-      .hostCloudAnchor(candidate.anchorId, 1)
-      .then((result: any) => {
-        if (cancelled) return;
-        if (!result?.success || !result.cloudAnchorId) {
-          setError(result?.error ?? 'Unable to publish the tabletop anchor.');
-          return;
-        }
-        setPhoneCloudAnchorId(result.cloudAnchorId);
-        setError(null);
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setError(
-            error instanceof Error
-              ? error.message
-              : 'Unable to publish the tabletop anchor.',
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setPhoneAnchorWorking(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    candidate,
-    mode,
-    navigator,
-    phoneAnchorWorking,
-    phoneCloudAnchorId,
-    placementConfirmed,
-    setError,
-  ]);
+    try {
+      const result = await navigator.hostCloudAnchor(candidate.anchorId, 1);
+      if (!result?.success || !result.cloudAnchorId) {
+        setPlacementConfirmed(false);
+        setError(result?.error ?? 'Unable to publish the tabletop anchor.');
+        return;
+      }
+      setPhoneCloudAnchorId(result.cloudAnchorId);
+      setError(null);
+    } catch (error) {
+      setPlacementConfirmed(false);
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to publish the tabletop anchor.',
+      );
+    } finally {
+      setPhoneAnchorWorking(false);
+    }
+  }, [candidate, navigator, setError]);
 
   const hostFrameSource = useMemo(() => {
     if (mode !== 'host' || !placementConfirmed) return null;
@@ -769,8 +753,7 @@ export function TabletopColocationScene({
             <PlacementControls
               surface={candidate.surface}
               onConfirm={() => {
-                setPlacementConfirmed(true);
-                setError(null);
+                void confirmPlacement();
               }}
               onMove={() => {
                 setCandidate(null);
