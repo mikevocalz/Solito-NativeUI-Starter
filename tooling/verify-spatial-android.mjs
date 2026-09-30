@@ -37,6 +37,7 @@ const checks = [
     'horizonos.permission.IMPORT_EXPORT_IOT_MAP_DATA',
     'com.oculus.permission.HAND_TRACKING',
     'com.oculus.feature.PASSTHROUGH',
+    'android:name="android.hardware.vr.headtracking" android:required="false"',
     'android:glEsVersion="0x00030000"',
   ]],
   ['app/src/main/res/values/strings.xml', [
@@ -53,6 +54,12 @@ for (const [relative, needles] of checks) {
 }
 
 const manifest = read('app/src/main/AndroidManifest.xml');
+if (manifest.includes('android:name="android.hardware.vr.headtracking" android:required="true"')) {
+  failures.push(
+    'app/src/main/AndroidManifest.xml: VR head tracking must remain optional for the combined phone + Quest APK',
+  );
+}
+
 if (manifest.includes('android.permission.SYSTEM_ALERT_WINDOW')) {
   failures.push(
     'app/src/main/AndroidManifest.xml: SYSTEM_ALERT_WINDOW must not ship in the Quest manifest',
