@@ -52,16 +52,16 @@ export function McpVoicePlaybackWeb({
   baseUrl,
   enabled = true,
 }: Props) {
-  const lastEventKey = useRef('');
+  const playedEventKeys = useRef(new Set<string>());
   const currentAudio = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (!enabled || !state) return;
 
     const cue = deriveMcpVoiceCue(state, localPlayerId);
-    if (!cue || cue.eventKey === lastEventKey.current) return;
+    if (!cue || playedEventKeys.current.has(cue.eventKey)) return;
 
-    lastEventKey.current = cue.eventKey;
+    playedEventKeys.current.add(cue.eventKey);
     currentAudio.current?.pause();
 
     const audio = new Audio(mcpVoiceAssetUrl(cue, baseUrl));
