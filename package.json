@@ -17,7 +17,8 @@
     "gen": "node tooling/generators/gen.mjs",
     "spatial:prepare-web": "node tooling/copy-viro-web-assets.mjs",
     "skia:prepare-web": "node tooling/copy-skia-web-assets.mjs",
-    "postinstall": "node tooling/copy-viro-web-assets.mjs && node tooling/copy-skia-web-assets.mjs"
+    "postinstall": "node tooling/copy-viro-web-assets.mjs && node tooling/copy-skia-web-assets.mjs",
+    "spatial:verify-android": "node tooling/verify-spatial-android.mjs"
   },
   "devDependencies": {
     "turbo": "catalog:"

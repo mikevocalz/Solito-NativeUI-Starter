@@ -44,7 +44,7 @@ includeBuild(expoAutolinking.reactNativeGradlePlugin)
 def viroPackageRoot = new File(
   providers.exec {
     workingDir(rootDir)
-    commandLine("node", "--print", "require('path').dirname(require.resolve('@reactvision/react-viro/package.json', { paths: [require.resolve('../package.json')] }))")
+    commandLine("node", "--print", "require('path').dirname(require.resolve('@reactvision/react-viro/package.json', { paths: [require('path').dirname(require.resolve('../package.json'))] }))")
   }.standardOutput.asText.get().trim()
 )
 

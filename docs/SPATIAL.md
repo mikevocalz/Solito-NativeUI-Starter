@@ -76,7 +76,11 @@ The headset scene remains usable without the 2D joystick because the steering pa
 
 ## Use the mikevocalz Viro fork
 
-The Quest/PICO development target is `mikevocalz/viro#decax9-three-panel`. Because this starter repository is public while that fork is private, the checked-in catalog keeps `@reactvision/react-viro@3.0.1` as an unauthenticated install/CI fallback. For real headset development, enable the private fork so PICO routing, OpenXR additions, spatial windows and the native Viro/Rive surface are active:
+The Quest/PICO native development target is `mikevocalz/viro#decax9-three-panel`. Because this starter repository is public while that fork is private, the checked-in catalog keeps public `@reactvision/react-viro@3.0.1` only as an unauthenticated **web/Storybook/CI resolution fallback**. It is not an accepted native SDK-58 runtime.
+
+Every native command now runs `apps/mobile/scripts/assert-viro-fork.mjs` first. If public Viro is installed, `dev`, `android`, `ios`, and `prebuild` fail before Expo starts. A native/headset build therefore cannot accidentally ship against the unsupported public 3.0.1 peer lane.
+
+For native/headset development, enable the private fork so the Expo 58/RN 0.88 peer lane, PICO routing, OpenXR bridge, spatial windows and native Viro/Rive surface are present:
 
 ```yaml
 overrides:
@@ -87,9 +91,14 @@ Then run:
 
 ```bash
 pnpm install
+pnpm --filter mobile viro:assert-fork
 pnpm spatial:prepare-web
 pnpm skia:prepare-web
 ```
+
+## Checked-in Android XR project
+
+The Android project is committed and kept in sync with the fork's generated Quest/OpenXR contract. `pnpm spatial:verify-android` verifies Viro Gradle projects/dependencies, Meta Layout SDK dependencies, AR/Quest/PICO package registration, Quest permissions/features, `VRActivity`, arm64 targeting, target SDK ceiling, scheme and app branding. CI runs this before the monorepo build so generated native drift fails visibly.
 
 ## Quest + Meta Layout SDK
 

@@ -3,13 +3,15 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "dev": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "dev": "node scripts/assert-viro-fork.mjs && expo start",
+    "android": "node scripts/assert-viro-fork.mjs && expo run:android",
+    "ios": "node scripts/assert-viro-fork.mjs && expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "test": "node --test 'src/**/*.test.ts'"
+    "test": "node --test 'src/**/*.test.ts'",
+    "viro:assert-fork": "node scripts/assert-viro-fork.mjs",
+    "prebuild": "node scripts/assert-viro-fork.mjs && expo prebuild"
   },
   "dependencies": {
     "@acme/app": "workspace:*",
