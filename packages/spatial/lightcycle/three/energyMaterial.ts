@@ -25,18 +25,32 @@ export function createLightCycleEnergyMaterial(
   const material = new THREE.MeshBasicNodeMaterial();
   material.transparent = true;
   material.depthWrite = true;
-  material.colorNode = t3.toTSL(() => {
+  const energyNode = t3.toTSL(() => {
     'use gpu';
 
     const uv = t3.uv().$;
     const time = t3.time.$;
-    const stripe = std.abs(std.sin((uv.y * 42 + time * 4.5) * 3.14159265));
-    const core = 0.72 + stripe * 0.28;
-    const edge = 1 - std.abs(uv.x * 2 - 1);
-    const glow = core * (0.78 + edge * 0.22) * intensityUniform.$;
+    const stripePhase = std.mul(
+      std.add(std.mul(uv.y, 42), std.mul(time, 4.5)),
+      3.14159265,
+    );
+    const stripe = std.abs(std.sin(stripePhase));
+    const core = std.add(0.72, std.mul(stripe, 0.28));
+    const edge = std.sub(1, std.abs(std.sub(std.mul(uv.x, 2), 1)));
+    const glow = std.mul(
+      std.mul(core, std.add(0.78, std.mul(edge, 0.22))),
+      intensityUniform.$,
+    );
 
-    return d.vec4f(colorUniform.$ * glow, 0.92);
+    return d.vec4f(std.mul(colorUniform.$, glow), 0.92);
   });
+
+  // @typegpu/three returns a generic TSL node because its return type is
+  // discovered when Three builds the shader. This function always returns
+  // vec4f, which is exactly what MeshBasicNodeMaterial.colorNode accepts.
+  material.colorNode = energyNode as unknown as NonNullable<
+    typeof material.colorNode
+  >;
 
   return {
     material,
