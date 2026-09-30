@@ -66,6 +66,51 @@ The old Viro AR Driving Car sample informed the input/simulation direction: acce
 
 The headset scene remains usable without the 2D joystick because the steering pads live inside the world.
 
+
+## Futuristic tabletop placement (implemented)
+
+Classic Grid Duel uses a placement-first mixed-reality flow rather than spawning a board at an arbitrary offset.
+
+1. The host enters a valid player name and chooses **Create Table**.
+2. The shared tabletop route mounts `TabletopColocationScene` with a `ViroARScene` root. On Quest this is the Horizon OS/OpenXR mixed-reality path; on phones it is normal Viro AR.
+3. `ViroARPlaneSelector` accepts horizontal **Table** and **Floor** classifications on Quest. Phone AR also accepts unclassified horizontal surfaces as a fallback.
+4. Valid surfaces receive a translucent cyan selector. The host taps a real surface.
+5. A 1.24 m × 0.84 m futuristic Grid mat preview appears at the tap point with a cyan vector grid, orange corner locks, **LOCK GRID**, and **MOVE** controls.
+6. The room/shared frame is not created until **LOCK GRID** is confirmed.
+7. Quest hosts create a Meta shared spatial frame. Phone hosts publish the selected local plane anchor and use the resulting ReactVision cloud-anchor frame.
+8. After `ViroSharedFrame` localizes, the host's world-space tap is converted with `parseLocationTransform()` + `worldToLocation()` into the shared/location coordinate frame.
+9. The host owns and replicates `lightcycle:placement`. Player 2 reads that location-frame pose only after localizing the same shared frame.
+10. Both devices therefore render the Grid mat from the same shared-frame coordinate, never from raw session-world coordinates.
+
+Quest surface data comes from the Horizon OS room model (`XR_FB_scene`), so the user must run **Settings → Physical Space → Space Setup** once for floor/table planes to exist. The app requests `horizonos.permission.USE_ANCHOR_API` before mounting tabletop placement.
+
+The tabletop MR navigator keeps `hdrEnabled={false}` and `bloomEnabled={false}`. Horizon OS passthrough is a transparent compositor layer; the current HDR/bloom intermediate path makes the final target opaque and can hide passthrough.
+
+### Player 2 / co-location contract
+
+Physical alignment and game replication remain separate concerns:
+
+- `ViroSharedFrame` = **where the Grid exists in the real room**.
+- `useViroColocationRoom` = host room creation / six-character guest lookup.
+- `useViroColocation` = peer membership and pose channel.
+- `useViroReplicatedState` / `ViroReplicationClient` = mat placement, player presence, ready state, match authority, input intents and authoritative snapshots.
+
+The host cannot create the room code until the mat has been locked and the shared frame has localized. The guest cannot become Ready until their own device has localized that frame and the replicated mat pose exists. Ready state alone is not proof of co-location.
+
+Current supported physical shared-frame paths are feature-detected:
+
+- **Quest ↔ Quest:** Meta group-shared spatial frame.
+- **Phone ↔ phone:** ReactVision/cloud-anchor shared frame.
+- **Vision ↔ Vision:** use the fork's visionOS shared-space path when the app supplies the required alignment transport.
+- **PICO:** do not advertise physical co-location until a supported shared-frame source is present in the runtime.
+
+Cross-family physical co-location is not claimed.
+
+References:
+- HorizonOS setup guide: https://viro-community.readme.io/docs/horizonos-setup-guide
+- ReactVision co-location article: https://www.reactvision.xyz/updates/building-multi-user-experiences-with-co-location/
+- ViroReact 3.0.0 five-platform architecture: https://www.reactvision.xyz/updates/viroreact-3-0-0-five-platforms-one-codebase/
+
 ## System spatial windows
 
 `ForkSpatialLayout` detects optional `ViroSpatialSceneProvider`, `ViroSpatialWindow` and layout-support exports from the mikevocalz Viro fork.
