@@ -58,11 +58,11 @@ export function disposeLightCycleWebGPURenderer(
     quad.geometry,
     quad.geometry.index,
     ...Object.values(quad.geometry.attributes),
-  ] as Array<
+  ] as (
     | ({ _listeners?: Record<string, unknown> } & object)
     | null
     | undefined
-  >;
+  )[];
 
   for (const target of targets) {
     if (target?._listeners) target._listeners = {};
