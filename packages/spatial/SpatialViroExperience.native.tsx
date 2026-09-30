@@ -1,6 +1,8 @@
 'use client';
 
 import type { ComponentType } from 'react';
+import { useEffect, useState } from 'react';
+import { PermissionsAndroid, Platform } from 'react-native';
 import { Text, View } from '@acme/ui/tw';
 import {
   isPico,
@@ -13,7 +15,7 @@ import {
 import { SpatialDemoScene } from './SpatialDemoScene';
 import { TabletopColocationScene } from './TabletopColocationScene.native';
 import { gridRace, useGridRaceStore } from './gridRaceStore';
-import { useTabletopSessionStore } from './tabletopSessionStore';
+import { tabletopSession, useTabletopSessionStore } from './tabletopSessionStore';
 
 type HeadsetNavigatorProps = {
   initialScene?: { scene: ComponentType<any> };
@@ -73,6 +75,56 @@ export function SpatialViroExperience() {
   const headset = isQuest || isPico;
   const tabletopMode = useTabletopSessionStore((state) => state.mode);
   const sharedTabletop = tabletopMode === 'host' || tabletopMode === 'guest';
+  const [questSpatialPermission, setQuestSpatialPermission] = useState<
+    'checking' | 'granted' | 'denied'
+  >(isQuest ? 'checking' : 'granted');
+
+  useEffect(() => {
+    if (!sharedTabletop || !isQuest || Platform.OS !== 'android') return;
+
+    let cancelled = false;
+    void PermissionsAndroid.request(
+      'horizonos.permission.USE_ANCHOR_API' as never,
+    )
+      .then((result) => {
+        if (cancelled) return;
+        const granted = result === PermissionsAndroid.RESULTS.GRANTED;
+        setQuestSpatialPermission(granted ? 'granted' : 'denied');
+        if (!granted) {
+          tabletopSession.setState({
+            error:
+              'Spatial Data permission is required to detect Quest tables/floors for tabletop placement.',
+          });
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setQuestSpatialPermission('denied');
+        tabletopSession.setState({
+          error: 'Unable to request Horizon OS Spatial Data permission.',
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [sharedTabletop]);
+
+  if (sharedTabletop && isQuest && questSpatialPermission !== 'granted') {
+    return (
+      <View className="flex-1 items-center justify-center gap-2 bg-black px-6">
+        <Text className="text-sm font-bold uppercase tracking-[0.18em] text-cyan-100">
+          {questSpatialPermission === 'checking'
+            ? 'Authorizing spatial placement…'
+            : 'Spatial placement permission required'}
+        </Text>
+        <Text className="max-w-lg text-center text-xs leading-5 text-white/55">
+          Quest tabletop mode needs Horizon OS Spatial Data access so Viro can read
+          the room-model floor/table planes used for mat placement.
+        </Text>
+      </View>
+    );
+  }
 
   if (sharedTabletop) {
     return (
@@ -85,9 +137,9 @@ export function SpatialViroExperience() {
         handTrackingEnabled
         trackingOrigin="floor"
         provider="reactvision"
-        hdrEnabled
+        hdrEnabled={false}
         pbrEnabled
-        bloomEnabled
+        bloomEnabled={false}
         shadowsEnabled
         multisamplingEnabled
         style={{ flex: 1 }}
