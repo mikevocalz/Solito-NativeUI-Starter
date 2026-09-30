@@ -64,7 +64,9 @@ function isInputEvent(value: unknown): value is LightCycleInputEvent {
   const event = value as Partial<LightCycleInputEvent>;
   return (
     (event.playerId === 'p1' || event.playerId === 'p2') &&
+    typeof event.sequence === 'number' &&
     Number.isSafeInteger(event.sequence) &&
+    typeof event.targetTick === 'number' &&
     Number.isSafeInteger(event.targetTick) &&
     (event.command === 'TURN_LEFT' ||
       event.command === 'TURN_RIGHT' ||
