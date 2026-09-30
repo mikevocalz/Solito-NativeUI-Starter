@@ -39,3 +39,15 @@ The runtime `.riv` should be exported/published from this source and supplied to
 ## State
 
 No React `useState`. The FX bus is Zustand. Rive Data Binding receives semantic values only when an FX event changes.
+
+## Package shortcuts
+
+From the monorepo root:
+
+```bash
+pnpm --filter @acme/spatial rive-fx:verify
+pnpm --filter @acme/spatial rive-fx:inspect
+pnpm --filter @acme/spatial rive-fx:spinner-shot
+```
+
+The CLI is intentionally not a JavaScript dependency; install the current official Rive CLI so its bundled RML schema/docs match the compiler being used.
