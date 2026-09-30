@@ -61,7 +61,13 @@ const SNAPSHOT_INTERVAL_TICKS = 6;
 const HOST_INPUT_LEAD_TICKS = 2;
 const GUEST_INPUT_LEAD_TICKS = 8;
 const INPUT_HISTORY_LIMIT = 32;
-// Metro already treats GLB as a spatial asset; keep the real GNM head bundled\n// for Quest/Pico/offline sessions while allowing a CDN URL override.\n// eslint-disable-next-line @typescript-eslint/no-require-imports\nconst BUNDLED_MCP_GNM_ASSET = require('./assets/mcp/mcp-gnm-head.glb') as number;\nconst MCP_GNM_ASSET_SOURCE = process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL\n  ? { uri: process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL }\n  : BUNDLED_MCP_GNM_ASSET;
+// Metro already treats GLB as a spatial asset; keep the real GNM head bundled
+// for Quest/Pico/offline sessions while allowing a CDN URL override.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const BUNDLED_MCP_GNM_ASSET = require('./assets/mcp/mcp-gnm-head.glb') as number;
+const MCP_GNM_ASSET_SOURCE = process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL
+  ? { uri: process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL }
+  : BUNDLED_MCP_GNM_ASSET;
 
 function isInputEvent(value: unknown): value is LightCycleInputEvent {
   if (!value || typeof value !== 'object') return false;
