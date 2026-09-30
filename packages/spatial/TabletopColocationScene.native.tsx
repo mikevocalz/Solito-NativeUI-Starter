@@ -7,6 +7,7 @@ import {
   ViroBox,
   ViroDirectionalLight,
   ViroNode,
+  ViroMaterials,
   ViroSharedFrame,
   ViroText,
   isQuest,
@@ -25,6 +26,13 @@ const API_KEY = process.env.EXPO_PUBLIC_REACTVISION_API_KEY ?? '';
 const PROJECT_ID = process.env.EXPO_PUBLIC_REACTVISION_PROJECT_ID ?? '';
 const ENDPOINT =
   process.env.EXPO_PUBLIC_REACTVISION_ENDPOINT || undefined;
+
+ViroMaterials.createMaterials({
+  raceCyan: { diffuseColor: '#00f3ff', lightingModel: 'Constant' },
+  raceOrange: { diffuseColor: '#ff7a00', lightingModel: 'Constant' },
+  raceWhite: { diffuseColor: '#fff6cf', lightingModel: 'Constant' },
+  raceDark: { diffuseColor: '#020407', lightingModel: 'Constant' },
+});
 
 type SceneProps = {
   sceneNavigator?: any;
