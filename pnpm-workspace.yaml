@@ -48,6 +48,7 @@ minimumReleaseAgeExclude:
   - 'expo-*'
   - babel-preset-expo
   - eslint-config-expo
+  - eslint-plugin-expo@1.2.1
 
 # One version per dependency, declared once. Package manifests consume catalog:.
 catalog:
