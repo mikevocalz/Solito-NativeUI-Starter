@@ -58,6 +58,7 @@
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "unplugin-typegpu": "catalog:"
   }
 }
