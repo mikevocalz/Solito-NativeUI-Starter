@@ -138,14 +138,13 @@ export function VoiceRecorder({ onComplete, onCancel, maxSeconds, className }: V
       return;
     }
 
-    // Mic -> adapter -> analyser, and stop there. Connecting the analyser to
-    // the destination would play the microphone back through the speakers.
+    // Mic -> recorder adapter (owned internally by AudioRecorder) -> analyser,
+    // and stop there. Connecting the analyser to the destination would play the
+    // microphone back through the speakers.
     const audioContext = new AudioContext();
-    const adapter = audioContext.createRecorderAdapter();
     const node = audioContext.createAnalyser();
     node.fftSize = FFT_SIZE;
-    adapter.connect(node);
-    instance.connect(adapter);
+    instance.connect(audioContext, node);
 
     recorder.current = instance;
     context.current = audioContext;
@@ -178,6 +177,7 @@ export function VoiceRecorder({ onComplete, onCancel, maxSeconds, className }: V
     teardown();
 
     const result = await recorder.current?.stop();
+    recorder.current?.disconnect();
     void context.current?.close();
     recorder.current = null;
     context.current = null;
@@ -208,6 +208,7 @@ export function VoiceRecorder({ onComplete, onCancel, maxSeconds, className }: V
   const cancel = () => {
     teardown();
     void recorder.current?.stop();
+    recorder.current?.disconnect();
     void context.current?.close();
     recorder.current = null;
     context.current = null;
