@@ -1,1 +1,63 @@
-# GNM MCP Head Pipeline\n\nThe Master Control Program head is authored from Google's **GNM Head v3**\nand then exported to an ordinary GLB. GNM is intentionally an offline authoring\ndependency; it is not bundled into Expo, Viro, Three.js, Quest, Pico, or web.\n\nSource: <https://github.com/google/GNM>  \nGNM package license: Apache-2.0\n\n## Why this split\n\nThe runtime needs a lightweight deterministic character, not NumPy/JAX/PyTorch/\nTensorFlow. The game consumes a GLB while the futuristic MCP shell (halo rings,\ndata spines, red emissive core, scan/pulse behavior) is renderer-owned and driven\nby the authoritative Light Cycle match state.\n\nIf the GLB is missing or fails to load, both Viro and Three.js keep a procedural\nblack-chrome/red MCP online instead of breaking the race.\n\n## Generate the head\n\nGNM currently targets Python 3.13. One reproducible setup is:\n\n```bash\ngit clone https://github.com/google/GNM .cache/google-gnm\npython3.13 -m venv .cache/gnm-venv\nsource .cache/gnm-venv/bin/activate\npip install -e .cache/google-gnm/gnm/shape\npip install trimesh\n\npython tooling/gnm-mcp/export_mcp_head.py \\n  --output apps/web/public/assets/mcp/mcp-gnm-head.glb \\n  --seed 1982\n```\n\nGNM downloads its model weights on first use and caches them using its own model\ncache. The exporter also writes a matching `.provenance.json` sidecar.\n\nThe exporter does **not** select a demographic semantic class. It makes a\ndeterministic synthetic identity from low-amplitude GNM identity coefficients,\nkeeping the MCP a fictional program rather than modeling a particular person.\n\n## Runtime URLs\n\nPoint both runtimes at the same generated artifact:\n\n```dotenv\nNEXT_PUBLIC_MCP_GNM_GLB_URL=/assets/mcp/mcp-gnm-head.glb\nEXPO_PUBLIC_MCP_GNM_GLB_URL=https://your-host/assets/mcp/mcp-gnm-head.glb\n```\n\nFor a native bundled asset, the Viro presence can also be changed to a local\n`require(...)`, but the shared hosted URL keeps web/native parity simple.\n\n## Runtime contract\n\n- MCP never owns race state.\n- MCP never advances simulation ticks.\n- MCP derives presentation from `LightCycleMatchState`.\n- Co-located peers derive reactions from replicated authoritative snapshots.\n- Derezzing, collision cause, round result, match result, boost state, and low\n  energy all have deterministic MCP presentation states.\n- No React `useState` is introduced; existing stores remain Zustand-based.\n
+# GNM MCP Head Pipeline
+
+The Master Control Program head is authored from Google's **GNM Head v3**
+and then exported to an ordinary GLB. GNM is intentionally an offline authoring
+dependency; it is not bundled into Expo, Viro, Three.js, Quest, Pico, or web.
+
+Source: <https://github.com/google/GNM>  
+GNM package license: Apache-2.0
+
+## Why this split
+
+The runtime needs a lightweight deterministic character, not NumPy/JAX/PyTorch/
+TensorFlow. The game consumes a GLB while the futuristic MCP shell (halo rings,
+data spines, red emissive core, scan/pulse behavior) is renderer-owned and driven
+by the authoritative Light Cycle match state.
+
+If the GLB is missing or fails to load, both Viro and Three.js keep a procedural
+black-chrome/red MCP online instead of breaking the race.
+
+## Generate the head
+
+GNM currently targets Python 3.13. One reproducible setup is:
+
+```bash
+git clone https://github.com/google/GNM .cache/google-gnm
+python3.13 -m venv .cache/gnm-venv
+source .cache/gnm-venv/bin/activate
+pip install -e .cache/google-gnm/gnm/shape
+pip install trimesh
+
+python tooling/gnm-mcp/export_mcp_head.py \
+  --output apps/web/public/assets/mcp/mcp-gnm-head.glb \
+  --seed 1982
+```
+
+GNM downloads its model weights on first use and caches them using its own model
+cache. The exporter also writes a matching `.provenance.json` sidecar.
+
+The exporter does **not** select a demographic semantic class. It makes a
+deterministic synthetic identity from low-amplitude GNM identity coefficients,
+keeping the MCP a fictional program rather than modeling a particular person.
+
+## Runtime URLs
+
+Point both runtimes at the same generated artifact:
+
+```dotenv
+NEXT_PUBLIC_MCP_GNM_GLB_URL=/assets/mcp/mcp-gnm-head.glb
+EXPO_PUBLIC_MCP_GNM_GLB_URL=https://your-host/assets/mcp/mcp-gnm-head.glb
+```
+
+For a native bundled asset, the Viro presence can also be changed to a local
+`require(...)`, but the shared hosted URL keeps web/native parity simple.
+
+## Runtime contract
+
+- MCP never owns race state.
+- MCP never advances simulation ticks.
+- MCP derives presentation from `LightCycleMatchState`.
+- Co-located peers derive reactions from replicated authoritative snapshots.
+- Derezzing, collision cause, round result, match result, boost state, and low
+  energy all have deterministic MCP presentation states.
+- No React `useState` is introduced; existing stores remain Zustand-based.
