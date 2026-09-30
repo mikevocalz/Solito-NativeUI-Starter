@@ -7,22 +7,24 @@ import type { LightCycleMatchState } from '../tabletopCore';
 import { ThreeLightCycleRenderer } from './ThreeLightCycleRenderer';
 
 export type ThreeLightCycleCanvasProps = {
-  state: LightCycleMatchState;
+  state?: LightCycleMatchState;
+  getState?: () => LightCycleMatchState | null;
   assetUri?: string;
   style?: object;
 };
 
 export function ThreeLightCycleCanvas({
   state,
+  getState,
   assetUri,
   style,
 }: ThreeLightCycleCanvasProps) {
   const canvasRef = useRef<CanvasRef>(null);
-  const stateRef = useRef(state);
+  const stateRef = useRef<LightCycleMatchState | null>(state ?? null);
   const { device } = useDevice();
 
   useEffect(() => {
-    stateRef.current = state;
+    if (state) stateRef.current = state;
   }, [state]);
 
   useEffect(() => {
@@ -65,7 +67,8 @@ export function ThreeLightCycleCanvas({
       }
 
       renderer.renderer.setAnimationLoop((now) => {
-        renderer?.render(stateRef.current, now);
+        const snapshot = getState?.() ?? stateRef.current;
+        if (snapshot) renderer?.render(snapshot, now);
       });
     })();
 
@@ -74,7 +77,7 @@ export function ThreeLightCycleCanvas({
       renderer?.renderer.setAnimationLoop(null);
       renderer?.dispose();
     };
-  }, [assetUri, device]);
+  }, [assetUri, device, getState]);
 
   return <Canvas ref={canvasRef} opaque={false} style={[{ flex: 1 }, style]} />;
 }
