@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { ViroSound } from '../viro';
 import type {
   LightCycleMatchState,
@@ -27,10 +28,22 @@ export function McpVoiceSoundNative({
   enabled = true,
   volume = 0.94,
 }: Props) {
+  const playedEventKeys = useRef(new Set<string>());
+  const activeEventKey = useRef<string | null>(null);
+
   if (!enabled) return null;
 
   const cue = deriveMcpVoiceCue(state, localPlayerId);
-  if (!cue) return null;
+  if (!cue) {
+    activeEventKey.current = null;
+    return null;
+  }
+
+  if (activeEventKey.current !== cue.eventKey) {
+    if (playedEventKeys.current.has(cue.eventKey)) return null;
+    playedEventKeys.current.add(cue.eventKey);
+    activeEventKey.current = cue.eventKey;
+  }
 
   const source = sources[cue.name];
   if (!source) return null;
