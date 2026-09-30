@@ -14,6 +14,10 @@
     "./lightcycle/three": {
       "react-native": "./lightcycle/three/index.native.ts",
       "default": "./lightcycle/three/index.web.ts"
+    },
+    "./rive-fx": {
+      "react-native": "./rive-fx/index.native.ts",
+      "default": "./rive-fx/index.web.ts"
     }
   },
   "scripts": {
