@@ -7,6 +7,7 @@ import {
   LIGHTCYCLE_CLIPS,
   LIGHTCYCLE_METERS_PER_FIXED_UNIT,
   createLightCycleRenderFrame,
+  validateLightCycleAssetManifest,
   type LightCycleClipName,
 } from '../assetContract';
 import {
@@ -58,15 +59,37 @@ function findNode(root: THREE.Object3D, name: string) {
   return root.getObjectByName(name) ?? null;
 }
 
-function validateCycleNodes(root: THREE.Object3D) {
-  const missing = Object.values(LIGHTCYCLE_ASSET_NODES).filter(
-    (name) => !root.getObjectByName(name),
-  );
-  if (missing.length > 0) {
-    throw new Error(
-      `Light Cycle GLB is missing required nodes: ${missing.join(', ')}`,
+function validateCycleAsset(
+  root: THREE.Object3D,
+  animations: readonly THREE.AnimationClip[],
+) {
+  const nodeNames: string[] = [];
+  root.traverse((object) => {
+    if (object.name) nodeNames.push(object.name);
+  });
+
+  const validation = validateLightCycleAssetManifest({
+    nodeNames,
+    clipNames: animations.map((clip) => clip.name),
+  });
+
+  if (validation.valid) return;
+
+  const problems: string[] = [];
+  if (validation.missingNodes.length > 0) {
+    problems.push(
+      `missing nodes: ${validation.missingNodes.join(', ')}`,
     );
   }
+  if (validation.missingClips.length > 0) {
+    problems.push(
+      `missing clips: ${validation.missingClips.join(', ')}`,
+    );
+  }
+
+  throw new Error(
+    `Light Cycle GLB does not satisfy the portable Viro/Three asset contract (${problems.join('; ')}).`,
+  );
 }
 
 function fallbackCycle(color: string) {
@@ -248,7 +271,7 @@ export class ThreeLightCycleRenderer {
 
     if (assetUri) {
       const gltf = await new GLTFLoader().loadAsync(assetUri);
-      validateCycleNodes(gltf.scene);
+      validateCycleAsset(gltf.scene, gltf.animations);
       source = gltf.scene;
       animations = gltf.animations;
     } else {
