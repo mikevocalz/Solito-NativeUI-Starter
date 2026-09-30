@@ -3,9 +3,12 @@
 import { Pressable, Text, View } from '@acme/ui/tw';
 import { Image } from 'react-native';
 import { ThreeLightCycleCanvas } from './lightcycle/three/ThreeLightCycleCanvas.native';
+import { McpVoicePlaybackNative } from './mcp/McpVoicePlayback.native';
+import type { McpVoiceCueName } from './mcp/mcpVoice';
 import { tabletopSoloInput } from './tabletopSoloInputStore';
 import { useTabletopSoloDriver } from './useTabletopSoloDriver';
 import { useTabletopSessionStore } from './tabletopSessionStore';
+import { useTabletopRaceStore } from './tabletopRaceStore';
 
 const LIGHTCYCLE_ASSET =
   process.env.EXPO_PUBLIC_LIGHTCYCLE_GLB_URL ?? undefined;
@@ -18,6 +21,23 @@ const BUNDLED_MCP_GNM_ASSET =
   Image.resolveAssetSource(BUNDLED_MCP_GNM_MODULE)?.uri;
 const MCP_GNM_ASSET =
   process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL ?? BUNDLED_MCP_GNM_ASSET;
+
+const MCP_VOICE_SOURCES: Partial<Record<McpVoiceCueName, number>> = {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'race-start': require('./assets/mcp/voice/race-start.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  boost: require('./assets/mcp/voice/boost.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'low-energy': require('./assets/mcp/voice/low-energy.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'derez-local': require('./assets/mcp/voice/derez-local.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'derez-rival': require('./assets/mcp/voice/derez-rival.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'round-result': require('./assets/mcp/voice/round-result.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'match-end': require('./assets/mcp/voice/end-of-line.wav') as number,
+};
 
 function Control({
   label,
@@ -40,10 +60,13 @@ function Control({
 
 export function TabletopThreeExperience() {
   const playerName = useTabletopSessionStore((state) => state.playerName);
+  const state = useTabletopRaceStore((race) => race.hostRenderState);
   const { getState } = useTabletopSoloDriver(playerName);
 
   return (
     <View className="relative flex-1 overflow-hidden bg-black">
+      <McpVoicePlaybackNative state={state} localPlayerId="p1" sources={MCP_VOICE_SOURCES} />
+
       <ThreeLightCycleCanvas
         getState={getState}
         assetUri={LIGHTCYCLE_ASSET}

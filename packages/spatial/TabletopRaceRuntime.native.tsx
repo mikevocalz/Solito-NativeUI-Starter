@@ -27,6 +27,8 @@ import {
 import { tabletopRace, useTabletopRaceStore } from './tabletopRaceStore';
 import { gridFx } from './rive-fx/store';
 import { McpPresence } from './mcp/McpPresence.native';
+import { McpVoiceSoundNative } from './mcp/McpVoiceSound.native';
+import type { McpVoiceCueName } from './mcp/mcpVoice';
 
 type ReplicatedEntity = {
   id: string;
@@ -68,6 +70,23 @@ const BUNDLED_MCP_GNM_ASSET = require('./assets/mcp/mcp-gnm-head.glb') as number
 const MCP_GNM_ASSET_SOURCE = process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL
   ? { uri: process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL }
   : BUNDLED_MCP_GNM_ASSET;
+
+const MCP_VOICE_SOURCES: Partial<Record<McpVoiceCueName, number>> = {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'race-start': require('./assets/mcp/voice/race-start.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  boost: require('./assets/mcp/voice/boost.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'low-energy': require('./assets/mcp/voice/low-energy.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'derez-local': require('./assets/mcp/voice/derez-local.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'derez-rival': require('./assets/mcp/voice/derez-rival.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'round-result': require('./assets/mcp/voice/round-result.wav') as number,
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  'match-end': require('./assets/mcp/voice/end-of-line.wav') as number,
+};
 
 function isInputEvent(value: unknown): value is LightCycleInputEvent {
   if (!value || typeof value !== 'object') return false;
@@ -560,6 +579,11 @@ export function TabletopRaceRuntime({
             state={displayState}
             localPlayerId={localPlayerId}
             assetSource={MCP_GNM_ASSET_SOURCE}
+          />
+          <McpVoiceSoundNative
+            state={displayState}
+            localPlayerId={localPlayerId}
+            sources={MCP_VOICE_SOURCES}
           />
 
           {displayState.phase === 'running' ? (

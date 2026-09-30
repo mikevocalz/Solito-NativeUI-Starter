@@ -14,6 +14,7 @@ import type {
   LightCyclePlayerId,
 } from '../lightcycle/tabletopCore';
 import { deriveMcpPresentation } from './mcpBrain';
+import { deriveMcpVoiceCue } from './mcpVoice';
 
 type Props = {
   state: LightCycleMatchState;
@@ -118,10 +119,26 @@ export function McpPresence({
   assetSource,
 }: Props) {
   const presentation = deriveMcpPresentation(state, localPlayerId);
+  const voiceCue = deriveMcpVoiceCue(state, localPlayerId);
+  const headRotation =
+    voiceCue?.expression === 'amused'
+      ? [-2, 4, 3]
+      : voiceCue?.expression === 'threat'
+        ? [-4, 0, 0]
+        : voiceCue?.expression === 'shock'
+          ? [-7, 0, 0]
+          : voiceCue?.expression === 'triumph'
+            ? [2, -4, -2]
+            : voiceCue?.expression === 'final'
+              ? [3, 0, 0]
+              : [0, 0, 0];
   const alert =
     presentation.mood === 'derez' ||
     presentation.mood === 'warning' ||
-    presentation.mood === 'match-victory';
+    presentation.mood === 'match-victory' ||
+    voiceCue?.expression === 'threat' ||
+    voiceCue?.expression === 'shock' ||
+    voiceCue?.expression === 'final';
 
   return (
     <ViroNode
@@ -173,15 +190,16 @@ export function McpPresence({
         materials={['mcpRed']}
       />
 
-      {assetSource ? (
-        <Viro3DObject
-          source={assetSource}
-          type="GLB"
-          position={[0, 0, 0]}
-          scale={[1, 1, 1]}
-        />
-      ) : (
-        <ViroNode>
+      <ViroNode rotation={headRotation as [number, number, number]}>
+        {assetSource ? (
+          <Viro3DObject
+            source={assetSource}
+            type="GLB"
+            position={[0, 0, 0]}
+            scale={[1, 1, 1]}
+          />
+        ) : (
+          <ViroNode>
           <ViroBox
             position={[0, 0.01, 0]}
             scale={[0.09, 0.125, 0.064]}
@@ -209,8 +227,9 @@ export function McpPresence({
             scale={[0.07, 0.004, 0.006]}
             materials={['mcpWhite']}
           />
-        </ViroNode>
-      )}
+          </ViroNode>
+        )}
+      </ViroNode>
 
       {[-0.17, -0.21, -0.25].map((y, index) => (
         <ViroPolyline
