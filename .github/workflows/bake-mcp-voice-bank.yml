@@ -3,7 +3,7 @@ name: Bake MCP Voice Bank
 on:
   push:
     branches:
-      - feat/mcp-voice-emotion
+      - feat/mcp-voice-bake
     paths:
       - .github/workflows/bake-mcp-voice-bank.yml
       - tooling/mcp-voice/bake_voxcpm2_bank.py
@@ -48,4 +48,4 @@ jobs:
           git add packages/spatial/assets/mcp/voice apps/web/public/assets/mcp/voice tooling/mcp-voice/bake_voxcpm2_bank.py
           git rm .github/workflows/bake-mcp-voice-bank.yml
           git commit -m "feat(mcp): bake VoxCPM2 voice bank"
-          git push origin HEAD:feat/mcp-voice-emotion
+          git push origin HEAD:feat/mcp-voice-bake
