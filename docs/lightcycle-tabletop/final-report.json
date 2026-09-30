@@ -1,0 +1,65 @@
+{
+  "schema": "game-room.room-final-report.v1",
+  "roomId": "lightcycle-tabletop-grid-v1",
+  "gates": {
+    "function": false,
+    "form": false,
+    "runtime": false
+  },
+  "formChecks": {
+    "floorPlanParity": false,
+    "primaryArrival": true,
+    "symmetry": false,
+    "shell": false,
+    "manifold": false,
+    "booleans": false,
+    "collisions": false,
+    "support": false,
+    "attachmentOrientation": false,
+    "ceilingAttachmentOrientation": true,
+    "seatingOrientation": true,
+    "focalDistribution": false,
+    "heroClearance": false,
+    "colonnades": true,
+    "screenClearance": false,
+    "scale": true,
+    "camera": false,
+    "ceilingCoverage": true,
+    "environmentCoverage": false,
+    "provenance": false
+  },
+  "reviewRenders": {
+    "corners": [],
+    "ceiling": [],
+    "environment": {}
+  },
+  "runtimeChecks": {
+    "vlow": false,
+    "textureTiers": false,
+    "lightmap": false,
+    "lightingManifest": false,
+    "performance": false,
+    "browserCapture": "",
+    "errors": [
+      "game-dev CLI not installed in current runtime",
+      "No production Light Cycle GLB present",
+      "No production Rive scoreboard .riv present",
+      "Real two-device co-location test not yet run"
+    ]
+  },
+  "postmortem": {
+    "observations": [
+      "Deterministic gameplay core is intentionally separate from Viro/Three rendering.",
+      "Quest VRActivity required an additional shared-frame bridge in the Viro fork."
+    ],
+    "corrections": [
+      "Patched ViroVRSceneNavigator to expose shared-frame create/join calls and arSceneNavigator alias."
+    ],
+    "remainingRisks": [
+      "Production asset contract has not been validated against a real GLB.",
+      "Host-authoritative live match loop is not yet connected to replicated input events.",
+      "Phone host cloud-anchor placement and visionOS alignment transport remain."
+    ]
+  },
+  "proposedLessons": []
+}
