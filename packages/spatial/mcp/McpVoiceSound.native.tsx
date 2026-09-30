@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect } from 'react';
 import { ViroSound } from '../viro';
 import type {
   LightCycleMatchState,
@@ -10,6 +10,7 @@ import {
   deriveMcpVoiceCue,
   type McpVoiceCueName,
 } from './mcpVoice';
+import { useMcpVoicePlaybackStore } from './mcpVoicePlaybackStore';
 
 type ViroAudioSource = number | { uri: string };
 
@@ -28,34 +29,34 @@ export function McpVoiceSoundNative({
   enabled = true,
   volume = 0.94,
 }: Props) {
-  const playedEventKeys = useRef(new Set<string>());
-  const activeEventKey = useRef<string | null>(null);
+  const activeKey = useMcpVoicePlaybackStore((store) => store.activeKey);
+  const activate = useMcpVoicePlaybackStore((store) => store.activate);
+  const clear = useMcpVoicePlaybackStore((store) => store.clear);
 
-  if (!enabled) return null;
+  const cue = enabled ? deriveMcpVoiceCue(state, localPlayerId) : null;
+  const source = cue ? sources[cue.name] : undefined;
+  const scopedKey = cue ? `${state.seed}:${cue.eventKey}` : null;
 
-  const cue = deriveMcpVoiceCue(state, localPlayerId);
-  if (!cue) {
-    activeEventKey.current = null;
+  useEffect(() => {
+    if (!scopedKey || !source) return;
+    activate(scopedKey);
+    return () => clear(scopedKey);
+  }, [activate, clear, scopedKey, source]);
+
+  if (!cue || !source || !scopedKey || activeKey !== scopedKey) {
     return null;
   }
 
-  if (activeEventKey.current !== cue.eventKey) {
-    if (playedEventKeys.current.has(cue.eventKey)) return null;
-    playedEventKeys.current.add(cue.eventKey);
-    activeEventKey.current = cue.eventKey;
-  }
-
-  const source = sources[cue.name];
-  if (!source) return null;
-
   return (
     <ViroSound
-      key={cue.eventKey}
+      key={scopedKey}
       source={source}
       paused={false}
       loop={false}
       muted={false}
       volume={volume}
+      onFinish={() => clear(scopedKey)}
+      onError={() => clear(scopedKey)}
     />
   );
 }
