@@ -31,7 +31,6 @@ export function ThreeLightCycleCanvas({
     if (!device || !canvasRef.current) return;
 
     let cancelled = false;
-    let frame = 0;
 
     const start = async () => {
       const context = canvasRef.current?.getContext('webgpu');
@@ -67,18 +66,19 @@ export function ThreeLightCycleCanvas({
         return;
       }
 
-      const tick = (now: number) => {
+      // Match react-native-webgpu's current ThreeJS example: let Three own
+      // the display-rate animation callback, then explicitly present the RN
+      // WebGPU surface from ThreeLightCycleRenderer.render().
+      renderer.renderer.setAnimationLoop((now) => {
         renderer.render(stateRef.current, now);
-        frame = requestAnimationFrame(tick);
-      };
-      frame = requestAnimationFrame(tick);
+      });
     };
 
     void start();
 
     return () => {
       cancelled = true;
-      cancelAnimationFrame(frame);
+      rendererRef.current?.renderer.setAnimationLoop(null);
       rendererRef.current?.dispose();
       rendererRef.current = null;
     };
