@@ -3,7 +3,7 @@ import {
   type LightCycleCrashCause,
   type LightCycleMatchState,
   type LightCyclePlayerId,
-} from '../lightcycle/tabletopCore';
+} from '../lightcycle/tabletopCore.ts';
 
 export type McpMood =
   | 'countdown'
