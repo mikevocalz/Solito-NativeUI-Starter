@@ -32,8 +32,10 @@ import {
 
 const API_KEY = process.env.EXPO_PUBLIC_REACTVISION_API_KEY ?? '';
 const PROJECT_ID = process.env.EXPO_PUBLIC_REACTVISION_PROJECT_ID ?? '';
-const ENDPOINT =
+const PLATFORM_ENDPOINT =
   process.env.EXPO_PUBLIC_REACTVISION_ENDPOINT || undefined;
+const RELAY_ENDPOINT =
+  process.env.EXPO_PUBLIC_REACTVISION_RELAY_ENDPOINT || undefined;
 
 const MAT_WIDTH = 1.24;
 const MAT_DEPTH = 0.84;
@@ -268,7 +270,7 @@ function SharedTabletopRoom({
     roomId,
     apiKey: API_KEY,
     projectId: PROJECT_ID,
-    endpoint: ENDPOINT,
+    endpoint: RELAY_ENDPOINT,
     enabled: true,
   });
 
@@ -276,7 +278,7 @@ function SharedTabletopRoom({
     roomId,
     apiKey: API_KEY,
     projectId: PROJECT_ID,
-    endpoint: ENDPOINT,
+    endpoint: RELAY_ENDPOINT,
     enabled: true,
     onReject: (rejection) => {
       tabletopSession.setState({
@@ -662,7 +664,7 @@ export function TabletopColocationScene({
   const room = useViroColocationRoom({
     apiKey: API_KEY,
     projectId: PROJECT_ID,
-    endpoint: ENDPOINT,
+    endpoint: PLATFORM_ENDPOINT,
     host: hostRoomFrame,
     joinCode: mode === 'guest' ? joinCode : undefined,
     enabled:
