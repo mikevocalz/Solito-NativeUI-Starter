@@ -17,6 +17,7 @@ export {
   ViroPolyline,
   ViroQuad,
   ViroScene,
+  ViroSound,
   ViroText,
   ViroVirtualButton,
   ViroVirtualJoystick,
