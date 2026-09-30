@@ -6,3 +6,4 @@ export { RiveStage, type RiveStageProps } from './rive/RiveStage';
 
 export { GridRaceScene } from './GridRaceScene';
 export * from './lightcycle';
+export * from './tabletopRenderState';
