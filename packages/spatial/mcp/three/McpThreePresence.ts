@@ -5,6 +5,7 @@ import type {
   LightCyclePlayerId,
 } from '../../lightcycle/tabletopCore';
 import { deriveMcpPresentation } from '../mcpBrain';
+import { deriveMcpVoiceCue } from '../mcpVoice';
 
 const MCP_RED = '#ff2b1c';
 const MCP_WHITE = '#f5f2eb';
@@ -71,6 +72,7 @@ export class McpThreePresence {
     THREE.MeshStandardMaterial
   >;
   private loadedHead: THREE.Object3D | null = null;
+  private loadedInternal: THREE.Object3D | null = null;
   private currentEventKey = '';
 
   constructor() {
@@ -94,6 +96,7 @@ export class McpThreePresence {
       this.chromeMaterial,
     );
     jaw.position.set(0, -0.095, 0.014);
+    jaw.name = 'MCP_FALLBACK_JAW';
     jaw.rotation.x = -0.08;
     this.fallbackHead.add(jaw);
 
@@ -204,6 +207,8 @@ export class McpThreePresence {
         const normalizedName = object.name.toLowerCase();
         if (normalizedName.includes('eye_interior')) {
           object.material = this.redMaterial;
+        } else if (normalizedName.includes('internal_structure')) {
+          this.loadedInternal = object;
         } else if (
           normalizedName.includes('skin') ||
           normalizedName.includes('head')
@@ -218,6 +223,7 @@ export class McpThreePresence {
     } catch {
       // Keep the procedural MCP online if the hosted GLB is unavailable.
       this.loadedHead = null;
+    this.loadedInternal = null;
       this.fallbackHead.visible = true;
     }
   }
@@ -228,6 +234,7 @@ export class McpThreePresence {
     localPlayerId: LightCyclePlayerId = 'p1',
   ) {
     const presentation = deriveMcpPresentation(state, localPlayerId);
+    const voiceCue = deriveMcpVoiceCue(state, localPlayerId);
     const seconds = now / 1000;
     const pulse =
       0.76 +
@@ -240,9 +247,44 @@ export class McpThreePresence {
     this.whiteMaterial.emissiveIntensity =
       0.22 + presentation.threat * 0.9;
 
-    this.haloA.rotation.z = seconds * 0.42 * presentation.haloSpeed;
-    this.haloB.rotation.z = -seconds * 0.24 * presentation.haloSpeed;
-    this.headMount.position.y = Math.sin(seconds * 1.35) * 0.008;
+    const voicePulse = voiceCue
+      ? 0.5 +
+        0.3 * Math.sin(seconds * 10.4) +
+        0.2 * Math.sin(seconds * 17.7 + 0.8)
+      : 0;
+    const expression = voiceCue?.expression ?? 'neutral';
+    const expressionTilt = {
+      neutral: [0, 0, 0],
+      amused: [-0.01, 0.035, 0.025],
+      threat: [-0.025, 0, 0],
+      shock: [-0.065, 0, 0],
+      triumph: [0.01, -0.04, -0.015],
+      final: [0.025, 0, 0],
+    }[expression] as [number, number, number];
+
+    this.haloA.rotation.z =
+      seconds * 0.42 * presentation.haloSpeed + voicePulse * 0.025;
+    this.haloB.rotation.z =
+      -seconds * 0.24 * presentation.haloSpeed - voicePulse * 0.018;
+    this.headMount.position.y =
+      Math.sin(seconds * 1.35) * 0.008 + Math.max(0, voicePulse) * 0.0018;
+    this.headMount.rotation.set(
+      expressionTilt[0] + (voiceCue ? Math.sin(seconds * 3.1) * 0.007 : 0),
+      expressionTilt[1],
+      expressionTilt[2],
+    );
+
+    const fallbackJaw = this.fallbackHead.getObjectByName('MCP_FALLBACK_JAW');
+    if (fallbackJaw) {
+      fallbackJaw.position.y = -0.095 - Math.max(0, voicePulse) * 0.008;
+    }
+    if (this.loadedInternal) {
+      this.loadedInternal.position.y = -Math.max(0, voicePulse) * 0.0018;
+    }
+
+    if (voiceCue) {
+      this.redMaterial.emissiveIntensity *= 1 + Math.max(0, voicePulse) * 0.22;
+    }
 
     if (this.currentEventKey !== presentation.eventKey) {
       this.currentEventKey = presentation.eventKey;
