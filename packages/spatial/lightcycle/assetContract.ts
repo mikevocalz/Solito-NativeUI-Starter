@@ -3,11 +3,11 @@ import type {
   LightCycleMatchState,
   LightCyclePlayerId,
   LightCycleTrailSegment,
-} from './tabletopCore';
+} from './tabletopCore.ts';
 import {
   LIGHTCYCLE_ARENA_HALF,
   LIGHTCYCLE_UNIT_SCALE,
-} from './tabletopCore';
+} from './tabletopCore.ts';
 
 export const LIGHTCYCLE_ASSET_NODES = {
   root: 'LightCycleRoot',

@@ -17,7 +17,7 @@ const LIGHTCYCLE_ASSET =
 const MCP_GNM_ASSET =
   process.env.NEXT_PUBLIC_MCP_GNM_GLB_URL ??
   process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL ??
-  undefined;
+  '/assets/mcp/mcp-gnm-head.glb';
 
 const SOLO_PRESENCE = {
   p1: { connected: true, localized: true, ready: true },
