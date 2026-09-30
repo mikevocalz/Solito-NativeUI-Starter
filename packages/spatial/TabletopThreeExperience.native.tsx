@@ -9,6 +9,9 @@ import { useTabletopSessionStore } from './tabletopSessionStore';
 const LIGHTCYCLE_ASSET =
   process.env.EXPO_PUBLIC_LIGHTCYCLE_GLB_URL ?? undefined;
 
+const MCP_GNM_ASSET =
+  process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL ?? undefined;
+
 function Control({
   label,
   onPress,
@@ -37,6 +40,7 @@ export function TabletopThreeExperience() {
       <ThreeLightCycleCanvas
         getState={getState}
         assetUri={LIGHTCYCLE_ASSET}
+        mcpAssetUri={MCP_GNM_ASSET}
         style={{ flex: 1 }}
       />
 
