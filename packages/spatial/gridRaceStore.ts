@@ -1,12 +1,19 @@
 'use client';
 
 import { create } from 'zustand';
-import type { GridTurn } from './gridRaceEngine';
+import {
+  advanceGridRace,
+  createGridRaceSimulation,
+  restartGridRace,
+  type GridRaceSimulation,
+  type GridTurn,
+} from './gridRaceEngine';
 
 export type GridRacePhase = 'gateway' | 'race';
 
 type GridRaceState = {
   phase: GridRacePhase;
+  simulation: GridRaceSimulation;
   steer: number;
   throttle: number;
   turn: GridTurn;
@@ -19,6 +26,8 @@ type GridRaceState = {
   pulseBoost: () => void;
   enterGateway: () => void;
   startRace: () => void;
+  advanceSimulation: (input: { turn: GridTurn; boost: boolean }, dt: number) => void;
+  restartSimulation: () => void;
   resetInput: () => void;
 };
 
@@ -29,6 +38,7 @@ const clampStick = (value: number) => Math.max(-1, Math.min(1, value));
 
 export const useGridRaceStore = create<GridRaceState>((set) => ({
   phase: 'gateway',
+  simulation: createGridRaceSimulation(),
   steer: 0,
   throttle: 0,
   turn: 0,
@@ -77,11 +87,22 @@ export const useGridRaceStore = create<GridRaceState>((set) => ({
   startRace: () =>
     set({
       phase: 'race',
+      simulation: createGridRaceSimulation(),
       steer: 0,
       throttle: 0,
       turn: 0,
       boostHeld: false,
     }),
+
+  advanceSimulation: (input, dt) =>
+    set((state) => ({
+      simulation: advanceGridRace(state.simulation, input, dt),
+    })),
+
+  restartSimulation: () =>
+    set((state) => ({
+      simulation: restartGridRace(state.simulation),
+    })),
 
   resetInput: () =>
     set({
@@ -100,5 +121,8 @@ export const gridRace = {
   queueTurn: (turn: Exclude<GridTurn, 0>) => useGridRaceStore.getState().queueTurn(turn),
   setBoost: (active: boolean) => useGridRaceStore.getState().setBoost(active),
   pulseBoost: () => useGridRaceStore.getState().pulseBoost(),
+  advanceSimulation: (input: { turn: GridTurn; boost: boolean }, dt: number) =>
+    useGridRaceStore.getState().advanceSimulation(input, dt),
+  restartSimulation: () => useGridRaceStore.getState().restartSimulation(),
   resetInput: () => useGridRaceStore.getState().resetInput(),
 };

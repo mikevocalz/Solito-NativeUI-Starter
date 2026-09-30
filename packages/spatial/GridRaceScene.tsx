@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   ViroAmbientLight,
   ViroBox,
@@ -17,14 +17,10 @@ import {
   useViroVRViewTag,
 } from './viro';
 import {
-  advanceGridRace,
-  createGridRaceSimulation,
   getActiveTrailSegments,
   GRID_ARENA_HALF,
   GRID_CELL,
-  restartGridRace,
   type GridPoint,
-  type GridRaceSimulation,
   type GridRiderId,
   type GridRiderState,
   type GridTrailSegment,
@@ -435,9 +431,7 @@ function RaceWorld({
 
 export function GridRaceScene() {
   const phase = useGridRaceStore((state) => state.phase);
-  const [simulation, setSimulation] = useState<GridRaceSimulation>(() =>
-    createGridRaceSimulation(),
-  );
+  const simulation = useGridRaceStore((state) => state.simulation);
   const lastTurnSerial = useRef(gridRace.getState().turnSerial);
   const lastBoostPulseSerial = useRef(gridRace.getState().boostPulseSerial);
   const boostPulseRemaining = useRef(0);
@@ -446,12 +440,11 @@ export function GridRaceScene() {
 
   const startRace = useCallback(() => {
     const input = gridRace.getState();
-    setSimulation(createGridRaceSimulation());
+    gridRace.startRace();
     lastTurnSerial.current = input.turnSerial;
     lastBoostPulseSerial.current = input.boostPulseSerial;
     boostPulseRemaining.current = 0;
     playerWasAlive.current = true;
-    gridRace.startRace();
   }, []);
 
   useEffect(() => {
@@ -485,7 +478,7 @@ export function GridRaceScene() {
     boostPulseRemaining.current = Math.max(0, boostPulseRemaining.current - dt);
     const boost = input.boostHeld || boostPulseRemaining.current > 0;
 
-    setSimulation((current) => advanceGridRace(current, { turn, boost }, dt));
+    gridRace.advanceSimulation({ turn, boost }, dt);
   }, [phase]);
 
   return (
@@ -499,7 +492,7 @@ export function GridRaceScene() {
       ) : (
         <RaceWorld
           simulation={simulation}
-          onRestart={() => setSimulation((current) => restartGridRace(current))}
+          onRestart={gridRace.restartSimulation}
         />
       )}
     </ViroScene>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   ViroARPlaneSelector,
   ViroARScene,
@@ -41,17 +41,6 @@ const MAT_WIDTH = 1.24;
 const MAT_DEPTH = 0.84;
 
 type Vec3 = [number, number, number];
-
-type PlacementCandidate = {
-  anchorId: string;
-  worldPosition: Vec3;
-  surface: string;
-};
-
-type SharedPlacement = {
-  position: Vec3;
-  surface: string;
-};
 
 ViroMaterials.createMaterials({
   raceCyan: { diffuseColor: '#00f3ff', lightingModel: 'Constant' },
@@ -257,7 +246,7 @@ function SharedTabletopRoom({
   hostPlacement,
 }: {
   roomId: string;
-  hostPlacement: SharedPlacement | null;
+  hostPlacement: import('./tabletopSessionStore').SharedPlacement | null;
 }) {
   const mode = useTabletopSessionStore((state) => state.mode);
   const name = useTabletopSessionStore((state) => state.playerName);
@@ -572,15 +561,37 @@ export function TabletopColocationScene({
   );
   const setError = useTabletopSessionStore((state) => state.setError);
 
-  const [candidate, setCandidate] = useState<PlacementCandidate | null>(null);
-  const [placementConfirmed, setPlacementConfirmed] = useState(false);
-  const [detectedSurfaceCount, setDetectedSurfaceCount] = useState(0);
-  const [phoneCloudAnchorId, setPhoneCloudAnchorId] = useState<string | null>(
-    null,
+  const candidate = useTabletopSessionStore((state) => state.placementCandidate);
+  const placementConfirmed = useTabletopSessionStore(
+    (state) => state.placementConfirmed,
   );
-  const [phoneAnchorWorking, setPhoneAnchorWorking] = useState(false);
-  const [hostPlacement, setHostPlacement] = useState<SharedPlacement | null>(
-    null,
+  const detectedSurfaceCount = useTabletopSessionStore(
+    (state) => state.detectedSurfaceCount,
+  );
+  const phoneCloudAnchorId = useTabletopSessionStore(
+    (state) => state.phoneCloudAnchorId,
+  );
+  const phoneAnchorWorking = useTabletopSessionStore(
+    (state) => state.phoneAnchorWorking,
+  );
+  const hostPlacement = useTabletopSessionStore((state) => state.hostPlacement);
+  const setCandidate = useTabletopSessionStore(
+    (state) => state.setPlacementCandidate,
+  );
+  const setPlacementConfirmed = useTabletopSessionStore(
+    (state) => state.setPlacementConfirmed,
+  );
+  const setDetectedSurfaceCount = useTabletopSessionStore(
+    (state) => state.setDetectedSurfaceCount,
+  );
+  const setPhoneCloudAnchorId = useTabletopSessionStore(
+    (state) => state.setPhoneCloudAnchorId,
+  );
+  const setPhoneAnchorWorking = useTabletopSessionStore(
+    (state) => state.setPhoneAnchorWorking,
+  );
+  const setHostPlacement = useTabletopSessionStore(
+    (state) => state.setHostPlacement,
   );
 
   const navigator = arSceneNavigator ?? sceneNavigator;

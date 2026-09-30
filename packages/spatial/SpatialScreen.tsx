@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { CircuitButton, GlyphCity, GridCard, GridScene, Heading, Text } from '@acme/ui';
 import { ScrollView, Section, View } from '@acme/ui/tw';
 import { RiveStage } from './rive/RiveStage';
@@ -8,13 +7,14 @@ import { ForkSpatialLayout, getSpatialForkCapabilities } from './ForkSpatialLayo
 import { SpatialViroExperience } from './SpatialViroExperience';
 import { TabletopSessionPanel } from './TabletopSessionPanel';
 import { gridRace } from './gridRaceStore';
-import { tabletopSession } from './tabletopSessionStore';
+import { tabletopSession, useTabletopSessionStore } from './tabletopSessionStore';
 
 const RIVE_DEMO = 'https://cdn.rive.app/animations/vehicles.riv';
 
 export function SpatialScreen() {
   const capabilities = getSpatialForkCapabilities();
-  const [showRace, setShowRace] = useState(false);
+  const showRace = useTabletopSessionStore((state) => state.spatialViewOpen);
+  const setShowRace = useTabletopSessionStore((state) => state.setSpatialViewOpen);
 
   const tools = (
     <GridCard eyebrow="Runtime" title="Spatial backend">

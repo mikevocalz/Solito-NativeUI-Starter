@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { Text, View } from '@acme/ui/tw';
 import {
@@ -75,12 +75,18 @@ export function SpatialViroExperience() {
   const headset = isQuest || isPico;
   const tabletopMode = useTabletopSessionStore((state) => state.mode);
   const sharedTabletop = tabletopMode === 'host' || tabletopMode === 'guest';
-  const [questSpatialPermission, setQuestSpatialPermission] = useState<
-    'checking' | 'granted' | 'denied'
-  >(isQuest ? 'checking' : 'granted');
+  const questSpatialPermission = useTabletopSessionStore(
+    (state) => state.questSpatialPermission,
+  );
+  const setQuestSpatialPermission = useTabletopSessionStore(
+    (state) => state.setQuestSpatialPermission,
+  );
 
   useEffect(() => {
-    if (!sharedTabletop || !isQuest || Platform.OS !== 'android') return;
+    if (!sharedTabletop || !isQuest || Platform.OS !== 'android') {
+      if (!isQuest) setQuestSpatialPermission('granted');
+      return;
+    }
 
     let cancelled = false;
     void PermissionsAndroid.request(
@@ -108,7 +114,7 @@ export function SpatialViroExperience() {
     return () => {
       cancelled = true;
     };
-  }, [sharedTabletop]);
+  }, [sharedTabletop, setQuestSpatialPermission]);
 
   if (sharedTabletop && isQuest && questSpatialPermission !== 'granted') {
     return (
