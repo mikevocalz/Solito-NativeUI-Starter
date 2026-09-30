@@ -2,6 +2,7 @@ import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 import { tgpu, type TgpuRoot } from 'typegpu';
+import { McpThreePresence } from '../../mcp/three/McpThreePresence';
 import {
   LIGHTCYCLE_ASSET_NODES,
   LIGHTCYCLE_CLIPS,
@@ -190,6 +191,7 @@ export class ThreeLightCycleRenderer {
   private readonly context: LightCycleGPUCanvasContext;
   private readonly device: GPUDevice;
   private readonly cycles = new Map<LightCyclePlayerId, CycleNodes>();
+  private readonly mcpPresence = new McpThreePresence();
   private readonly trailPool: TrailMesh[] = [];
   private readonly trailMaterials = {
     p1: createLightCycleEnergyMaterial(PLAYER_COLOR.p1),
@@ -234,11 +236,15 @@ export class ThreeLightCycleRenderer {
     this.scene.add(key);
 
     this.createArena();
+    this.scene.add(this.mcpPresence.root);
   }
 
-  async init(assetUri?: string) {
+  async init(assetUri?: string, mcpAssetUri?: string) {
     await this.renderer.init();
-    await this.mountCycles(assetUri);
+    await Promise.all([
+      this.mountCycles(assetUri),
+      this.mcpPresence.init(mcpAssetUri),
+    ]);
   }
 
   resize(width: number, height: number) {
@@ -541,6 +547,7 @@ export class ThreeLightCycleRenderer {
     };
     this.trailMaterials.p1.setIntensity(boostIntensity.p1);
     this.trailMaterials.p2.setIntensity(boostIntensity.p2);
+    this.mcpPresence.update(state, now, 'p1');
 
     this.renderer.render(this.scene, this.camera);
     this.context.present?.();
@@ -573,6 +580,7 @@ export class ThreeLightCycleRenderer {
     this.crashPresentations.clear();
     this.trailMaterials.p1.material.dispose();
     this.trailMaterials.p2.material.dispose();
+    this.mcpPresence.dispose();
     this.typegpu.destroy();
     disposeLightCycleWebGPURenderer(this.renderer);
   }

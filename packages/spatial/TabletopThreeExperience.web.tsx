@@ -12,6 +12,11 @@ const LIGHTCYCLE_ASSET =
   process.env.EXPO_PUBLIC_LIGHTCYCLE_GLB_URL ??
   undefined;
 
+const MCP_GNM_ASSET =
+  process.env.NEXT_PUBLIC_MCP_GNM_GLB_URL ??
+  process.env.EXPO_PUBLIC_MCP_GNM_GLB_URL ??
+  undefined;
+
 export function TabletopThreeExperience() {
   const playerName = useTabletopSessionStore((state) => state.playerName);
   const { getState } = useTabletopSoloDriver(playerName);
@@ -62,6 +67,7 @@ export function TabletopThreeExperience() {
       <ThreeLightCycleCanvas
         getState={getState}
         assetUri={LIGHTCYCLE_ASSET}
+        mcpAssetUri={MCP_GNM_ASSET}
         style={{ flex: 1 }}
       />
       <View

@@ -1,6 +1,7 @@
 import * as ViroRuntime from '@reactvision/react-viro';
 
 export {
+  Viro3DObject,
   Viro3DSceneNavigator,
   ViroAnimations,
   ViroARScene,
