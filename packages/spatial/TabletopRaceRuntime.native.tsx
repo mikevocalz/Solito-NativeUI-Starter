@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   ViroBox,
   ViroGameLoop,
@@ -24,6 +24,7 @@ import {
   LIGHTCYCLE_REPLICATION_IDS,
   LightCycleInputQueue,
 } from './lightcycle/sessionProtocol';
+import { tabletopRace, useTabletopRaceStore } from './tabletopRaceStore';
 
 type ReplicatedEntity = {
   id: string;
@@ -297,8 +298,9 @@ export function TabletopRaceRuntime({
   });
   const localSequence = useRef(0);
   const localHistory = useRef<LightCycleInputEvent[]>([]);
-  const [hostRenderState, setHostRenderState] =
-    useState<LightCycleMatchState | null>(null);
+  const hostRenderState = useTabletopRaceStore(
+    (state) => state.hostRenderState,
+  );
 
   useEffect(() => {
     if (replication.state !== 'synced') return;
@@ -401,7 +403,7 @@ export function TabletopRaceRuntime({
       hostState.current = initial;
       queue.current.clear();
       boostHeld.current = { p1: false, p2: false };
-      setHostRenderState(initial);
+      tabletopRace.setHostRenderState(initial);
     }
 
     const current = hostState.current;
@@ -452,7 +454,7 @@ export function TabletopRaceRuntime({
     }
 
     if (next.tick % 2 === 0 || next.phase !== current.phase) {
-      setHostRenderState(next);
+      tabletopRace.setHostRenderState(next);
     }
 
     if (
