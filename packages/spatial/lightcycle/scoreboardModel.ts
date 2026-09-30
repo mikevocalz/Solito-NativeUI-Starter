@@ -194,3 +194,72 @@ export const LIGHTCYCLE_RIVE_BINDINGS = {
     finalGrid: 'match/finalGrid',
   },
 } as const;
+
+
+export type LightCycleRiveBindingValue =
+  | string
+  | number
+  | boolean
+  | { kind: 'enum'; value: string }
+  | { kind: 'color'; value: number };
+
+export type LightCycleRiveBindings = Record<
+  string,
+  LightCycleRiveBindingValue
+>;
+
+const RIVE_COLOR = {
+  cyan: 0xff00f3ff,
+  orange: 0xffff7a00,
+} as const;
+
+/**
+ * Flatten the authoritative scoreboard model into the exact Rive View Model
+ * paths authored for lightcycle_scoreboard.riv.
+ */
+export function createLightCycleRiveBindings(
+  model: LightCycleScoreboardModel,
+): LightCycleRiveBindings {
+  return {
+    [LIGHTCYCLE_RIVE_BINDINGS.player1.name]: model.player1.name,
+    [LIGHTCYCLE_RIVE_BINDINGS.player1.score]: model.player1.score,
+    [LIGHTCYCLE_RIVE_BINDINGS.player1.roundsWon]: model.player1.roundsWon,
+    [LIGHTCYCLE_RIVE_BINDINGS.player1.ready]: model.player1.ready,
+    [LIGHTCYCLE_RIVE_BINDINGS.player1.connected]: model.player1.connected,
+    [LIGHTCYCLE_RIVE_BINDINGS.player1.localized]: model.player1.localized,
+    [LIGHTCYCLE_RIVE_BINDINGS.player1.state]: {
+      kind: 'enum',
+      value: model.player1.state,
+    },
+    [LIGHTCYCLE_RIVE_BINDINGS.player1.color]: {
+      kind: 'color',
+      value: RIVE_COLOR.cyan,
+    },
+
+    [LIGHTCYCLE_RIVE_BINDINGS.player2.name]: model.player2.name,
+    [LIGHTCYCLE_RIVE_BINDINGS.player2.score]: model.player2.score,
+    [LIGHTCYCLE_RIVE_BINDINGS.player2.roundsWon]: model.player2.roundsWon,
+    [LIGHTCYCLE_RIVE_BINDINGS.player2.ready]: model.player2.ready,
+    [LIGHTCYCLE_RIVE_BINDINGS.player2.connected]: model.player2.connected,
+    [LIGHTCYCLE_RIVE_BINDINGS.player2.localized]: model.player2.localized,
+    [LIGHTCYCLE_RIVE_BINDINGS.player2.state]: {
+      kind: 'enum',
+      value: model.player2.state,
+    },
+    [LIGHTCYCLE_RIVE_BINDINGS.player2.color]: {
+      kind: 'color',
+      value: RIVE_COLOR.orange,
+    },
+
+    [LIGHTCYCLE_RIVE_BINDINGS.match.round]: model.match.round,
+    [LIGHTCYCLE_RIVE_BINDINGS.match.roundsToWin]: model.match.roundsToWin,
+    [LIGHTCYCLE_RIVE_BINDINGS.match.countdown]: model.match.countdown,
+    [LIGHTCYCLE_RIVE_BINDINGS.match.phase]: {
+      kind: 'enum',
+      value: model.match.phase,
+    },
+    [LIGHTCYCLE_RIVE_BINDINGS.match.winnerName]: model.match.winnerName,
+    [LIGHTCYCLE_RIVE_BINDINGS.match.joinCode]: model.match.joinCode,
+    [LIGHTCYCLE_RIVE_BINDINGS.match.finalGrid]: model.match.finalGrid,
+  };
+}
