@@ -55,17 +55,10 @@ export function createLightCycleEnergyMaterial(
   return {
     material,
     setColor(hex) {
-      colorValue.set(hex);
-      const node = colorUniform.node as typeof colorUniform.node & {
-        value?: THREE.Color;
-      };
-      if ('value' in node) node.value = colorValue;
+      colorUniform.node.value.set(hex);
     },
     setIntensity(value) {
-      const node = intensityUniform.node as typeof intensityUniform.node & {
-        value?: number;
-      };
-      if ('value' in node) node.value = Math.max(0, value);
+      intensityUniform.node.value = Math.max(0, value);
     },
   };
 }
