@@ -2,8 +2,6 @@ import * as THREE from 'three/webgpu';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 import { tgpu, type TgpuRoot } from 'typegpu';
-import type { RNCanvasContext } from 'react-native-webgpu';
-
 import {
   LIGHTCYCLE_ASSET_NODES,
   LIGHTCYCLE_CLIPS,
@@ -138,8 +136,13 @@ function fallbackCycle(color: string) {
   return root;
 }
 
+export type LightCycleGPUCanvasContext = GPUCanvasContext & {
+  /** react-native-webgpu requires explicit presentation; browser WebGPU does not. */
+  present?: () => void;
+};
+
 export type ThreeLightCycleRendererOptions = {
-  context: RNCanvasContext;
+  context: LightCycleGPUCanvasContext;
   device: GPUDevice;
   width: number;
   height: number;
@@ -161,7 +164,7 @@ export class ThreeLightCycleRenderer {
   readonly renderer: THREE.WebGPURenderer;
   readonly typegpu: TgpuRoot;
 
-  private readonly context: RNCanvasContext;
+  private readonly context: LightCycleGPUCanvasContext;
   private readonly device: GPUDevice;
   private readonly cycles = new Map<LightCyclePlayerId, CycleNodes>();
   private readonly trailPool: TrailMesh[] = [];
@@ -517,7 +520,7 @@ export class ThreeLightCycleRenderer {
     this.trailMaterials.p2.setIntensity(boostIntensity.p2);
 
     this.renderer.render(this.scene, this.camera);
-    this.context.present();
+    this.context.present?.();
   }
 
   dispose() {
