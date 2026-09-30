@@ -53,6 +53,7 @@ const config: ExpoConfig = {
       },
     ],
     'expo-image',
+    'react-native-webgpu',
     [
       '@reactvision/react-viro',
       {
