@@ -19,7 +19,11 @@
       "react-native": "./rive-fx/index.native.ts",
       "default": "./rive-fx/index.web.ts"
     },
-    "./mcp": "./mcp/index.ts"
+    "./mcp": "./mcp/index.ts",
+    "./audio": {
+      "react-native": "./audio/index.native.ts",
+      "default": "./audio/index.web.ts"
+    }
   },
   "scripts": {
     "lint": "eslint",
