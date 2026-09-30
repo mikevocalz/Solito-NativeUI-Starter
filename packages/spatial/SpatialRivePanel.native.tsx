@@ -4,6 +4,16 @@ import type { ComponentType } from 'react';
 import * as Viro from '@reactvision/react-viro';
 import { ViroQuad, ViroText } from './viro';
 
+export type SpatialRiveBindingValue =
+  | string
+  | number
+  | boolean
+  | { kind: 'enum'; value: string }
+  | { kind: 'color'; value: number }
+  | { kind: 'trigger'; serial: number };
+
+export type SpatialRiveBindings = Record<string, SpatialRiveBindingValue>;
+
 type ForkRivePanel = ComponentType<{
   source: {
     rivBytes: ArrayBuffer;
@@ -11,40 +21,51 @@ type ForkRivePanel = ComponentType<{
     stateMachine?: string;
     fit?: 'contain' | 'cover' | 'fill';
   };
+  bindings?: SpatialRiveBindings;
   width: number;
   height: number;
   position?: [number, number, number];
+  rotation?: [number, number, number];
   resolution?: { width: number; height: number };
 }>;
 
-const ViroRivePanel = (Viro as unknown as { ViroRivePanel?: ForkRivePanel }).ViroRivePanel;
+const ViroRivePanel = (
+  Viro as unknown as { ViroRivePanel?: ForkRivePanel }
+).ViroRivePanel;
 
-/**
- * Adapter for the user's Nitro-backed ViroRivePanel.
- *
- * With stock Viro 3.0.1 this renders a visible placeholder. When the app
- * overrides @reactvision/react-viro to mikevocalz/viro, the exact same shared
- * scene can hand compiled .riv bytes to the native surface bridge.
- */
 export function SpatialRivePanel({
   bytes,
+  bindings,
+  artboard = 'LightCycleScoreboard',
+  stateMachine = 'Main',
   position = [0, 0.1, -2.2],
+  rotation,
+  width = 1.3,
+  height = 0.8,
 }: {
   bytes?: ArrayBuffer;
+  bindings?: SpatialRiveBindings;
+  artboard?: string;
+  stateMachine?: string;
   position?: [number, number, number];
+  rotation?: [number, number, number];
+  width?: number;
+  height?: number;
 }) {
   if (bytes && ViroRivePanel) {
     return (
       <ViroRivePanel
         source={{
           rivBytes: bytes,
-          artboard: 'SpatialPanel',
-          stateMachine: 'Main',
+          artboard,
+          stateMachine,
           fit: 'contain',
         }}
-        width={1.3}
-        height={0.8}
+        bindings={bindings}
+        width={width}
+        height={height}
         position={position}
+        rotation={rotation}
         resolution={{ width: 1040, height: 640 }}
       />
     );
@@ -52,14 +73,29 @@ export function SpatialRivePanel({
 
   return (
     <>
-      <ViroQuad position={position} width={1.3} height={0.8} materials={['spatialDark']} />
+      <ViroQuad
+        position={position}
+        rotation={rotation}
+        width={width}
+        height={height}
+        materials={['spatialDark']}
+      />
       <ViroText
         position={[position[0], position[1], position[2] + 0.01]}
-        width={2.4}
+        rotation={rotation}
+        width={Math.max(1.8, width * 1.8)}
         height={0.5}
         scale={[0.4, 0.4, 0.4]}
-        text={ViroRivePanel ? 'Load a .riv asset to activate the Viro Rive surface' : 'Viro fork Rive bridge available after fork override'}
-        style={{ fontSize: 18, color: '#2cf6ff', textAlign: 'center' }}
+        text={
+          ViroRivePanel
+            ? 'Set EXPO_PUBLIC_LIGHTCYCLE_SCOREBOARD_RIV_URL to load the Rive scoreboard'
+            : 'Viro fork Rive bridge available after fork override'
+        }
+        style={{
+          fontSize: 18,
+          color: '#2cf6ff',
+          textAlign: 'center',
+        }}
       />
     </>
   );
