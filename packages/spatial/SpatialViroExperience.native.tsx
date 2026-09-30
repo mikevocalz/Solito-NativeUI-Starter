@@ -11,15 +11,24 @@ import {
   ViroXRSceneNavigator,
 } from './viro';
 import { SpatialDemoScene } from './SpatialDemoScene';
+import { TabletopColocationScene } from './TabletopColocationScene.native';
 import { gridRace, useGridRaceStore } from './gridRaceStore';
+import { useTabletopSessionStore } from './tabletopSessionStore';
 
 type HeadsetNavigatorProps = {
   initialScene?: { scene: ComponentType<any> };
+  arInitialScene?: { scene: ComponentType<any> };
   vrInitialScene?: { scene: ComponentType<any> };
   vrModeEnabled?: boolean;
   passthroughEnabled?: boolean;
   handTrackingEnabled?: boolean;
   trackingOrigin?: 'eye' | 'floor';
+  provider?: 'reactvision' | 'arcore' | 'none';
+  hdrEnabled?: boolean;
+  pbrEnabled?: boolean;
+  bloomEnabled?: boolean;
+  shadowsEnabled?: boolean;
+  multisamplingEnabled?: boolean;
   style?: Record<string, unknown>;
 };
 
@@ -62,6 +71,29 @@ function FlatPreviewControls() {
 
 export function SpatialViroExperience() {
   const headset = isQuest || isPico;
+  const tabletopMode = useTabletopSessionStore((state) => state.mode);
+  const sharedTabletop = tabletopMode === 'host' || tabletopMode === 'guest';
+
+  if (sharedTabletop) {
+    return (
+      <HeadsetNavigator
+        initialScene={{ scene: TabletopColocationScene }}
+        arInitialScene={{ scene: TabletopColocationScene }}
+        vrInitialScene={{ scene: TabletopColocationScene }}
+        vrModeEnabled
+        passthroughEnabled={isQuest}
+        handTrackingEnabled
+        trackingOrigin="floor"
+        provider="reactvision"
+        hdrEnabled
+        pbrEnabled
+        bloomEnabled
+        shadowsEnabled
+        multisamplingEnabled
+        style={{ flex: 1 }}
+      />
+    );
+  }
 
   if (headset) {
     return (
