@@ -673,7 +673,7 @@ export function advanceLightCycleMatch(
 }
 
 export function lightCycleStateHash(state: LightCycleMatchState) {
-  const chunks = [
+  const chunks: Array<string | number> = [
     state.phase,
     state.tick,
     state.round,
