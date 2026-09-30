@@ -1,0 +1,114 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import type { LightCycleMatchState } from './lightcycle/tabletopCore';
+import {
+  createLightCycleRiveBindings,
+  createLightCycleScoreboardModel,
+  type LightCycleLobbyPresence,
+} from './lightcycle/scoreboardModel';
+import {
+  SpatialRivePanel,
+  type SpatialRiveBindings,
+} from './SpatialRivePanel.native';
+
+const SCOREBOARD_URL =
+  process.env.EXPO_PUBLIC_LIGHTCYCLE_SCOREBOARD_RIV_URL ?? '';
+
+function isMatchState(value: unknown): value is LightCycleMatchState {
+  if (!value || typeof value !== 'object') return false;
+  const state = value as Partial<LightCycleMatchState>;
+  return (
+    typeof state.tick === 'number' &&
+    typeof state.round === 'number' &&
+    typeof state.phase === 'string' &&
+    Boolean(state.config) &&
+    Boolean(state.riders) &&
+    Boolean(state.scores) &&
+    Array.isArray(state.trails)
+  );
+}
+
+export function TabletopRiveScoreboard({
+  replicatedState,
+  presence,
+  joinCode,
+}: {
+  replicatedState: unknown;
+  presence: LightCycleLobbyPresence;
+  joinCode?: string | null;
+}) {
+  const [bytes, setBytes] = useState<ArrayBuffer>();
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!SCOREBOARD_URL) return;
+
+    let cancelled = false;
+    void fetch(SCOREBOARD_URL)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(
+            `Scoreboard .riv request failed (${response.status})`,
+          );
+        }
+        return await response.arrayBuffer();
+      })
+      .then((nextBytes) => {
+        if (!cancelled) {
+          setBytes(nextBytes);
+          setLoadError(null);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setLoadError(
+            error instanceof Error
+              ? error.message
+              : 'Unable to load scoreboard .riv file.',
+          );
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const bindings = useMemo(() => {
+    const model = createLightCycleScoreboardModel({
+      state: isMatchState(replicatedState) ? replicatedState : null,
+      presence,
+      joinCode,
+    });
+    return createLightCycleRiveBindings(model) as SpatialRiveBindings;
+  }, [joinCode, presence, replicatedState]);
+
+  // Both sides display the same authoritative data but are physically oriented
+  // toward opposite players.
+  return (
+    <>
+      <SpatialRivePanel
+        bytes={bytes}
+        bindings={bindings}
+        artboard="LightCycleScoreboard"
+        stateMachine="Main"
+        position={[0, 0.31, 0.51]}
+        rotation={[0, 0, 0]}
+        width={0.92}
+        height={0.31}
+      />
+      <SpatialRivePanel
+        bytes={bytes}
+        bindings={bindings}
+        artboard="LightCycleScoreboard"
+        stateMachine="Main"
+        position={[0, 0.31, -0.51]}
+        rotation={[0, 180, 0]}
+        width={0.92}
+        height={0.31}
+      />
+      {loadError ? null : null}
+    </>
+  );
+}
