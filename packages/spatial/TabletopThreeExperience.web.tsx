@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { Text, View } from '@acme/ui/tw';
 import { ThreeLightCycleCanvas } from './lightcycle/three/ThreeLightCycleCanvas.web';
+import { McpVoicePlaybackWeb } from './mcp/McpVoicePlayback.web';
 import { TabletopRiveScoreboardWeb } from './TabletopRiveScoreboard.web';
 import { tabletopSoloInput } from './tabletopSoloInputStore';
 import { useTabletopRaceStore } from './tabletopRaceStore';
@@ -72,6 +73,8 @@ export function TabletopThreeExperience() {
 
   return (
     <View className="relative flex-1 overflow-hidden bg-black">
+      <McpVoicePlaybackWeb state={state} localPlayerId="p1" />
+
       <ThreeLightCycleCanvas
         getState={getState}
         assetUri={LIGHTCYCLE_ASSET}
