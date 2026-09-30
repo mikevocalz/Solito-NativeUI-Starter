@@ -8,6 +8,7 @@ import { lightCycleStateHash } from './tabletopCore';
 
 export const LIGHTCYCLE_REPLICATION_IDS = {
   match: 'lightcycle:match',
+  placement: 'lightcycle:placement',
   player: (id: LightCyclePlayerId) => `lightcycle:player:${id}`,
   input: (id: LightCyclePlayerId) => `lightcycle:input:${id}`,
   snapshot: 'lightcycle:snapshot',
