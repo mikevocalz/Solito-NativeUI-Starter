@@ -43,6 +43,7 @@ minimumReleaseAgeExclude:
   - '@expo/*'
   - '@rive-app/*'
   - '@reactvision/*'
+  - 'react-native-webgpu'
   - expo
   - 'expo-*'
   - babel-preset-expo
