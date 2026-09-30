@@ -372,9 +372,24 @@ function SharedTabletopRoom({
   const remoteEntity = replication.byId(remoteEntityId);
   const p1Entity = replication.byId(LIGHTCYCLE_REPLICATION_IDS.player('p1'));
   const p2Entity = replication.byId(LIGHTCYCLE_REPLICATION_IDS.player('p2'));
-  const p1Ready = Boolean(p1Entity?.fields.ready) && Boolean(p1Entity?.fields.localized);
-  const p2Ready = Boolean(p2Entity?.fields.ready) && Boolean(p2Entity?.fields.localized);
-  const bothReady = placementReady && p1Ready && p2Ready;
+  const peers = colocated.peers.filter(
+    (peer) => peer.peerId !== colocated.localPeerId,
+  );
+  const remotePeerLocalized = peers.some((peer) => peer.localized);
+  const p1Ready =
+    Boolean(p1Entity?.fields.ready) &&
+    Boolean(p1Entity?.fields.localized) &&
+    Boolean(p1Entity?.fields.connected);
+  const p2Ready =
+    Boolean(p2Entity?.fields.ready) &&
+    Boolean(p2Entity?.fields.localized) &&
+    Boolean(p2Entity?.fields.connected);
+  const bothReady =
+    placementReady &&
+    colocated.state === 'joined' &&
+    remotePeerLocalized &&
+    p1Ready &&
+    p2Ready;
   const playerNames = {
     p1:
       typeof p1Entity?.fields.name === 'string'
@@ -481,10 +496,6 @@ function SharedTabletopRoom({
       ? remoteEntity.fields.name
       : 'WAITING…';
   const remoteReady = Boolean(remoteEntity?.fields.ready);
-  const peers = colocated.peers.filter(
-    (peer) => peer.peerId !== colocated.localPeerId,
-  );
-  const remotePeerLocalized = peers.some((peer) => peer.localized);
   const localFrameLocalized = useTabletopSessionStore(
     (state) => state.localized,
   );
@@ -493,6 +504,12 @@ function SharedTabletopRoom({
     colocated.state === 'joined' &&
     remotePeerLocalized &&
     placementReady;
+
+  useEffect(() => {
+    if (!localCanReady && ready) {
+      setReady(false);
+    }
+  }, [localCanReady, ready, setReady]);
 
   useEffect(() => {
     const publish = (state: ReturnType<typeof useTabletopSessionStore.getState>) => {
