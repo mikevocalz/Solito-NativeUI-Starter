@@ -27,6 +27,7 @@ type ForkRivePanel = ComponentType<{
   position?: [number, number, number];
   rotation?: [number, number, number];
   resolution?: { width: number; height: number };
+  androidRoute?: 'ahb' | 'surface-texture';
 }>;
 
 const ViroRivePanel = (
@@ -67,6 +68,7 @@ export function SpatialRivePanel({
         position={position}
         rotation={rotation}
         resolution={{ width: 1040, height: 640 }}
+        androidRoute="ahb"
       />
     );
   }
