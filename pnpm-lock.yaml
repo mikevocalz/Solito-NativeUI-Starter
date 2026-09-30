@@ -840,6 +840,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
+      unplugin-typegpu:
+        specifier: 'catalog:'
+        version: 0.12.4
 
   packages/app:
     dependencies:
