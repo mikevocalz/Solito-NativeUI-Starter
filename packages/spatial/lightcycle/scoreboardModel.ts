@@ -3,6 +3,10 @@ import type {
   LightCyclePlayerId,
 } from './tabletopCore';
 
+export const LIGHTCYCLE_SCOREBOARD_ARTBOARD = 'LightCycleScoreboard';
+export const LIGHTCYCLE_SCOREBOARD_MACHINE = 'Main';
+export const LIGHTCYCLE_SCOREBOARD_VIEW_MODEL = 'MatchScoreboard';
+
 export type LightCycleScoreboardPlayerState =
   | 'waiting'
   | 'ready'
