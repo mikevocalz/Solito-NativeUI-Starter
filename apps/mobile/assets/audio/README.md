@@ -39,3 +39,10 @@ await spatialAudio.playSpatial('arena-core', source, {
 
 Use headphones/headsets when evaluating panning. React Native Audio API currently
 uses its supported equal-power `PannerNode` spatialization model.
+
+
+## Spatial Audio API version
+
+This branch is locked to `react-native-audio-api@1.0.0-nightly-87cca81-20260930`.
+That nightly contains the upstream PannerNode/AudioListener spatial-audio work
+merged in commit `87cca81`. Stable `0.13.6` does not expose those APIs yet.
