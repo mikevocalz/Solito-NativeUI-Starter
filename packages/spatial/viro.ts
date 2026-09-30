@@ -30,12 +30,22 @@ export {
   parseLocationTransform,
   worldToLocation,
   isQuest,
-  isVisionOS,
 } from '@reactvision/react-viro';
 
 export const isPico = Boolean(
   (ViroRuntime as typeof ViroRuntime & { isPico?: boolean }).isPico,
 );
+
+const visionRuntimeValue = (
+  ViroRuntime as typeof ViroRuntime & {
+    isVisionOS?: boolean | (() => boolean);
+  }
+).isVisionOS;
+
+export const isVisionOS =
+  typeof visionRuntimeValue === 'function'
+    ? Boolean(visionRuntimeValue())
+    : Boolean(visionRuntimeValue);
 
 type ForkHapticOptions = {
   hand?: 'left' | 'right' | 'both' | 'active';
