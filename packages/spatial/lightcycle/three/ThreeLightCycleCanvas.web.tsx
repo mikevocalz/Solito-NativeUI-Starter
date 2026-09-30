@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import type { CanvasRef } from 'react-native-webgpu';
-import { Canvas, useDevice } from 'react-native-webgpu';
+import type { CSSProperties } from 'react';
 import type { LightCycleMatchState } from '../tabletopCore';
 import { ThreeLightCycleRenderer } from './ThreeLightCycleRenderer';
 
@@ -19,37 +18,55 @@ export function ThreeLightCycleCanvas({
   assetUri,
   style,
 }: ThreeLightCycleCanvasProps) {
-  const canvasRef = useRef<CanvasRef>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef<LightCycleMatchState | null>(state ?? null);
-  const { device } = useDevice();
 
   useEffect(() => {
     if (state) stateRef.current = state;
   }, [state]);
 
   useEffect(() => {
-    if (!device || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const gpu = navigator.gpu;
+    if (!canvas || !gpu) return;
 
     let disposed = false;
     let renderer: ThreeLightCycleRenderer | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let device: GPUDevice | null = null;
 
     void (async () => {
-      const context = canvasRef.current?.getContext('webgpu');
-      if (!context || disposed) return;
+      const adapter = await gpu.requestAdapter();
+      if (!adapter || disposed) return;
 
-      const canvas = context.canvas as unknown as {
-        width: number;
-        height: number;
-        clientWidth: number;
-        clientHeight: number;
+      device = await adapter.requestDevice();
+      if (disposed) {
+        device.destroy();
+        return;
+      }
+
+      const context = canvas.getContext('webgpu');
+      if (!context) {
+        device.destroy();
+        return;
+      }
+
+      const resize = () => {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        const width = Math.max(1, Math.round(rect.width * dpr));
+        const height = Math.max(1, Math.round(rect.height * dpr));
+
+        if (canvas.width !== width) canvas.width = width;
+        if (canvas.height !== height) canvas.height = height;
+
+        renderer?.resize(width, height);
       };
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.max(1, Math.floor(canvas.clientWidth * dpr));
-      canvas.height = Math.max(1, Math.floor(canvas.clientHeight * dpr));
 
+      resize();
       context.configure({
         device,
-        format: navigator.gpu.getPreferredCanvasFormat(),
+        format: gpu.getPreferredCanvasFormat(),
         alphaMode: 'premultiplied',
       });
 
@@ -61,10 +78,15 @@ export function ThreeLightCycleCanvas({
         assetUri,
       });
       await renderer.init(assetUri);
+
       if (disposed) {
         renderer.dispose();
+        device.destroy();
         return;
       }
+
+      resizeObserver = new ResizeObserver(resize);
+      resizeObserver.observe(canvas);
 
       renderer.renderer.setAnimationLoop((now) => {
         const snapshot = getState?.() ?? stateRef.current;
@@ -74,10 +96,22 @@ export function ThreeLightCycleCanvas({
 
     return () => {
       disposed = true;
+      resizeObserver?.disconnect();
       renderer?.renderer.setAnimationLoop(null);
       renderer?.dispose();
+      device?.destroy();
     };
-  }, [assetUri, device, getState]);
+  }, [assetUri, getState]);
 
-  return <Canvas ref={canvasRef} opaque={false} style={[{ flex: 1 }, style]} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        display: 'block',
+        width: '100%',
+        height: '100%',
+        ...(style as CSSProperties | undefined),
+      }}
+    />
+  );
 }
