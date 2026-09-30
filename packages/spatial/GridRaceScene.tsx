@@ -21,6 +21,7 @@ import {
   GRID_ARENA_HALF,
   GRID_CELL,
   type GridPoint,
+  type GridRaceSimulation,
   type GridRiderId,
   type GridRiderState,
   type GridTrailSegment,
