@@ -9,6 +9,7 @@ export type ThreeLightCycleCanvasProps = {
   state?: LightCycleMatchState;
   getState?: () => LightCycleMatchState | null;
   assetUri?: string;
+  mcpAssetUri?: string;
   style?: object;
 };
 
@@ -16,6 +17,7 @@ export function ThreeLightCycleCanvas({
   state,
   getState,
   assetUri,
+  mcpAssetUri,
   style,
 }: ThreeLightCycleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -77,7 +79,7 @@ export function ThreeLightCycleCanvas({
         height: canvas.height,
         assetUri,
       });
-      await renderer.init(assetUri);
+      await renderer.init(assetUri, mcpAssetUri);
 
       if (disposed) {
         renderer.dispose();
@@ -101,7 +103,7 @@ export function ThreeLightCycleCanvas({
       renderer?.dispose();
       device?.destroy();
     };
-  }, [assetUri, getState]);
+  }, [assetUri, getState, mcpAssetUri]);
 
   return (
     <canvas
