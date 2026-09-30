@@ -156,6 +156,23 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 
+    // ViroReact New Architecture (Fabric) dependencies.
+    implementation project(':gvr_common')
+    implementation project(':arcore_client')
+    implementation project(path: ':react_viro')
+    implementation project(path: ':viro_renderer')
+    implementation 'androidx.media3:media3-exoplayer:1.1.1'
+    implementation 'androidx.media3:media3-exoplayer-dash:1.1.1'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.1.1'
+    implementation 'androidx.media3:media3-exoplayer-smoothstreaming:1.1.1'
+    implementation 'com.google.protobuf.nano:protobuf-javanano:3.1.0'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+
+    // Meta VR Layout SDK for Quest spatial windows.
+    implementation platform('com.meta.metavrx:metavrx-bom:1.2026.0.0')
+    implementation 'com.meta.metavrx.layout:layout-react-compat'
+    implementation 'com.meta.metavrx.layout:layout-window-react-compat'
+
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
