@@ -172,6 +172,73 @@ These are implementation references only. The starter's Skia backgrounds, produc
 
 ---
 
+## Horizon OS tabletop placement and co-location contract
+
+The tabletop duel is an **MR placement flow**, not a pure VR scene. On Quest, use a `ViroARScene` root through `ViroXRSceneNavigator` so Horizon OS room-model planes are available inside VRActivity.
+
+Placement rules:
+
+1. request `horizonos.permission.USE_ANCHOR_API` at runtime;
+2. require Physical Space / Space Setup when Quest reports no planes;
+3. accept horizontal `Floor` and `Table` classifications for the game mat;
+4. render the futuristic Grid mat as a live animated preview on the detected plane;
+5. let the host move/reselect before confirming;
+6. disable HDR/bloom for the MR placement scene so passthrough remains visible;
+7. once locked, convert the mat pose into the shared location frame;
+8. only then create the co-location room / join code.
+
+The preview uses Viro's native animation system; placement animation must not be driven by React component state.
+
+### Shared frame is not game replication
+
+Keep these layers separate:
+
+- **ViroSharedFrame / frame source** answers: *where is the physical tabletop?*
+- **useViroColocationRoom** answers: *which room/code and which frame source does this session use?*
+- **useViroColocation** answers: *which peers are actually present/localized in that shared frame?*
+- **useViroReplicatedState** answers: *what durable lobby/match state exists?*
+
+Never transmit raw device world coordinates. Camera/player poses are converted into the shared location frame before publishing.
+
+For Quest host/join:
+
+- host creates a Meta group frame using `metaSpatialAnchorFrameSource(groupId, 'create')`;
+- guest resolves the room code and receives the same frame reference;
+- guest joins using `metaSpatialAnchorFrameSource(groupId, 'join')`;
+- the Grid mat pose is replicated **inside that shared frame**, not as a raw world pose.
+
+A player may become Ready only when all of these are true:
+
+- local shared frame localized;
+- co-location channel state is `joined`;
+- the remote peer is present and reports localized;
+- the confirmed mat placement exists.
+
+If co-location drops, Ready is revoked. A stale replicated `ready: true` is never sufficient to start the countdown.
+
+Current physical co-location scope is same-family only unless separately tested:
+
+- phone ↔ phone via cloud-anchor frame;
+- Quest ↔ Quest via Meta shared spatial-anchor group;
+- Vision ↔ Vision only when shared-space transport is fully wired.
+
+Do not advertise cross-family physical alignment without a tested bridge between those coordinate systems.
+
+### Zustand-only spatial state
+
+Application/session/game state in `packages/spatial` lives in Zustand stores. Do not introduce React `useState` for:
+
+- placement candidates;
+- detected-surface state;
+- permission state;
+- room/join state;
+- localization/readiness;
+- race simulation state;
+- authoritative tabletop snapshots;
+- spatial-view visibility.
+
+React refs are allowed for renderer handles, sequence cursors, timers and other non-render application internals. Effects may synchronize Zustand state with Viro/native systems.
+
 ## Production tabletop Light Cycle game
 
 The current `GridRaceScene` is only the starting point. The intended Light Cycle experience is a complete tabletop competitive game that preserves iconic light-wall trapping gameplay while sharing one deterministic gameplay core across Viro and Three.js.
