@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { LightCycleMatchState } from './lightcycle/tabletopCore';
 import {
   LIGHTCYCLE_SCOREBOARD_ARTBOARD,
@@ -13,6 +13,7 @@ import {
   SpatialRivePanel,
   type SpatialRiveBindings,
 } from './SpatialRivePanel.native';
+import { useTabletopRiveScoreboardAssetStore } from './tabletopRiveScoreboardAssetStore';
 
 const SCOREBOARD_URL =
   process.env.EXPO_PUBLIC_LIGHTCYCLE_SCOREBOARD_RIV_URL ?? '';
@@ -40,42 +41,19 @@ export function TabletopRiveScoreboard({
   presence: LightCycleLobbyPresence;
   joinCode?: string | null;
 }) {
-  const [bytes, setBytes] = useState<ArrayBuffer>();
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const bytes = useTabletopRiveScoreboardAssetStore(
+    (asset) => asset.bytes,
+  );
+  const loadError = useTabletopRiveScoreboardAssetStore(
+    (asset) => asset.error,
+  );
+  const loadScoreboard = useTabletopRiveScoreboardAssetStore(
+    (asset) => asset.load,
+  );
 
   useEffect(() => {
-    if (!SCOREBOARD_URL) return;
-
-    let cancelled = false;
-    void fetch(SCOREBOARD_URL)
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error(
-            `Scoreboard .riv request failed (${response.status})`,
-          );
-        }
-        return await response.arrayBuffer();
-      })
-      .then((nextBytes) => {
-        if (!cancelled) {
-          setBytes(nextBytes);
-          setLoadError(null);
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setLoadError(
-            error instanceof Error
-              ? error.message
-              : 'Unable to load scoreboard .riv file.',
-          );
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    void loadScoreboard(SCOREBOARD_URL);
+  }, [loadScoreboard]);
 
   const bindings = useMemo(() => {
     const model = createLightCycleScoreboardModel({
