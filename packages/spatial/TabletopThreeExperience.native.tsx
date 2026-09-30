@@ -44,8 +44,10 @@ export function TabletopThreeExperience() {
         <Control label="Left" onPress={() => tabletopSoloInput.queueTurn(-1)} />
 
         <Pressable
-          onPressIn={() => tabletopSoloInput.setBoost(true)}
-          onPressOut={() => tabletopSoloInput.setBoost(false)}
+          onPress={() => {
+            tabletopSoloInput.setBoost(true);
+            setTimeout(() => tabletopSoloInput.setBoost(false), 450);
+          }}
           className="min-h-14 min-w-28 items-center justify-center border border-orange-300/70 bg-orange-500/20 px-4"
         >
           <Text className="text-xs font-bold uppercase tracking-[0.18em] text-orange-100">
