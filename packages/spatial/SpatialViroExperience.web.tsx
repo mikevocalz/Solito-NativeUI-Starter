@@ -26,26 +26,9 @@ export function SpatialViroExperience() {
   const phase = useGridRaceStore((state) => state.phase);
   const tabletopMode = useTabletopSessionStore((state) => state.mode);
 
-  if (tabletopMode === 'solo') {
-    return <TabletopThreeExperience />;
-  }
-
-  if (tabletopMode === 'host' || tabletopMode === 'guest') {
-    return (
-      <View className="flex-1 items-center justify-center gap-2 bg-black px-6">
-        <Text className="text-center text-sm font-bold uppercase tracking-[0.18em] text-cyan-100">
-          Physical tabletop co-location requires the native Viro runtime
-        </Text>
-        <Text className="max-w-xl text-center text-xs leading-5 text-white/55">
-          Use Solo / AI here to exercise the identical deterministic core through
-          Three.js WebGPU + TypeGPU. Host / Join uses Viro shared spatial frames on
-          supported native device families.
-        </Text>
-      </View>
-    );
-  }
-
   useEffect(() => {
+    if (tabletopMode !== 'idle') return;
+
     const onKeyDown = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase();
       const isTurnKey =
@@ -83,7 +66,26 @@ export function SpatialViroExperience() {
       window.removeEventListener('keyup', onKeyUp);
       gridRace.setBoost(false);
     };
-  }, []);
+  }, [tabletopMode]);
+
+  if (tabletopMode === 'solo') {
+    return <TabletopThreeExperience />;
+  }
+
+  if (tabletopMode === 'host' || tabletopMode === 'guest') {
+    return (
+      <View className="flex-1 items-center justify-center gap-2 bg-black px-6">
+        <Text className="text-center text-sm font-bold uppercase tracking-[0.18em] text-cyan-100">
+          Physical tabletop co-location requires the native Viro runtime
+        </Text>
+        <Text className="max-w-xl text-center text-xs leading-5 text-white/55">
+          Use Solo / AI here to exercise the identical deterministic core through
+          Three.js WebGPU + TypeGPU. Host / Join uses Viro shared spatial frames on
+          supported native device families.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View className="relative flex-1">
