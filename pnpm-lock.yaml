@@ -7913,6 +7913,7 @@ packages:
       react-dom: 19.3.0
 
   react-native-webgpu@0.10.4:
+    resolution: {integrity: sha512-Rpc2jTSZZoZfj+p1C3NKEl6Y6r9GJmVFFuBqzV5ZOWm/er5RTVNrqL3ZX22YNuAT1f1Cbj+QKHOUVX67nOz1Bw==}
     peerDependencies:
       react: 19.3.0
       react-native: '>=0.81.0'
