@@ -402,8 +402,8 @@ catalogs:
       specifier: 0.21.3
       version: 0.21.3
     react-native-webgpu:
-      specifier: 0.10.2
-      version: 0.10.2
+      specifier: 0.10.4
+      version: 0.10.4
     react-native-worklets:
       specifier: 0.13.0
       version: 0.13.0
