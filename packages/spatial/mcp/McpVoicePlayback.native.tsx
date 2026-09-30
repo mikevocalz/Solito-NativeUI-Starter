@@ -33,7 +33,7 @@ export function McpVoicePlaybackNative({
   sources,
   enabled = true,
 }: Props) {
-  const lastEventKey = useRef('');
+  const playedEventKeys = useRef(new Set<string>());
   const contextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<ReturnType<AudioContext['createBufferSource']> | null>(
     null,
@@ -43,14 +43,14 @@ export function McpVoicePlaybackNative({
     if (!enabled || !state) return;
 
     const cue = deriveMcpVoiceCue(state, localPlayerId);
-    if (!cue || cue.eventKey === lastEventKey.current) return;
+    if (!cue || playedEventKeys.current.has(cue.eventKey)) return;
 
     const source = sources[cue.name];
     if (!source) return;
     const uri = sourceUri(source);
     if (!uri) return;
 
-    lastEventKey.current = cue.eventKey;
+    playedEventKeys.current.add(cue.eventKey);
 
     let cancelled = false;
     const play = async () => {
