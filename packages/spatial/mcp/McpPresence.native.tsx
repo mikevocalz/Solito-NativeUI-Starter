@@ -60,8 +60,6 @@ ViroAnimations.registerAnimations({
 ViroMaterials.createMaterials({
   mcpChrome: {
     diffuseColor: '#050609',
-    specularColor: '#7f858d',
-    shininess: 0.92,
     lightingModel: 'Phong',
   },
   mcpRed: {
