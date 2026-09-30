@@ -14,6 +14,7 @@ import {
 } from './viro';
 import { SpatialDemoScene } from './SpatialDemoScene';
 import { TabletopColocationScene } from './TabletopColocationScene.native';
+import { TabletopThreeExperience } from './TabletopThreeExperience.native';
 import { GridCoreSpinner } from './rive-fx/GridFxStage.native';
 import { gridRace, useGridRaceStore } from './gridRaceStore';
 import { tabletopSession, useTabletopSessionStore } from './tabletopSessionStore';
@@ -120,6 +121,10 @@ export function SpatialViroExperience() {
       cancelled = true;
     };
   }, [sharedTabletop, setQuestSpatialPermission]);
+
+  if (tabletopMode === 'solo' && !headset) {
+    return <TabletopThreeExperience />;
+  }
 
   if (sharedTabletop && isQuest && questSpatialPermission !== 'granted') {
     return (
