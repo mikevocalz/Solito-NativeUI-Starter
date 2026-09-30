@@ -31,8 +31,14 @@ export function TabletopSessionPanel({
     <GridCard eyebrow="Tabletop / Classic Grid Duel" title="Enter the Grid" tone="orange">
       <View className="gap-4">
         <Text className="text-sm leading-6 text-white/65">
-          Enter your name before creating or joining a shared tabletop. The host places the Grid;
-          the second player joins with the room code and localizes into the same physical frame.
+          Enter your name before creating or joining a shared tabletop. The host scans a real
+          table or floor, taps a surface, previews the futuristic Grid mat, and locks placement
+          before the room code is created. Player 2 then joins and localizes into that exact frame.
+        </Text>
+
+        <Text className="text-xs leading-5 text-cyan-100/65">
+          Quest placement uses the Horizon OS room model. Run Physical Space / Space Setup once if
+          table or floor surfaces do not appear.
         </Text>
 
         <TextField
