@@ -1,0 +1,46 @@
+name: Finalize Spatial Audio Lock
+
+on:
+  push:
+    branches:
+      - feat/spatial-audio-engine
+    paths:
+      - .github/workflows/finalize-spatial-audio-lock.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: feat/spatial-audio-engine
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.7.0
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.15.0"
+          cache: pnpm
+
+      - name: Regenerate lockfile
+        run: pnpm install --lockfile-only --no-frozen-lockfile
+
+      - name: Commit lockfile and remove workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml apps/mobile/package.json pnpm-workspace.yaml
+          git rm .github/workflows/finalize-spatial-audio-lock.yml
+          git commit -m "chore(audio): finalize mobile spatial audio lock"
+          git push origin HEAD:feat/spatial-audio-engine
