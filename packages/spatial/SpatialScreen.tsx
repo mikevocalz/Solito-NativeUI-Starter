@@ -29,17 +29,32 @@ export function SpatialScreen() {
 
   return (
     <ForkSpatialLayout panel={tools}>
-      <GridScene className="flex-1" gap={0.06} speed={0.45} showCeiling={!showRace}>
-        <View pointerEvents="none" className="absolute inset-x-0 bottom-0 h-[62%]">
+      <GridScene
+        className="flex-1"
+        horizon={0.44}
+        gap={0}
+        speed={0.6}
+        lineColor="#00f3ff"
+        glowColor="#00f3ff"
+        backgroundColor="#050505"
+        opacity={0.88}
+        showCeiling={false}
+      >
+        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[44%]">
           <GlyphCity
             className="flex-1"
             variant="megacity"
             colorPrimary="#00f3ff"
             colorSecondary="#ff8a00"
             colorTertiary="#fff4b0"
-            opacity={0.76}
+            opacity={0.68}
           />
         </View>
+        <View
+          pointerEvents="none"
+          className="absolute inset-x-0 h-px bg-cyan-200/40"
+          style={{ top: '44%' }}
+        />
         <ScrollView
           className="flex-1"
           contentContainerClassName="mx-auto w-full max-w-screen-2xl gap-6 px-4 py-8 sm:px-6 lg:px-8"

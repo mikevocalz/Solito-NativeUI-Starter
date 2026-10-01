@@ -20,7 +20,7 @@ const ICONS = {
 } as const;
 
 const LABELS = {
-  index: 'Home',
+  index: 'Grid',
   explore: 'Explore',
   notifications: 'Alerts',
   profile: 'Profile',
@@ -41,6 +41,7 @@ type RouteName = keyof typeof ICONS;
  * put the menu button.
  */
 export function AppTabBar({ state, emitter, navigateToTab, insets, rail }: BottomTabBarProps & { rail: boolean }) {
+  const gridMode = state.routes[state.index]?.name === 'index';
 
   const items = state.routes.map((route, index) => {
     const focused = state.index === index;
@@ -73,15 +74,36 @@ export function AppTabBar({ state, emitter, navigateToTab, insets, rail }: Botto
             rail ? 'px-1' : 'px-3 py-1.5'
           } ${
             focused
-              ? 'border-border bg-primary shadow-card hover:bg-primary-pressed'
-              : 'border-transparent hover:bg-surface-sunken'
+              ? gridMode
+                ? 'border-cyan-300/40 bg-cyan-300/10 shadow-card'
+                : 'border-border bg-primary shadow-card hover:bg-primary-pressed'
+              : gridMode
+                ? 'border-transparent hover:bg-white/5'
+                : 'border-transparent hover:bg-surface-sunken'
           }`}
         >
-          <Icon size={24} className={focused ? 'text-on-primary' : 'text-text-muted'} />
+          <Icon
+            size={24}
+            className={
+              gridMode
+                ? focused
+                  ? 'text-cyan-200'
+                  : 'text-white/55'
+                : focused
+                  ? 'text-on-primary'
+                  : 'text-text-muted'
+            }
+          />
           <Text
             numberOfLines={1}
             className={`text-xs font-semibold md:text-sm ${
-              focused ? 'text-on-primary' : 'text-text-muted'
+              gridMode
+                ? focused
+                  ? 'text-cyan-100'
+                  : 'text-white/55'
+                : focused
+                  ? 'text-on-primary'
+                  : 'text-text-muted'
             }`}
           >
             {LABELS[name]}
@@ -95,7 +117,11 @@ export function AppTabBar({ state, emitter, navigateToTab, insets, rail }: Botto
     return (
       <View
         style={{ paddingBottom: insets.bottom }}
-        className="flex-row items-center gap-1 border-t-2 border-border bg-surface px-2 pt-1"
+        className={`flex-row items-center gap-1 px-2 pt-1 ${
+          gridMode
+            ? 'border-t border-cyan-300/25 bg-[#020407]/95'
+            : 'border-t-2 border-border bg-surface'
+        }`}
       >
         {items}
       </View>
@@ -109,7 +135,9 @@ export function AppTabBar({ state, emitter, navigateToTab, insets, rail }: Botto
         paddingTop: insets.top + 12,
         paddingBottom: insets.bottom + MENU_BOTTOM_GAP,
       }}
-      className="h-full items-center gap-2 bg-surface px-1.5"
+      className={`h-full items-center gap-2 px-1.5 ${
+        gridMode ? 'bg-[#020407]' : 'bg-surface'
+      }`}
     >
       {items}
       {/* No trailing rule: the rail shares the screen's surface colour, so the

@@ -1,4 +1,6 @@
+'use client';
 import { Link } from 'solito/link';
+import { usePathname } from 'solito/navigation';
 import { Footer, Nav, View, Text as TWText, P } from '@acme/ui/tw';
 import { NAV_ITEMS, PROFILE } from './nav';
 
@@ -18,6 +20,9 @@ const footerLink =
   'rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus/50';
 
 export function SiteFooter() {
+  const pathname = usePathname() ?? '/';
+  if (pathname === '/' || pathname.startsWith('/spatial')) return null;
+
   return (
     <Footer className="border-t-2 border-border bg-surface-sunken">
       <View className="mx-auto w-full max-w-screen-2xl gap-10 px-4 py-12 sm:px-6 md:flex-row md:justify-between">

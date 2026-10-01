@@ -8,11 +8,11 @@ import '../globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Solito NativeUI Starter',
-    template: '%s — Solito NativeUI Starter',
+    default: 'Spatial-Solotio-Starter',
+    template: '%s — Spatial-Solotio-Starter',
   },
   description:
-    'Universal app starter — Expo + Next.js + Payload sharing screens via Solito and a Uniwind UI kit.',
+    'Futuristic universal spatial starter — Expo SDK 58, Next.js, Skia, Rive, Viro/OpenXR and a Neon Grid interface.',
 };
 
 export default function SiteLayout({ children }: Readonly<{ children: React.ReactNode }>) {

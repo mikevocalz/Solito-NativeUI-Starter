@@ -130,6 +130,7 @@ export function SiteHeader() {
   const name = useProfile((s) => s.name);
   const handle = useProfile((s) => s.handle);
   const profileActive = isActive(pathname, PROFILE.href);
+  const gridChrome = pathname === '/' || pathname.startsWith('/spatial');
 
   useEffect(() => {
     const onScroll = () => useScrolled.getState().set(window.scrollY > 8);
@@ -143,6 +144,8 @@ export function SiteHeader() {
       window.removeEventListener('resize', measureAll);
     };
   }, []);
+
+  if (gridChrome) return null;
 
   return (
     <Header
