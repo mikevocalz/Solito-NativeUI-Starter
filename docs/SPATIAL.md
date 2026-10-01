@@ -111,6 +111,18 @@ References:
 - ReactVision co-location article: https://www.reactvision.xyz/updates/building-multi-user-experiences-with-co-location/
 - ViroReact 3.0.0 five-platform architecture: https://www.reactvision.xyz/updates/viroreact-3-0-0-five-platforms-one-codebase/
 
+## Meta Horizon and Meta VR Glasses
+
+The current private Viro fork treats Meta immersive hardware as one **Meta Horizon/OpenXR runtime family** rather than assuming every Meta device is a Quest.
+
+- `isMetaHorizonXR` owns immersive routing.
+- `isKnownQuest` and reported model strings are diagnostics only.
+- `metaVrGlassesCompatible: true` writes Meta's current `quest3+` Store delivery target while preserving the existing Quest compatibility metadata.
+- `getOpenXRRuntimeCapabilities(viewTag)` reports negotiated gaze, hand tracking/aim, passthrough, plane detection, scene understanding, foveation, eye-tracked foveation and local-floor capabilities.
+- Product behavior must feature-detect those runtime facts instead of branching on a headset model name.
+
+The checked-in Android manifest mirrors the generated config-plugin result so bare/native builds and Expo prebuilds agree.
+
 ## System spatial windows
 
 `ForkSpatialLayout` detects optional `ViroSpatialSceneProvider`, `ViroSpatialWindow` and layout-support exports from the mikevocalz Viro fork.
@@ -121,7 +133,7 @@ References:
 
 ## Use the mikevocalz Viro fork
 
-The Quest/PICO native development target is `mikevocalz/viro#decax9-three-panel`. Because this starter repository is public while that fork is private, the checked-in catalog keeps public `@reactvision/react-viro@3.0.1` only as an unauthenticated **web/Storybook/CI resolution fallback**. It is not an accepted native SDK-58 runtime.
+The Quest/PICO native development target is `mikevocalz/viro#decax9-three-panel`. Because this starter repository is public while that fork is private, the checked-in catalog keeps public `@reactvision/react-viro@3.0.2` only as an unauthenticated **web/Storybook/CI resolution fallback**. It is not an accepted native SDK-58 runtime.
 
 Every native command now runs `apps/mobile/scripts/assert-viro-fork.mjs` first. If public Viro is installed, `dev`, `android`, `ios`, and `prebuild` fail before Expo starts. A native/headset build therefore cannot accidentally ship against the unsupported public 3.0.1 peer lane.
 
