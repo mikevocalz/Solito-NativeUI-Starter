@@ -1,3 +1,5 @@
-import { HomeScreen } from '@acme/app';
+import { SpatialScreen } from '@acme/spatial';
 
-export default HomeScreen;
+export default function GridHomeRoute() {
+  return <SpatialScreen />;
+}
