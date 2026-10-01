@@ -32,6 +32,8 @@ const checks = [
     'android:name=".VRActivity"',
     'com.oculus.intent.category.VR',
     'com.oculus.supportedDevices',
+    'com.meta.store.defaultDeviceTargets',
+    'android:value="quest3+"',
     'horizonos.permission.USE_ANCHOR_API',
     'horizonos.permission.HEADSET_CAMERA',
     'horizonos.permission.IMPORT_EXPORT_IOT_MAP_DATA',
@@ -80,4 +82,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('[spatial:verify-android] Android XR project matches the checked-in Viro/Quest contract.');
+console.log('[spatial:verify-android] Android XR project matches the checked-in Viro Meta Horizon/PICO contract.');
