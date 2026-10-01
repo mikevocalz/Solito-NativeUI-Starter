@@ -17,13 +17,19 @@
   "dependencies": {
     "@acme/app": "workspace:*",
     "@acme/payload": "workspace:*",
+    "@acme/spatial": "workspace:*",
     "@acme/theme": "workspace:*",
     "@acme/ui": "workspace:*",
     "@next/env": "catalog:",
     "@payloadcms/db-postgres": "catalog:",
     "@payloadcms/next": "catalog:",
     "@payloadcms/ui": "catalog:",
+    "@reactvision/react-viro": "catalog:",
+    "@reactvision/viro-web-renderer": "catalog:",
+    "@rive-app/react-webgl2": "catalog:",
+    "@shopify/react-native-skia": "catalog:",
     "@tanstack/react-query": "catalog:",
+    "canvaskit-wasm": "catalog:",
     "graphql": "catalog:",
     "next": "catalog:",
     "nextjs-toploader": "catalog:",
@@ -52,6 +58,7 @@
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "unplugin-typegpu": "catalog:"
   }
 }

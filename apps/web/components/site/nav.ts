@@ -6,6 +6,7 @@ export const NAV_ITEMS = [
   { label: 'Home', href: '/' },
   { label: 'Explore', href: '/explore' },
   { label: 'Schedule', href: '/schedule' },
+  { label: 'Spatial', href: '/spatial' },
   { label: 'Notifications', href: '/notifications' },
 ] as const;
 

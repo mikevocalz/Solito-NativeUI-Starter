@@ -1,5 +1,6 @@
 package com.example.solitostarter
 import com.facebook.react.common.assets.ReactFontManager
+import com.viromedia.bridge.ReactViroPackage
 
 import android.app.Application
 import android.content.res.Configuration
@@ -22,6 +23,11 @@ class MainApplication : Application(), ReactApplication {
       context = applicationContext,
       packageList =
         PackageList(this).packages.apply {
+          // Viro XR runtimes generated from app.config.ts.
+          add(ReactViroPackage(ReactViroPackage.ViroPlatform.AR))
+          add(ReactViroPackage(ReactViroPackage.ViroPlatform.QUEST))
+          add(ReactViroPackage(ReactViroPackage.ViroPlatform.PICO))
+
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // add(MyReactNativePackage())
         }

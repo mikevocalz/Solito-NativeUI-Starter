@@ -106,7 +106,7 @@ export function AudioPlayer({ uri, duration, levels, label, className }: AudioPl
     const node = audioContext.createBufferSource();
     node.buffer = decoded;
     node.connect(audioContext.destination);
-    node.onEnded = () => {
+    node.onended = () => {
       if (ticker.current !== null) clearInterval(ticker.current);
       offset.current = 0;
       store.current?.getState().set({ playing: false, elapsed: 0 });

@@ -65,3 +65,8 @@ export {
 export { PressScale, type PressScaleProps } from './press-scale';
 export { useInstanceStore, useStore } from './use-instance-store';
 export * from './audio';
+
+export { GridFloor, type GridFloorProps } from './backgrounds/GridFloor';
+export { GridScene, type GridSceneProps } from './backgrounds/GridScene';
+export { GlyphCity, type GlyphCityProps, type GlyphCityVariant } from './backgrounds/GlyphCity';
+export { CircuitButton, type CircuitButtonProps, GridCard, type GridCardProps } from './future';

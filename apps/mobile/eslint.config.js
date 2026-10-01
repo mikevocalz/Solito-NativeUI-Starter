@@ -15,7 +15,7 @@ const reactNativeVisuals = {
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*'],
+    ignores: ['dist/*', 'public/canvaskit/**'],
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -32,18 +32,10 @@ module.exports = defineConfig([
             },
             {
               group: [
-                'gsap',
-                'gsap/*',
-                'framer-motion',
-                'framer-motion/*',
-                'lenis',
-                'lenis/*',
-                '@studio-freight/lenis',
-                '@studio-freight/lenis/*',
-                '@react-three/fiber',
-                '@react-three/fiber/*',
-                '@react-three/drei',
-                '@react-three/drei/*',
+                'gsap', 'gsap/*', 'framer-motion', 'framer-motion/*', 'lenis', 'lenis/*',
+                '@studio-freight/lenis', '@studio-freight/lenis/*',
+                '@react-three/fiber', '@react-three/fiber/*',
+                '@react-three/drei', '@react-three/drei/*',
               ],
               message:
                 'Browser-only animation/rendering libraries stay out of apps/mobile; use Reanimated, Gesture Handler, Legend Motion, and Skia.',
@@ -53,14 +45,8 @@ module.exports = defineConfig([
       ],
       'no-restricted-globals': [
         'error',
-        {
-          name: 'window',
-          message: 'Browser globals are not available in the native app.',
-        },
-        {
-          name: 'document',
-          message: 'DOM APIs are not available in the native app.',
-        },
+        { name: 'window', message: 'Browser globals are not available in the native app.' },
+        { name: 'document', message: 'DOM APIs are not available in the native app.' },
       ],
     },
   },

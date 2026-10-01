@@ -1,24 +1,33 @@
-# Solito-NativeUI-Starter
+# Spatial-Solotio-Starter
 
-Universal app monorepo starter: **Expo (iOS/Android) + Next.js (web + Payload CMS)** sharing
-screens via **Solito** and a **Uniwind** UI kit, with **Storybook** for the components.
+A spatial-first universal app starter: **Expo SDK 58 (iOS/Android) + Next.js 16**
+sharing application code through **Solito**, with **Tailwind CSS 4 + Uniwind** for
+product UI, **React Native Skia** for universal GPU graphics, **Rive** for animated
+surfaces, and **Viro/OpenXR** for immersive 3D.
+
+The included visual sandbox is a neon Grid world: procedural Skia Grid Scene +
+Glyph City on web/native, futuristic semantic controls, and a Viro light-cycle
+race that becomes the headset entry experience.
 
 ## Layout
 
 ```
 apps/
-  mobile      Expo app (expo-router) — renders screens from packages/app
-  web         Next.js app — (site) route group + (payload) Payload admin/API
-  storybook   Storybook (react-vite + react-native-web) for packages/ui
+  mobile      Expo Router app; Quest/Pico configuration lives here
+  web         Next.js app + Payload CMS; /spatial mounts the shared Grid experience
+  storybook   Storybook 10 + Vite; includes Spatial / Grid World showcases
 packages/
-  app         Shared screens (Solito pattern: screen.tsx / .native.tsx / .web.tsx) + providers
-  ui          Universal UI kit — @expo/html-elements + @expo/ui + Uniwind, SolitoImage-based Image
-  theme       Design tokens + theme.css (light/dark via data-theme)
-  assets      Shared fonts (Fraunces + Inter, OFL)
-  payload     Payload config (Users + Media collections, postgres adapter)
-  config      Shared tsconfig/eslint presets and boundary rules
+  app         Shared product screens and providers
+  ui          Universal semantic UI + Skia backgrounds + futuristic controls
+  spatial     Shared Viro scene, XR routing, race state, Rive surfaces
+  theme       Design tokens + Tailwind theme CSS
+  assets      Shared fonts/assets
+  payload     Payload config
+  config      Shared TypeScript/ESLint presets and architecture boundaries
 tooling/
-  generators  pnpm gen domain <name> | feature <name> | component <Name>
+  generators
+  copy-viro-web-assets.mjs
+  copy-skia-web-assets.mjs
 ```
 
 ## Quick start
@@ -26,21 +35,39 @@ tooling/
 ```sh
 pnpm install
 
-# Web (Next + Payload admin at /admin — needs DATABASE_URL + PAYLOAD_SECRET in .env)
+# Web (Next + Payload admin at /admin — needs DATABASE_URL + PAYLOAD_SECRET)
 cp .env.example .env
 pnpm --filter web dev
 
-# Mobile (Expo)
+# Mobile / Expo
 pnpm --filter mobile ios      # or: android / dev
 
-# Storybook — browse the whole UI kit
+# Storybook — open Spatial / Grid World
 pnpm --filter storybook dev
 ```
 
+Postinstall copies Viro WASM/SLAM sidecars and CanvasKit into the app public
+directories. Do not replace those scripts with remote CDN dependencies; the starter
+is designed to build from pinned local runtime assets.
+
+## Rendering model
+
+- **Product UI:** Tailwind 4 on web; Tailwind 4 classes through Uniwind on native.
+- **Universal graphics:** one React Native Skia implementation for Grid Floor,
+  Grid Scene and Glyph City. Web loads the same code through CanvasKit/WASM.
+- **Animation surfaces:** Rive Nitro on native and Rive WebGL2 on web.
+- **Immersive 3D:** Viro scene code shared across web/native; Quest enters the
+  XR navigator/VR activity, and the mikevocalz Viro fork adds the PICO route.
+- **Meta spatial windows:** optional fork capability via Meta Layout SDK.
+
+See [docs/SPATIAL.md](docs/SPATIAL.md) for the renderer, XR, race and fork details.
+
 ## Conventions
 
-- One version per dependency — everything resolves through the pnpm catalog in `pnpm-workspace.yaml`.
-- Screens live in `packages/app/features/*`; route files in apps are thin wrappers.
-- `packages/ui` is pure presentation: it depends only on `@acme/theme` (lint-enforced boundaries).
-- Web forks use `@expo/html-elements` semantic wrappers from `@acme/ui/tw` — no raw HTML in shared code.
-- Scaffold new work with `pnpm gen domain <name>` / `pnpm gen feature <name>` / `pnpm gen component <Name>`.
+- One dependency version lives in the pnpm catalog.
+- Screens/routes stay thin; reusable product UI belongs in `packages/ui`.
+- Raw DOM/native styling details stay behind the UI package boundaries.
+- Skia is for procedural graphics, not normal form/layout styling.
+- Viro owns immersive world geometry; do not flatten XR scenes into Skia.
+- Scaffold ordinary work with `pnpm gen domain <name>`,
+  `pnpm gen feature <name>`, or `pnpm gen component <Name>`.

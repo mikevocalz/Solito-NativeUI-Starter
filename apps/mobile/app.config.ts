@@ -8,9 +8,9 @@ const appDir = dirname(fileURLToPath(import.meta.url));
 loadProjectEnv(join(appDir, '../..'), { silent: true, force: true });
 
 const config: ExpoConfig = {
-  name: 'Solito NativeUI Starter',
-  slug: 'solito-nativeui-starter',
-  scheme: 'solitostarter',
+  name: 'Spatial Solotio Starter',
+  slug: 'spatial-solotio-starter',
+  scheme: 'spatialsolotio',
   version: '0.1.0',
   orientation: 'default',
   icon: './assets/images/icon.png',
@@ -53,6 +53,25 @@ const config: ExpoConfig = {
       },
     ],
     'expo-image',
+    'react-native-webgpu',
+    [
+      '@reactvision/react-viro',
+      {
+        provider: 'reactvision',
+        rvApiKey: process.env.EXPO_PUBLIC_REACTVISION_API_KEY,
+        rvProjectId: process.env.EXPO_PUBLIC_REACTVISION_PROJECT_ID,
+        rvEndpoint: process.env.EXPO_PUBLIC_REACTVISION_ENDPOINT,
+        android: {
+          xRMode: ['AR', 'QUEST', 'PICO'],
+          questAppId:
+            process.env.EXPO_PUBLIC_META_QUEST_APP_ID ??
+            process.env.META_QUEST_APP_ID,
+          metaSpatialLayout: true,
+          metaSpatialLayoutBomVersion: '1.2026.0.0',
+          questArm64Only: true,
+        },
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

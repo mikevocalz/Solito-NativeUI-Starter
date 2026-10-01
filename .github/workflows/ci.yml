@@ -22,4 +22,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm spatial:verify-android
+      - run: pnpm spatial:verify-typegpu
+      - run: pnpm --filter @acme/spatial test
       - run: pnpm turbo build typecheck lint

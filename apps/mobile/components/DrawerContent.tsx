@@ -16,6 +16,7 @@ const MAIN_ITEMS = [
   { label: 'Home', icon: Home, href: '/' },
   { label: 'Explore', icon: Compass, href: '/explore' },
   { label: 'Schedule', icon: Calendar, href: '/split' },
+  { label: 'Spatial', icon: Compass, href: '/spatial' },
   { label: 'Notifications', icon: Bell, href: '/notifications' },
   { label: 'Profile', icon: User, href: '/profile' },
   { label: 'Settings', icon: Settings, href: '/settings' },
