@@ -6,7 +6,7 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import { Text, View } from '@acme/ui/tw';
 import {
   isPico,
-  isQuest,
+  isMetaHorizonXR,
   Viro3DSceneNavigator,
   ViroVirtualButton,
   ViroVirtualJoystick,
@@ -78,7 +78,7 @@ function FlatPreviewControls() {
 }
 
 export function SpatialViroExperience() {
-  const headset = isQuest || isPico;
+  const headset = isMetaHorizonXR || isPico;
   const tabletopMode = useTabletopSessionStore((state) => state.mode);
   const sharedTabletop = tabletopMode === 'host' || tabletopMode === 'guest';
   const questSpatialPermission = useTabletopSessionStore(
@@ -89,8 +89,8 @@ export function SpatialViroExperience() {
   );
 
   useEffect(() => {
-    if (!sharedTabletop || !isQuest || Platform.OS !== 'android') {
-      if (!isQuest) setQuestSpatialPermission('granted');
+    if (!sharedTabletop || !isMetaHorizonXR || Platform.OS !== 'android') {
+      if (!isMetaHorizonXR) setQuestSpatialPermission('granted');
       return;
     }
 
@@ -126,7 +126,7 @@ export function SpatialViroExperience() {
     return <TabletopThreeExperience />;
   }
 
-  if (sharedTabletop && isQuest && questSpatialPermission !== 'granted') {
+  if (sharedTabletop && isMetaHorizonXR && questSpatialPermission !== 'granted') {
     return (
       <View className="flex-1 items-center justify-center gap-2 bg-black px-6">
         {GRID_FX_RIV_SOURCE ? (
@@ -138,7 +138,7 @@ export function SpatialViroExperience() {
             : 'Spatial placement permission required'}
         </Text>
         <Text className="max-w-lg text-center text-xs leading-5 text-white/55">
-          Quest tabletop mode needs Horizon OS Spatial Data access so Viro can read
+          Meta Horizon tabletop mode needs Spatial Data access so Viro can read
           the room-model floor/table planes used for mat placement.
         </Text>
       </View>
@@ -152,7 +152,7 @@ export function SpatialViroExperience() {
         arInitialScene={{ scene: TabletopColocationScene }}
         vrInitialScene={{ scene: TabletopColocationScene }}
         vrModeEnabled
-        passthroughEnabled={isQuest}
+        passthroughEnabled={isMetaHorizonXR}
         handTrackingEnabled
         trackingOrigin="floor"
         provider="reactvision"

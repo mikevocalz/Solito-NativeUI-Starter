@@ -15,17 +15,30 @@ try {
 const root = dirname(packageJsonPath);
 const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 const platformSource = join(root, 'components/Utilities/ViroPlatform.ts');
+const openXRSource = join(root, 'components/Utilities/VRModuleOpenXR.ts');
+const metaTargetingSource = join(root, 'plugins/metaTargeting.ts');
 
-const hasPico =
-  existsSync(platformSource) &&
-  readFileSync(platformSource, 'utf8').includes('isPico');
+const platformBody = existsSync(platformSource)
+  ? readFileSync(platformSource, 'utf8')
+  : '';
+const openXRBody = existsSync(openXRSource)
+  ? readFileSync(openXRSource, 'utf8')
+  : '';
+
+const hasPico = platformBody.includes('isPico');
+const hasMetaHorizonRuntime = platformBody.includes('isMetaHorizonXR');
 const hasRivePanel = existsSync(join(root, 'components/ViroRivePanel.tsx'));
 const hasSpatialLayout = existsSync(
   join(root, 'components/Spatial/ViroSpatialLayout.tsx'),
 );
-const hasOpenXRBridge = existsSync(
-  join(root, 'components/Utilities/VRModuleOpenXR.ts'),
-);
+const hasOpenXRBridge = existsSync(openXRSource);
+const hasOpenXRCapabilityProbe =
+  openXRBody.includes('getOpenXRRuntimeCapabilities');
+const hasMetaVrGlassesTargeting =
+  existsSync(metaTargetingSource) &&
+  readFileSync(metaTargetingSource, 'utf8').includes(
+    'metaVrGlassesCompatible',
+  );
 
 let nitroPackageJsonPath = null;
 try {
@@ -75,9 +88,12 @@ const sdk58PeerLane =
 const forkCompatible =
   sdk58PeerLane &&
   hasPico &&
+  hasMetaHorizonRuntime &&
   hasRivePanel &&
   hasSpatialLayout &&
-  hasOpenXRBridge;
+  hasOpenXRBridge &&
+  hasOpenXRCapabilityProbe &&
+  hasMetaVrGlassesTargeting;
 
 if (!forkCompatible) {
   console.error(`
@@ -103,9 +119,12 @@ Required fork capabilities:
   Expo <59 peer lane
   React Native <0.89 peer lane
   PICO platform detection
+  generalized Meta Horizon runtime detection
+  Meta VR Glasses Store targeting
   ViroRivePanel
   ViroSpatialLayout
   VRModuleOpenXR
+  typed OpenXR runtime capability probe
 `);
   process.exit(1);
 }

@@ -14,6 +14,22 @@ export { ViroMaterials } from '@reactvision/react-viro/dist/components/Material/
 
 export const isQuest = false;
 export const isPico = false;
+export const isMetaHorizonXR = false;
+export const isKnownQuest = false;
+export const metaHorizonFormFactor = null;
+
+export type ViroOpenXRRuntimeCapabilities = {
+  eyeGazeExtensionAvailable: boolean;
+  eyeGazeSupported: boolean;
+  handTrackingAvailable: boolean;
+  handAimAvailable: boolean;
+  passthroughAvailable: boolean;
+  planeDetectionAvailable: boolean;
+  sceneUnderstandingAvailable: boolean;
+  foveationAvailable: boolean;
+  eyeTrackedFoveationAvailable: boolean;
+  localFloorAvailable: boolean;
+};
 
 export function ViroController() {
   return null;
@@ -30,6 +46,12 @@ type ForkHapticOptions = {
 };
 
 export function useViroVRViewTag() {
+  return null;
+}
+
+export async function getOpenXRRuntimeCapabilities(
+  _viewTag: number | null,
+): Promise<ViroOpenXRRuntimeCapabilities | null> {
   return null;
 }
 

@@ -13,7 +13,7 @@ race that becomes the headset entry experience.
 
 ```
 apps/
-  mobile      Expo Router app; Quest/Pico configuration lives here
+  mobile      Expo Router app; Meta Horizon/PICO configuration lives here
   web         Next.js app + Payload CMS; /spatial mounts the shared Grid experience
   storybook   Storybook 10 + Vite; includes Spatial / Grid World showcases
 packages/
@@ -56,9 +56,12 @@ is designed to build from pinned local runtime assets.
 - **Universal graphics:** one React Native Skia implementation for Grid Floor,
   Grid Scene and Glyph City. Web loads the same code through CanvasKit/WASM.
 - **Animation surfaces:** Rive Nitro on native and Rive WebGL2 on web.
-- **Immersive 3D:** Viro scene code shared across web/native; Quest enters the
-  XR navigator/VR activity, and the mikevocalz Viro fork adds the PICO route.
-- **Meta spatial windows:** optional fork capability via Meta Layout SDK.
+- **Immersive 3D:** Viro scene code shared across web/native; Meta Horizon
+  devices (Quest + Meta VR Glasses) and PICO use the fork's OpenXR path.
+- **Capability-first XR:** gaze, hands, passthrough, planes, scene understanding,
+  foveation and local-floor support are queried from the active OpenXR runtime.
+- **Meta spatial windows:** optional fork capability via Meta Layout SDK, gated
+  to Meta Horizon rather than generic Android.
 
 See [docs/SPATIAL.md](docs/SPATIAL.md) for the renderer, XR, race and fork details.
 
