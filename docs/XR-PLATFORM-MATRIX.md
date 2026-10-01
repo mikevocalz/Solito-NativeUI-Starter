@@ -1,5 +1,7 @@
 # XR platform matrix
 
+**Synchronized:** October 1, 2026.
+
 This starter uses **capability-first routing**. Product/device names select only the broad runtime family; negotiated runtime facts decide features.
 
 ## Current lanes
