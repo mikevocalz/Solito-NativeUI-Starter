@@ -1,4 +1,5 @@
 name: Refresh dependency lock
+# One-shot branch helper; removed after pnpm-lock.yaml is refreshed.
 on:
   push:
     branches: [chore/current-stack-2026-10-01]
