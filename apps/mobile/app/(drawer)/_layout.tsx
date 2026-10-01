@@ -35,6 +35,7 @@ export default function DrawerLayout() {
         swipeEdgeWidth: 40,
       }}
     >
+      <Drawer.Screen name="(tabs)" options={{ headerShown: false }} />
       <Drawer.Screen name="split" options={{ headerShown: false }} />
     </Drawer>
   );
