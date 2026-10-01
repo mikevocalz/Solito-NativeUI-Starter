@@ -63,7 +63,7 @@ is designed to build from pinned local runtime assets.
 - **Meta spatial windows:** optional fork capability via Meta Layout SDK, gated
   to Meta Horizon rather than generic Android.
 
-See [docs/SPATIAL.md](docs/SPATIAL.md) for the renderer, XR, race and fork details.
+See [docs/SPATIAL.md](docs/SPATIAL.md) for the renderer, XR, race and fork details, and [docs/XR-PLATFORM-MATRIX.md](docs/XR-PLATFORM-MATRIX.md) for the current Meta Horizon, PICO, visionOS, WebSpatial, Meta wearables and Specs support boundaries.
 
 ## Conventions
 
