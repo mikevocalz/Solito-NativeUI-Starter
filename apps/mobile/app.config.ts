@@ -68,6 +68,7 @@ const config: ExpoConfig = {
             process.env.META_QUEST_APP_ID,
           metaSpatialLayout: true,
           metaSpatialLayoutBomVersion: '1.2026.0.0',
+          metaVrGlassesCompatible: true,
           questArm64Only: true,
         },
       },
