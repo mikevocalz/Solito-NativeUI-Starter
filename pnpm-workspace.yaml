@@ -17,7 +17,7 @@ overrides:
 # fallback's stale peer metadata from poisoning non-native CI resolution; it
 # must not be treated as native compatibility evidence.
 packageExtensions:
-  '@reactvision/react-viro@3.0.1':
+  '@reactvision/react-viro@3.0.2':
     peerDependencies:
       expo: '>=57.0.0 <59.0.0'
       react-native: '>=0.86.0 <0.89.0'
@@ -58,7 +58,7 @@ catalog:
   react-dom: 19.3.0
   react-native: 0.88.0-rc.3
   react-native-web: 0.21.3
-  expo: 58.0.0
+  expo: 58.0.1
   "@expo/env": 2.5.0
   "@expo/metro-runtime": 58.0.9
   expo-asset: 58.0.9
@@ -107,7 +107,7 @@ catalog:
   "@typegpu/three": 0.12.1
 
   # spatial / XR / Rive
-  "@reactvision/react-viro": 3.0.1
+  "@reactvision/react-viro": 3.0.2
   "@reactvision/viro-web-renderer": 1.0.0
   "@metavr/layout-compat": 1.0.0
   "@metavr/layout-window-compat": 1.0.0
@@ -115,8 +115,8 @@ catalog:
   "@rive-app/react-webgl2": 4.35.0
 
   # web
-  "@next/env": 16.3.6
-  next: 16.3.6
+  "@next/env": 16.3.8
+  next: 16.3.8
   nextjs-toploader: 3.9.17
 
   # styling
@@ -140,10 +140,10 @@ catalog:
   zod: 4.6.5
 
   # backend / cms
-  payload: 4.0.0-canary.28
-  "@payloadcms/db-postgres": 4.0.0-canary.28
-  "@payloadcms/next": 4.0.0-canary.28
-  "@payloadcms/ui": 4.0.0-canary.28
+  payload: 4.0.0-canary.33
+  "@payloadcms/db-postgres": 4.0.0-canary.33
+  "@payloadcms/next": 4.0.0-canary.33
+  "@payloadcms/ui": 4.0.0-canary.33
   graphql: 16.14.2
   pg: 8.23.0
   sharp: 0.35.5
@@ -169,7 +169,7 @@ catalog:
   unplugin-typegpu: 0.12.4
   eslint: ^9.39.2
   eslint-config-expo: ~58.0.4
-  eslint-config-next: 16.3.6
+  eslint-config-next: 16.3.8
   "@eslint/eslintrc": ^3.3.7
   babel-plugin-react-compiler: 1.0.0
   turbo: 2.11.5
