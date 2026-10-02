@@ -23,9 +23,9 @@ packageExtensions:
       react-native: '>=0.86.0 <0.89.0'
       '@reactvision/react-native-visionos': '>=0.86.0 <0.89.0'
   # Intentional compatibility lane: this starter stays on Nitro 0.37.x.
-  # Rive 0.5.0 still publishes a <0.37 peer cap, so keep this extension
+  # Rive 0.5.1 remains on the SDK 58 Nitro compatibility lane; keep this extension
   # explicit until upstream widens its declared range.
-  '@rive-app/react-native@0.5.0':
+  '@rive-app/react-native@0.5.1':
     peerDependencies:
       react-native-nitro-modules: '>=0.37.0 <0.38'
 
@@ -58,7 +58,7 @@ catalog:
   react-dom: 19.3.0
   react-native: 0.88.0-rc.3
   react-native-web: 0.21.3
-  expo: 58.0.1
+  expo: 58.0.2
   "@expo/env": 2.5.0
   "@expo/metro-runtime": 58.0.9
   expo-asset: 58.0.9
@@ -99,7 +99,7 @@ catalog:
   expo-drag-drop-content-view: 0.9.2
 
   # universal GPU graphics
-  "@shopify/react-native-skia": 2.13.0
+  "@shopify/react-native-skia": 2.14.0
   canvaskit-wasm: 0.41.0
   react-native-webgpu: 0.10.4
   three: 0.186.1
@@ -111,7 +111,7 @@ catalog:
   "@reactvision/viro-web-renderer": 1.0.0
   "@metavr/layout-compat": 1.0.0
   "@metavr/layout-window-compat": 1.0.0
-  "@rive-app/react-native": 0.5.0
+  "@rive-app/react-native": 0.5.1
   "@rive-app/react-webgl2": 4.35.0
 
   # web
@@ -172,4 +172,4 @@ catalog:
   eslint-config-next: 16.3.8
   "@eslint/eslintrc": ^3.3.7
   babel-plugin-react-compiler: 1.0.0
-  turbo: 2.11.5
+  turbo: 2.11.6
